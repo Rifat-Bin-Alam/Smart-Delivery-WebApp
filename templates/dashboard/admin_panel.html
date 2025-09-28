@@ -1,0 +1,687 @@
+{% extends 'base.html' %}
+{% load static %}
+
+{% block title %}অ্যাডমিন প্যানেল - নাগরীবাসী এক্সপ্রেস{% endblock %}
+
+{% block content %}
+<div class="container py-5">
+    <div class="row">
+        <div class="col-12">
+            <h2 class="mb-4">
+                <i class="fas fa-cog me-2"></i>অ্যাডমিন প্যানেল
+            </h2>
+        </div>
+    </div>
+
+    <!-- Admin Navigation -->
+    <div class="row mb-4">
+        <div class="col-12">
+            <div class="card">
+                <div class="card-body">
+                    <div class="row">
+                        <div class="col-md-3 mb-2">
+                            <button class="btn btn-primary w-100" onclick="showSection('products')">
+                                <i class="fas fa-shopping-bag me-2"></i>পণ্য ব্যবস্থাপনা
+                            </button>
+                        </div>
+                        <div class="col-md-3 mb-2">
+                            <button class="btn btn-success w-100" onclick="showSection('orders')">
+                                <i class="fas fa-eye me-2"></i>অর্ডার বিশ্লেষণ
+                            </button>
+                        </div>
+                        <div class="col-md-3 mb-2">
+                            <button class="btn btn-info w-100" onclick="showSection('analytics')">
+                                <i class="fas fa-chart-bar me-2"></i>এনালিটিক্স
+                            </button>
+                        </div>
+                        <div class="col-md-3 mb-2">
+                            <button class="btn btn-warning w-100" onclick="showSection('settings')">
+                                <i class="fas fa-cog me-2"></i>সেটিংস
+                            </button>
+                        </div>
+                    </div>
+                </div>
+            </div>
+        </div>
+    </div>
+
+    <!-- Products Management Section -->
+    <div id="products-section" class="admin-section">
+        <div class="card">
+            <div class="card-header d-flex justify-content-between align-items-center">
+                <h5><i class="fas fa-shopping-bag me-2"></i>পণ্য ব্যবস্থাপনা</h5>
+                <button class="btn btn-primary" onclick="showAddProductModal()">
+                    <i class="fas fa-plus me-2"></i>নতুন পণ্য যোগ করুন
+                </button>
+            </div>
+            <div class="card-body">
+                <div class="table-responsive">
+                    <table class="table table-striped">
+                        <thead>
+                            <tr>
+                                <th>ID</th>
+                                <th>নাম</th>
+                                <th>ক্যাটাগরি</th>
+                                <th>দর</th>
+                                <th>স্টক</th>
+                                <th>অ্যাকশন</th>
+                            </tr>
+                        </thead>
+                        <tbody id="products-table">
+                            {% for product in products %}
+                                <tr>
+                                    <td>{{ product.id }}</td>
+                                    <td>{{ product.name }}</td>
+                                    <td>{{ product.category }}</td>
+                                    <td>৳ {{ product.price }}</td>
+                                    <td>{{ product.stock_quantity|default:"0" }}</td>
+                                    <td>
+                                        <button class="btn btn-sm btn-primary me-1 edit-product-btn" 
+                                                data-id="{{ product.id }}"
+                                                data-name="{{ product.name }}"
+                                                data-category="{{ product.category }}"
+                                                data-price="{{ product.price }}"
+                                                data-description="{{ product.description }}"
+                                                data-stock="{{ product.stock_quantity|default:0 }}">
+                                            <i class="fas fa-edit"></i>
+                                        </button>
+                                        <button class="btn btn-sm btn-danger delete-product-btn" data-product-id="{{ product.id }}">
+                                            <i class="fas fa-trash"></i>
+                                        </button>
+                                    </td>
+                                </tr>
+                            {% empty %}
+                                <tr>
+                                    <td colspan="6" class="text-center text-muted">কোন পণ্য নেই</td>
+                                </tr>
+                            {% endfor %}
+                        </tbody>
+                    </table>
+                </div>
+            </div>
+        </div>
+    </div>
+
+    <!-- Orders Analysis Section (Read-Only) -->
+    <div id="orders-section" class="admin-section" style="display: none;">
+        <div class="card">
+            <div class="card-header">
+                <h5><i class="fas fa-eye me-2"></i>অর্ডার বিশ্লেষণ (পড়ার জন্য)</h5>
+                <small class="text-muted">অ্যাডমিন শুধুমাত্র অর্ডার বিশ্লেষণ করতে পারবেন, নতুন অর্ডার দিতে পারবেন না</small>
+            </div>
+            <div class="card-body">
+                <div class="table-responsive">
+                    <table class="table table-striped">
+                        <thead>
+                            <tr>
+                                <th>অর্ডার ID</th>
+                                <th>গ্রাহক</th>
+                                <th>তারিখ</th>
+                                <th>মোট</th>
+                                <th>স্ট্যাটাস</th>
+                                <th>অ্যাকশন</th>
+                            </tr>
+                        </thead>
+                        <tbody id="orders-table">
+                            {% for order in orders %}
+                                <tr>
+                                    <td>#{{ order.id }}</td>
+                                    <td>{{ order.customer.get_full_name|default:order.customer.username }}</td>
+                                    <td>{{ order.created_at|date:"d M Y, h:i A" }}</td>
+                                    <td>৳ {{ order.total_amount }}</td>
+                                    <td>
+                                        <span class="badge 
+                                            {% if order.status == 'pending' %}bg-warning
+                                            {% elif order.status == 'confirmed' %}bg-info
+                                            {% elif order.status == 'processing' %}bg-primary
+                                            {% elif order.status == 'dispatched' %}bg-success
+                                            {% elif order.status == 'delivered' %}bg-success
+                                            {% elif order.status == 'cancelled' %}bg-danger
+                                            {% elif order.status == 'returned' %}bg-secondary
+                                            {% else %}bg-secondary{% endif %}">
+                                            {{ order.get_status_display }}
+                                        </span>
+                                    </td>
+                                    <td>
+                                        <a href="{% url 'orders:order_detail' order.pk %}" class="btn btn-sm btn-primary me-1">
+                                            <i class="fas fa-eye"></i> দেখুন
+                                        </a>
+                                        <button class="btn btn-sm btn-success update-order-status-btn" 
+                                                data-order-id="{{ order.id }}"
+                                                data-current-status="{{ order.status }}">
+                                            <i class="fas fa-check"></i> স্ট্যাটাস
+                                        </button>
+                                        <a href="{% url 'orders:order_track' order.pk %}" class="btn btn-sm btn-info">
+                                            <i class="fas fa-map-marker-alt"></i> ট্র্যাক
+                                        </a>
+                                    </td>
+                                </tr>
+                            {% empty %}
+                                <tr>
+                                    <td colspan="6" class="text-center text-muted">কোন অর্ডার নেই</td>
+                                </tr>
+                            {% endfor %}
+                        </tbody>
+                    </table>
+                </div>
+            </div>
+        </div>
+    </div>
+
+    <!-- Analytics Section -->
+    <div id="analytics-section" class="admin-section" style="display: none;">
+        <div class="row">
+            <div class="col-md-3 mb-4">
+                <div class="card text-center">
+                    <div class="card-body">
+                        <i class="fas fa-shopping-cart fa-2x text-primary mb-3"></i>
+                        <h5>মোট অর্ডার</h5>
+                        <h3 class="text-primary" id="total-orders">{{ total_orders }}</h3>
+                    </div>
+                </div>
+            </div>
+            <div class="col-md-3 mb-4">
+                <div class="card text-center">
+                    <div class="card-body">
+                        <i class="fas fa-money-bill fa-2x text-success mb-3"></i>
+                        <h5>মোট বিক্রয়</h5>
+                        <h3 class="text-success" id="total-sales">৳ {{ total_revenue }}</h3>
+                    </div>
+                </div>
+            </div>
+            <div class="col-md-3 mb-4">
+                <div class="card text-center">
+                    <div class="card-body">
+                        <i class="fas fa-users fa-2x text-info mb-3"></i>
+                        <h5>সক্রিয় গ্রাহক</h5>
+                        <h3 class="text-info" id="active-customers">{{ total_customers }}</h3>
+                    </div>
+                </div>
+            </div>
+            <div class="col-md-3 mb-4">
+                <div class="card text-center">
+                    <div class="card-body">
+                        <i class="fas fa-star fa-2x text-warning mb-3"></i>
+                        <h5>গড় রেটিং</h5>
+                        <h3 class="text-warning" id="avg-rating">0.0</h3>
+                    </div>
+                </div>
+            </div>
+        </div>
+    </div>
+
+    <!-- Settings Section -->
+    <div id="settings-section" class="admin-section" style="display: none;">
+        <div class="card">
+            <div class="card-header">
+                <h5><i class="fas fa-cog me-2"></i>সিস্টেম সেটিংস</h5>
+            </div>
+            <div class="card-body">
+                <form>
+                    <div class="row">
+                        <div class="col-md-6 mb-3">
+                            <label class="form-label">ডেলিভারি চার্জ</label>
+                            <input type="number" class="form-control" value="50">
+                        </div>
+                        <div class="col-md-6 mb-3">
+                            <label class="form-label">ভ্যাট (%)</label>
+                            <input type="number" class="form-control" value="5">
+                        </div>
+                    </div>
+                    <div class="row">
+                        <div class="col-md-6 mb-3">
+                            <label class="form-label">প্রসেসিং ফি (%)</label>
+                            <input type="number" class="form-control" value="2">
+                        </div>
+                        <div class="col-md-6 mb-3">
+                            <label class="form-label">মিনিমাম অর্ডার</label>
+                            <input type="number" class="form-control" value="100">
+                        </div>
+                    </div>
+                    <button type="submit" class="btn btn-primary">
+                        <i class="fas fa-save me-2"></i>সেটিংস সংরক্ষণ করুন
+                    </button>
+                </form>
+            </div>
+        </div>
+    </div>
+</div>
+
+<!-- Add/Edit Product Modal -->
+<div class="modal fade" id="productModal" tabindex="-1">
+    <div class="modal-dialog">
+        <div class="modal-content">
+            <div class="modal-header">
+                <h5 class="modal-title" id="productModalTitle">নতুন পণ্য যোগ করুন</h5>
+                <button type="button" class="btn-close" data-bs-dismiss="modal"></button>
+            </div>
+            <div class="modal-body">
+                <form id="productForm">
+                    <div class="mb-3">
+                        <label class="form-label">পণ্যের নাম</label>
+                        <input type="text" class="form-control" id="product-name" required>
+                    </div>
+                    <div class="mb-3">
+                        <label class="form-label">ক্যাটাগরি</label>
+                        <select class="form-select" id="product-category" required>
+                            <option value="">ক্যাটাগরি নির্বাচন করুন</option>
+                            <option value="food">খাবার</option>
+                            <option value="medicine">ঔষধ</option>
+                            <option value="gas">গ্যাস</option>
+                            <option value="groceries">মুদি সামগ্রী</option>
+                            <option value="electronics">ইলেকট্রনিক্স</option>
+                            <option value="clothing">পোশাক</option>
+                            <option value="books">বই</option>
+                            <option value="other">অন্যান্য</option>
+                        </select>
+                    </div>
+                    <div class="mb-3">
+                        <label class="form-label">দর (৳)</label>
+                        <input type="number" class="form-control" id="product-price" required>
+                    </div>
+                    <div class="mb-3">
+                        <label class="form-label">বিবরণ</label>
+                        <textarea class="form-control" id="product-description" rows="3"></textarea>
+                    </div>
+                    <div class="mb-3">
+                        <label class="form-label">স্টক</label>
+                        <input type="number" class="form-control" id="product-stock" value="0">
+                    </div>
+                </form>
+            </div>
+            <div class="modal-footer">
+                <button type="button" class="btn btn-secondary" data-bs-dismiss="modal">বাতিল</button>
+                <button type="button" class="btn btn-primary" onclick="saveProduct()">সংরক্ষণ করুন</button>
+            </div>
+        </div>
+    </div>
+</div>
+
+<!-- Order Status Update Modal -->
+<div class="modal fade" id="orderStatusModal" tabindex="-1">
+    <div class="modal-dialog">
+        <div class="modal-content">
+            <div class="modal-header">
+                <h5 class="modal-title">অর্ডার স্ট্যাটাস আপডেট করুন</h5>
+                <button type="button" class="btn-close" data-bs-dismiss="modal"></button>
+            </div>
+            <div class="modal-body">
+                <div class="mb-3">
+                    <label for="statusSelect" class="form-label">নতুন স্ট্যাটাস</label>
+                    <select class="form-select" id="statusSelect" required>
+                        <option value="pending">অপেক্ষমান</option>
+                        <option value="confirmed">নিশ্চিত</option>
+                        <option value="processing">প্রক্রিয়াধীন</option>
+                        <option value="dispatched">প্রেরিত</option>
+                        <option value="delivered">ডেলিভারি সম্পন্ন</option>
+                        <option value="cancelled">বাতিল</option>
+                        <option value="returned">ফেরত</option>
+                    </select>
+                </div>
+            </div>
+            <div class="modal-footer">
+                <button type="button" class="btn btn-secondary" data-bs-dismiss="modal">বাতিল</button>
+                <button type="button" class="btn btn-primary" id="confirmStatusUpdate">আপডেট করুন</button>
+            </div>
+        </div>
+    </div>
+</div>
+
+<!-- Admin Notice Modal -->
+<div class="modal fade" id="adminNoticeModal" tabindex="-1">
+    <div class="modal-dialog">
+        <div class="modal-content">
+            <div class="modal-header">
+                <h5 class="modal-title">অ্যাডমিন নোটিশ</h5>
+                <button type="button" class="btn-close" data-bs-dismiss="modal"></button>
+            </div>
+            <div class="modal-body">
+                <div class="alert alert-info">
+                    <i class="fas fa-info-circle me-2"></i>
+                    <strong>মনে রাখবেন:</strong> অ্যাডমিন হিসেবে আপনি অর্ডার স্ট্যাটাস আপডেট এবং সিস্টেম ব্যবস্থাপনা করতে পারবেন।
+                </div>
+                <p>আপনি যা করতে পারবেন:</p>
+                <ul>
+                    <li>পণ্য যোগ, সম্পাদনা ও মুছে ফেলা</li>
+                    <li>অর্ডার স্ট্যাটাস আপডেট ও ট্র্যাকিং</li>
+                    <li>গ্রাহক তথ্য দেখুন</li>
+                    <li>সিস্টেম এনালিটিক্স</li>
+                </ul>
+            </div>
+            <div class="modal-footer">
+                <button type="button" class="btn btn-primary" data-bs-dismiss="modal">বুঝেছি</button>
+            </div>
+        </div>
+    </div>
+</div>
+
+<script>
+    document.addEventListener('DOMContentLoaded', function() {
+        // Analytics data is already loaded from server
+        loadAnalytics();
+        
+        // Add event listeners for edit product buttons
+        document.querySelectorAll('.edit-product-btn').forEach(btn => {
+            btn.addEventListener('click', function() {
+                const id = this.dataset.id;
+                const name = this.dataset.name;
+                const category = this.dataset.category;
+                const price = this.dataset.price;
+                const description = this.dataset.description;
+                const stock = this.dataset.stock;
+                editProduct(id, name, category, price, description, stock);
+            });
+        });
+        
+        // Add event listeners for update order status buttons
+        document.querySelectorAll('.update-order-status-btn').forEach(btn => {
+            btn.addEventListener('click', function() {
+                const orderId = this.dataset.orderId;
+                const currentStatus = this.dataset.currentStatus;
+                updateOrderStatus(orderId, currentStatus);
+            });
+        });
+        
+        // Show admin notice on page load
+        setTimeout(function() {
+            new bootstrap.Modal(document.getElementById('adminNoticeModal')).show();
+        }, 1000);
+        
+        // Add event listeners for delete product buttons
+        document.querySelectorAll('.delete-product-btn').forEach(btn => {
+            btn.addEventListener('click', function() {
+                const productId = this.dataset.productId;
+                deleteProduct(productId);
+            });
+        });
+    });
+
+    function showSection(sectionName) {
+        document.querySelectorAll('.admin-section').forEach(section => {
+            section.style.display = 'none';
+        });
+        document.getElementById(sectionName + '-section').style.display = 'block';
+    }
+
+    function loadAnalytics() {
+        // Analytics data is already loaded from server in the template
+        document.getElementById('avg-rating').textContent = '4.5';
+    }
+
+    function showAddProductModal() {
+        editingProductId = null;
+        document.getElementById('productModalTitle').textContent = 'নতুন পণ্য যোগ করুন';
+        document.getElementById('productForm').reset();
+        new bootstrap.Modal(document.getElementById('productModal')).show();
+    }
+
+    function editProduct(id, name, category, price, description, stock) {
+        editingProductId = id;
+        document.getElementById('productModalTitle').textContent = 'পণ্য সম্পাদনা করুন';
+        document.getElementById('product-name').value = name;
+        document.getElementById('product-category').value = category;
+        document.getElementById('product-price').value = price;
+        document.getElementById('product-description').value = description;
+        document.getElementById('product-stock').value = stock;
+        new bootstrap.Modal(document.getElementById('productModal')).show();
+    }
+
+    let editingProductId = null;
+
+    function saveProduct() {
+        const name = document.getElementById('product-name').value;
+        const category = document.getElementById('product-category').value;
+        const price = parseFloat(document.getElementById('product-price').value);
+        const description = document.getElementById('product-description').value;
+        const stock = parseInt(document.getElementById('product-stock').value);
+
+        if (!name || !category || !price) {
+            showNotification('সব প্রয়োজনীয় তথ্য পূরণ করুন!', 'error');
+            return;
+        }
+
+        // Show loading
+        const submitBtn = document.querySelector('#productModal .btn-primary');
+        const originalText = submitBtn.innerHTML;
+        submitBtn.innerHTML = '<i class="fas fa-spinner fa-spin me-2"></i>সংরক্ষণ হচ্ছে...';
+        submitBtn.disabled = true;
+
+        // Prepare product data
+        const productData = {
+            name: name,
+            category: category,
+            price: price,
+            description: description,
+            stock_quantity: stock
+        };
+
+        // Determine if this is an edit or add operation
+        const isEdit = editingProductId !== null;
+        const url = isEdit ? 
+            `{% url "orders:update_product_api" 0 %}`.replace('0', editingProductId) : 
+            '{% url "orders:add_product_api" %}';
+        const method = isEdit ? 'POST' : 'POST';
+
+        // Send to server
+        fetch(url, {
+            method: method,
+            headers: {
+                'Content-Type': 'application/json',
+                'X-CSRFToken': getCookie('csrftoken')
+            },
+            body: JSON.stringify(productData)
+        })
+        .then(response => response.json())
+        .then(data => {
+            if (data.success) {
+                showNotification(`পণ্য সফলভাবে ${isEdit ? 'আপডেট' : 'সংরক্ষণ'} করা হয়েছে!`, 'success');
+                bootstrap.Modal.getInstance(document.getElementById('productModal')).hide();
+                // Reload page to show changes
+                location.reload();
+            } else {
+                showNotification(data.message || 'পণ্য সংরক্ষণে সমস্যা হয়েছে।', 'error');
+            }
+        })
+        .catch(error => {
+            console.error('Error:', error);
+            showNotification('পণ্য সংরক্ষণে সমস্যা হয়েছে।', 'error');
+        })
+        .finally(() => {
+            // Reset button
+            submitBtn.innerHTML = originalText;
+            submitBtn.disabled = false;
+        });
+    }
+    
+    // Get CSRF token
+    function getCookie(name) {
+        let cookieValue = null;
+        if (document.cookie && document.cookie !== '') {
+            const cookies = document.cookie.split(';');
+            for (let i = 0; i < cookies.length; i++) {
+                const cookie = cookies[i].trim();
+                if (cookie.substring(0, name.length + 1) === (name + '=')) {
+                    cookieValue = decodeURIComponent(cookie.substring(name.length + 1));
+                    break;
+                }
+            }
+        }
+        return cookieValue;
+    }
+    
+    // Show notification
+    function showNotification(message, type = 'info') {
+        const notification = document.createElement('div');
+        notification.className = `alert alert-${type === 'error' ? 'danger' : type} alert-dismissible fade show`;
+        notification.style.position = 'fixed';
+        notification.style.top = '20px';
+        notification.style.right = '20px';
+        notification.style.zIndex = '9999';
+        notification.innerHTML = `
+            ${message}
+            <button type="button" class="btn-close" data-bs-dismiss="alert"></button>
+        `;
+        
+        document.body.appendChild(notification);
+        
+        setTimeout(() => {
+            notification.remove();
+        }, 5000);
+    }
+
+    function deleteProduct(id) {
+        if (confirm('আপনি কি এই পণ্য মুছে ফেলতে চান?')) {
+            fetch(`{% url "orders:delete_product_api" 0 %}`.replace('0', id), {
+                method: 'DELETE',
+                headers: {
+                    'X-CSRFToken': getCookie('csrftoken')
+                }
+            })
+            .then(response => response.json())
+            .then(data => {
+                if (data.success) {
+                    showNotification('পণ্য সফলভাবে মুছে ফেলা হয়েছে!', 'success');
+                    location.reload();
+                } else {
+                    showNotification(data.message || 'পণ্য মুছে ফেলতে সমস্যা হয়েছে।', 'error');
+                }
+            })
+            .catch(error => {
+                console.error('Error:', error);
+                showNotification('পণ্য মুছে ফেলতে সমস্যা হয়েছে।', 'error');
+            });
+        }
+    }
+
+    // Order status update functionality
+    let currentOrderId = null;
+    
+    function updateOrderStatus(orderId, currentStatus) {
+        currentOrderId = orderId;
+        document.getElementById('statusSelect').value = currentStatus;
+        
+        var modal = new bootstrap.Modal(document.getElementById('orderStatusModal'));
+        modal.show();
+    }
+    
+    // Handle status update confirmation
+    document.getElementById('confirmStatusUpdate').addEventListener('click', function() {
+        const newStatus = document.getElementById('statusSelect').value;
+        
+        if (!currentOrderId || !newStatus) {
+            showNotification('অর্ডার ID এবং স্ট্যাটাস প্রয়োজন', 'error');
+            return;
+        }
+        
+        // Show loading state
+        const btn = this;
+        const originalText = btn.innerHTML;
+        btn.innerHTML = '<i class="fas fa-spinner fa-spin me-2"></i>আপডেট হচ্ছে...';
+        btn.disabled = true;
+        
+        // Make API call
+        fetch('{% url "orders:admin_update_order_status" %}', {
+            method: 'POST',
+            headers: {
+                'Content-Type': 'application/json',
+                'X-CSRFToken': getCookie('csrftoken')
+            },
+            body: JSON.stringify({
+                order_id: currentOrderId,
+                status: newStatus
+            })
+        })
+        .then(response => response.json())
+        .then(data => {
+            if (data.success) {
+                showNotification(data.message, 'success');
+                bootstrap.Modal.getInstance(document.getElementById('orderStatusModal')).hide();
+                // Reload the page to show updated data
+                location.reload();
+            } else {
+                showNotification(data.message || 'স্ট্যাটাস আপডেটে সমস্যা হয়েছে', 'error');
+            }
+        })
+        .catch(error => {
+            console.error('Error:', error);
+            showNotification('স্ট্যাটাস আপডেটে সমস্যা হয়েছে', 'error');
+        })
+        .finally(() => {
+            // Reset button
+            btn.innerHTML = originalText;
+            btn.disabled = false;
+        });
+    });
+    
+    // Real-time dashboard updates
+    function updateDashboardData() {
+        fetch('{% url "orders:dashboard_data_api" %}')
+            .then(response => response.json())
+            .then(data => {
+                if (data.success && data.data.user_type === 'admin') {
+                    // Update statistics
+                    document.getElementById('total-orders').textContent = data.data.total_orders;
+                    
+                    // Update recent orders table
+                    const tbody = document.getElementById('orders-table');
+                    if (tbody && data.data.recent_orders) {
+                        tbody.innerHTML = data.data.recent_orders.map(order => `
+                            <tr>
+                                <td>#${order.order_number}</td>
+                                <td>${order.customer_name}</td>
+                                <td>${order.created_at}</td>
+                                <td>৳ ${order.total_amount}</td>
+                                <td>
+                                    <span class="badge 
+                                        ${order.status === 'pending' ? 'bg-warning' :
+                                          order.status === 'confirmed' ? 'bg-info' :
+                                          order.status === 'processing' ? 'bg-primary' :
+                                          order.status === 'dispatched' ? 'bg-success' :
+                                          order.status === 'delivered' ? 'bg-success' :
+                                          order.status === 'cancelled' ? 'bg-danger' :
+                                          order.status === 'returned' ? 'bg-secondary' : 'bg-secondary'}">
+                                        ${order.status_display}
+                                    </span>
+                                </td>
+                                <td>
+                                    <a href="/orders/${order.id}/" class="btn btn-sm btn-primary me-1">
+                                        <i class="fas fa-eye"></i> দেখুন
+                                    </a>
+                                    <button class="btn btn-sm btn-success update-order-status-btn" 
+                                            data-order-id="${order.id}"
+                                            data-current-status="${order.status}">
+                                        <i class="fas fa-check"></i> স্ট্যাটাস
+                                    </button>
+                                    <a href="/orders/${order.id}/track/" class="btn btn-sm btn-info">
+                                        <i class="fas fa-map-marker-alt"></i> ট্র্যাক
+                                    </a>
+                                </td>
+                            </tr>
+                        `).join('');
+                        
+                        // Re-add event listeners for new buttons
+                        document.querySelectorAll('.update-order-status-btn').forEach(btn => {
+                            btn.addEventListener('click', function() {
+                                const orderId = this.dataset.orderId;
+                                const currentStatus = this.dataset.currentStatus;
+                                updateOrderStatus(orderId, currentStatus);
+                            });
+                        });
+                    }
+                }
+            })
+            .catch(error => {
+                console.log('Dashboard update failed:', error);
+            });
+    }
+    
+    // Update dashboard every 30 seconds
+    setInterval(updateDashboardData, 30000);
+</script>
+
+<style>
+    .admin-section {
+        display: block;
+    }
+</style>
+{% endblock %}

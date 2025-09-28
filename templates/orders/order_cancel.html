@@ -1,0 +1,208 @@
+{% extends 'base.html' %}
+{% load static %}
+
+{% block title %}অর্ডার বাতিল - নগরবাসী এক্সপ্রেস{% endblock %}
+
+{% block content %}
+<div class="container py-4">
+    <div class="row justify-content-center">
+        <div class="col-lg-8">
+            <!-- Header -->
+            <div class="text-center mb-4">
+                <h2 class="text-danger">
+                    <i class="fas fa-times-circle me-2"></i>অর্ডার বাতিল
+                </h2>
+                <p class="text-muted">আপনার অর্ডার বাতিল করার জন্য নিচের ফর্মটি পূরণ করুন</p>
+            </div>
+
+            {% if error %}
+                <div class="alert alert-danger text-center">
+                    <i class="fas fa-exclamation-triangle me-2"></i>{{ error }}
+                </div>
+                <div class="text-center">
+                    <a href="{% url 'orders:order_detail' order.pk %}" class="btn btn-primary">
+                        <i class="fas fa-arrow-left me-2"></i>অর্ডার বিস্তারিত দেখুন
+                    </a>
+                </div>
+            {% else %}
+                <!-- Order Information -->
+                <div class="card mb-4">
+                    <div class="card-header bg-light">
+                        <h5 class="mb-0">
+                            <i class="fas fa-shopping-cart me-2"></i>অর্ডার তথ্য
+                        </h5>
+                    </div>
+                    <div class="card-body">
+                        <div class="row">
+                            <div class="col-md-6">
+                                <p><strong>অর্ডার নম্বর:</strong> {{ order.order_number }}</p>
+                                <p><strong>অর্ডার তারিখ:</strong> {{ order.created_at|date:"d M Y, h:i A" }}</p>
+                                <p><strong>মোট পরিমাণ:</strong> ৳{{ order.total_amount }}</p>
+                            </div>
+                            <div class="col-md-6">
+                                <p><strong>বর্তমান অবস্থা:</strong> 
+                                    <span class="badge bg-warning">{{ order.get_status_display }}</span>
+                                </p>
+                                <p><strong>ডেলিভারি ঠিকানা:</strong> {{ order.delivery_address }}</p>
+                                {% if cancellation_deadline %}
+                                <p><strong>বাতিলের শেষ সময়:</strong> 
+                                    <span class="text-danger">{{ cancellation_deadline|date:"d M Y, h:i A" }}</span>
+                                </p>
+                                {% endif %}
+                            </div>
+                        </div>
+                    </div>
+                </div>
+
+                <!-- Cancellation Instructions -->
+                <div class="alert alert-info">
+                    <h6><i class="fas fa-info-circle me-2"></i>বাতিলের নিয়মাবলী:</h6>
+                    <ul class="mb-0">
+                        <li>অর্ডার বাতিল করার পর তা আর ফিরিয়ে আনা যাবে না</li>
+                        <li>রিফান্ড ৩-৫ কার্যদিবসের মধ্যে প্রক্রিয়াকরণ হবে</li>
+                        <li>ডেলিভারি শুরু হওয়ার পর অর্ডার বাতিল করা যাবে না</li>
+                        <li>বাতিলের কারণ আমাদের সেবা উন্নতিতে সাহায্য করবে</li>
+                    </ul>
+                </div>
+
+                <!-- Cancellation Form -->
+                <div class="card">
+                    <div class="card-header bg-danger text-white">
+                        <h5 class="mb-0">
+                            <i class="fas fa-exclamation-triangle me-2"></i>বাতিলের ফর্ম
+                        </h5>
+                    </div>
+                    <div class="card-body">
+                        <form method="post" id="cancellationForm">
+                            {% csrf_token %}
+                            
+                            <!-- Reason -->
+                            <div class="mb-4">
+                                <label for="{{ form.reason.id_for_label }}" class="form-label">
+                                    {{ form.reason.label }} <span class="text-danger">*</span>
+                                </label>
+                                {{ form.reason }}
+                                {% if form.reason.help_text %}
+                                    <div class="form-text">{{ form.reason.help_text }}</div>
+                                {% endif %}
+                                {% if form.reason.errors %}
+                                    <div class="text-danger">{{ form.reason.errors }}</div>
+                                {% endif %}
+                            </div>
+
+                            <!-- Additional Notes -->
+                            <div class="mb-4">
+                                <label for="{{ form.additional_notes.id_for_label }}" class="form-label">
+                                    {{ form.additional_notes.label }}
+                                </label>
+                                {{ form.additional_notes }}
+                                {% if form.additional_notes.help_text %}
+                                    <div class="form-text">{{ form.additional_notes.help_text }}</div>
+                                {% endif %}
+                                {% if form.additional_notes.errors %}
+                                    <div class="text-danger">{{ form.additional_notes.errors }}</div>
+                                {% endif %}
+                            </div>
+
+                            <!-- Refund Preference -->
+                            <div class="mb-4">
+                                <label for="{{ form.refund_preference.id_for_label }}" class="form-label">
+                                    {{ form.refund_preference.label }}
+                                </label>
+                                {{ form.refund_preference }}
+                                {% if form.refund_preference.help_text %}
+                                    <div class="form-text">{{ form.refund_preference.help_text }}</div>
+                                {% endif %}
+                                {% if form.refund_preference.errors %}
+                                    <div class="text-danger">{{ form.refund_preference.errors }}</div>
+                                {% endif %}
+                            </div>
+
+                            <!-- Confirmation -->
+                            <div class="mb-4">
+                                <div class="form-check">
+                                    {{ form.confirm_cancellation }}
+                                    <label class="form-check-label" for="{{ form.confirm_cancellation.id_for_label }}">
+                                        {{ form.confirm_cancellation.label }} <span class="text-danger">*</span>
+                                    </label>
+                                </div>
+                                {% if form.confirm_cancellation.help_text %}
+                                    <div class="form-text">{{ form.confirm_cancellation.help_text }}</div>
+                                {% endif %}
+                                {% if form.confirm_cancellation.errors %}
+                                    <div class="text-danger">{{ form.confirm_cancellation.errors }}</div>
+                                {% endif %}
+                            </div>
+
+                            <!-- Action Buttons -->
+                            <div class="d-flex gap-3 justify-content-center">
+                                <button type="button" class="btn btn-secondary" onclick="history.back()">
+                                    <i class="fas fa-arrow-left me-2"></i>ফিরে যান
+                                </button>
+                                <button type="submit" class="btn btn-danger" id="cancelOrderBtn">
+                                    <i class="fas fa-times-circle me-2"></i>অর্ডার বাতিল করুন
+                                </button>
+                            </div>
+                        </form>
+                    </div>
+                </div>
+
+                <!-- Warning Message -->
+                <div class="alert alert-warning mt-4">
+                    <h6><i class="fas fa-exclamation-triangle me-2"></i>সতর্কতা:</h6>
+                    <p class="mb-0">আপনি নিশ্চিত যে আপনি এই অর্ডার বাতিল করতে চান? এই কাজটি অপরিবর্তনীয় এবং অর্ডার বাতিল হওয়ার পর তা আর ফিরিয়ে আনা যাবে না।</p>
+                </div>
+            {% endif %}
+        </div>
+    </div>
+</div>
+{% endblock %}
+
+{% block extra_js %}
+<script>
+document.addEventListener('DOMContentLoaded', function() {
+    const form = document.getElementById('cancellationForm');
+    const cancelBtn = document.getElementById('cancelOrderBtn');
+    const confirmCheckbox = document.querySelector('input[name="confirm_cancellation"]');
+    
+    // Disable submit button initially
+    cancelBtn.disabled = true;
+    
+    // Enable/disable submit button based on confirmation checkbox
+    confirmCheckbox.addEventListener('change', function() {
+        cancelBtn.disabled = !this.checked;
+        if (this.checked) {
+            cancelBtn.classList.remove('btn-secondary');
+            cancelBtn.classList.add('btn-danger');
+        } else {
+            cancelBtn.classList.remove('btn-danger');
+            cancelBtn.classList.add('btn-secondary');
+        }
+    });
+    
+    // Form submission confirmation
+    form.addEventListener('submit', function(e) {
+        if (!confirm('আপনি কি নিশ্চিত যে আপনি এই অর্ডার বাতিল করতে চান? এই কাজটি অপরিবর্তনীয়।')) {
+            e.preventDefault();
+        }
+    });
+    
+    // Real-time character count for additional notes
+    const additionalNotes = document.querySelector('textarea[name="additional_notes"]');
+    const maxLength = 500;
+    
+    additionalNotes.addEventListener('input', function() {
+        const remaining = maxLength - this.value.length;
+        const helpText = this.nextElementSibling;
+        
+        if (remaining < 50) {
+            helpText.innerHTML = `আর ${remaining} অক্ষর বাকি আছে`;
+            helpText.classList.add('text-warning');
+        } else {
+            helpText.innerHTML = 'আপনার মতামত আমাদের উন্নতিতে সাহায্য করবে';
+            helpText.classList.remove('text-warning');
+        }
+    });
+});
+</script>
+{% endblock %}

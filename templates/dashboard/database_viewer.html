@@ -1,0 +1,306 @@
+{% load static %}
+<!DOCTYPE html>
+<html lang="bn">
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title>ডেটাবেস ভিউয়ার - নাগরীবাসী এক্সপ্রেস</title>
+    
+    <!-- Bootstrap CSS -->
+    <link href="https://cdn.jsdelivr.net/npm/bootstrap@5.3.3/dist/css/bootstrap.min.css" rel="stylesheet">
+    
+    <!-- Google Fonts for Bangla -->
+    <link rel="preconnect" href="https://fonts.googleapis.com">
+    <link rel="preconnect" href="https://fonts.gstatic.com" crossorigin>
+    <link href="https://fonts.googleapis.com/css2?family=Hind+Siliguri:wght@300;400;500;600;700&display=swap" rel="stylesheet">
+    
+    <!-- Font Awesome -->
+    <link rel="stylesheet" href="https://cdnjs.cloudflare.com/ajax/libs/font-awesome/6.4.0/css/all.min.css">
+    
+    <style>
+        body { 
+            font-family: 'Hind Siliguri', sans-serif; 
+            background-color: #f8f9fa;
+        }
+        .data-card {
+            border: none;
+            box-shadow: 0 4px 6px rgba(0,0,0,0.1);
+            border-top: 4px solid #dc3545;
+        }
+        .navbar-brand {
+            color: #dc3545 !important;
+            font-weight: 700;
+        }
+        .btn-primary {
+            background-color: #dc3545;
+            border-color: #dc3545;
+        }
+        .btn-primary:hover {
+            background-color: #c82333;
+            border-color: #c82333;
+        }
+        .table-responsive {
+            border-radius: 10px;
+            overflow: hidden;
+        }
+    </style>
+</head>
+<body>
+    <!-- Navigation -->
+    <nav class="navbar navbar-expand-lg navbar-light bg-white shadow-sm">
+        <div class="container">
+            <a class="navbar-brand fw-bold" href="/">
+                <i class="fas fa-motorcycle me-2" style="color: #dc3545;"></i>নাগরীবাসী এক্সপ্রেস
+            </a>
+            <button class="navbar-toggler" type="button" data-bs-toggle="collapse" data-bs-target="#navbarNav">
+                <span class="navbar-toggler-icon"></span>
+            </button>
+            <div class="collapse navbar-collapse" id="navbarNav">
+                <ul class="navbar-nav ms-auto">
+                    <li class="nav-item">
+                        <a class="nav-link" href="/">হোম</a>
+                    </li>
+                    <li class="nav-item">
+                        <a class="nav-link" href="/orders/">পণ্য</a>
+                    </li>
+                    <li class="nav-item">
+                        <a class="nav-link" href="/admin-dashboard/">অ্যাডমিন</a>
+                    </li>
+                    <li class="nav-item">
+                        <a class="nav-link active" href="/database-viewer/">ডেটাবেস</a>
+                    </li>
+                    <li class="nav-item">
+                        <a class="nav-link" href="/admin/">ডিজেঙ্গো অ্যাডমিন</a>
+                    </li>
+                </ul>
+            </div>
+        </div>
+    </nav>
+
+    <!-- Database Viewer -->
+    <div class="container py-4">
+        <div class="row mb-4">
+            <div class="col-12">
+                <h2 class="text-center mb-3">
+                    <i class="fas fa-database me-2"></i>ডেটাবেস ভিউয়ার
+                </h2>
+                <p class="text-center text-muted">আপনার ডেটাবেসের সব তথ্য দেখুন</p>
+            </div>
+        </div>
+        
+        <!-- Users Data -->
+        <div class="row mb-4">
+            <div class="col-12">
+                <div class="card data-card">
+                    <div class="card-header bg-primary text-white">
+                        <h5 class="mb-0">
+                            <i class="fas fa-users me-2"></i>ব্যবহারকারী ({{ users|length }} জন)
+                        </h5>
+                    </div>
+                    <div class="card-body">
+                        <div class="table-responsive">
+                            <table class="table table-striped">
+                                <thead>
+                                    <tr>
+                                        <th>ID</th>
+                                        <th>ইউজারনেম</th>
+                                        <th>ইমেইল</th>
+                                        <th>নাম</th>
+                                        <th>ফোন</th>
+                                        <th>ধরন</th>
+                                        <th>সুপারইউজার</th>
+                                        <th>যোগদান</th>
+                                    </tr>
+                                </thead>
+                                <tbody>
+                                    {% for user in users %}
+                                    <tr>
+                                        <td>{{ user.id }}</td>
+                                        <td>{{ user.username }}</td>
+                                        <td>{{ user.email }}</td>
+                                        <td>{{ user.get_full_name|default:"-" }}</td>
+                                        <td>{{ user.phone_number|default:"-" }}</td>
+                                        <td>
+                                            <span class="badge bg-secondary">{{ user.get_user_type_display }}</span>
+                                        </td>
+                                        <td>
+                                            {% if user.is_superuser %}
+                                                <span class="badge bg-success">হ্যাঁ</span>
+                                            {% else %}
+                                                <span class="badge bg-secondary">না</span>
+                                            {% endif %}
+                                        </td>
+                                        <td>{{ user.date_joined|date:"d M Y" }}</td>
+                                    </tr>
+                                    {% empty %}
+                                    <tr>
+                                        <td colspan="8" class="text-center text-muted">কোন ব্যবহারকারী নেই</td>
+                                    </tr>
+                                    {% endfor %}
+                                </tbody>
+                            </table>
+                        </div>
+                    </div>
+                </div>
+            </div>
+        </div>
+        
+        <!-- Products Data -->
+        <div class="row mb-4">
+            <div class="col-12">
+                <div class="card data-card">
+                    <div class="card-header bg-success text-white">
+                        <h5 class="mb-0">
+                            <i class="fas fa-box me-2"></i>পণ্য/সেবা ({{ products|length }} টি)
+                        </h5>
+                    </div>
+                    <div class="card-body">
+                        <div class="table-responsive">
+                            <table class="table table-striped">
+                                <thead>
+                                    <tr>
+                                        <th>ID</th>
+                                        <th>নাম</th>
+                                        <th>বর্ণনা</th>
+                                        <th>বিভাগ</th>
+                                        <th>দাম</th>
+                                        <th>উপলব্ধ</th>
+                                        <th>তৈরি</th>
+                                    </tr>
+                                </thead>
+                                <tbody>
+                                    {% for product in products %}
+                                    <tr>
+                                        <td>{{ product.id }}</td>
+                                        <td>{{ product.name }}</td>
+                                        <td>{{ product.description|truncatechars:50 }}</td>
+                                        <td>
+                                            <span class="badge bg-info">{{ product.get_category_display }}</span>
+                                        </td>
+                                        <td>৳ {{ product.price }}</td>
+                                        <td>
+                                            {% if product.is_available %}
+                                                <span class="badge bg-success">হ্যাঁ</span>
+                                            {% else %}
+                                                <span class="badge bg-danger">না</span>
+                                            {% endif %}
+                                        </td>
+                                        <td>{{ product.created_at|date:"d M Y" }}</td>
+                                    </tr>
+                                    {% empty %}
+                                    <tr>
+                                        <td colspan="7" class="text-center text-muted">কোন পণ্য নেই</td>
+                                    </tr>
+                                    {% endfor %}
+                                </tbody>
+                            </table>
+                        </div>
+                    </div>
+                </div>
+            </div>
+        </div>
+        
+        <!-- Orders Data -->
+        <div class="row mb-4">
+            <div class="col-12">
+                <div class="card data-card">
+                    <div class="card-header bg-warning text-white">
+                        <h5 class="mb-0">
+                            <i class="fas fa-shopping-cart me-2"></i>অর্ডার ({{ orders|length }} টি)
+                        </h5>
+                    </div>
+                    <div class="card-body">
+                        <div class="table-responsive">
+                            <table class="table table-striped">
+                                <thead>
+                                    <tr>
+                                        <th>ID</th>
+                                        <th>গ্রাহক</th>
+                                        <th>মোট পরিমাণ</th>
+                                        <th>অবস্থা</th>
+                                        <th>ডেলিভারি ধরন</th>
+                                        <th>তৈরি</th>
+                                    </tr>
+                                </thead>
+                                <tbody>
+                                    {% for order in orders %}
+                                    <tr>
+                                        <td>{{ order.id }}</td>
+                                        <td>{{ order.customer.username }}</td>
+                                        <td>৳ {{ order.total_amount }}</td>
+                                        <td>
+                                            <span class="badge bg-secondary">{{ order.get_status_display }}</span>
+                                        </td>
+                                        <td>
+                                            <span class="badge bg-info">{{ order.get_delivery_type_display }}</span>
+                                        </td>
+                                        <td>{{ order.created_at|date:"d M Y" }}</td>
+                                    </tr>
+                                    {% empty %}
+                                    <tr>
+                                        <td colspan="6" class="text-center text-muted">কোন অর্ডার নেই</td>
+                                    </tr>
+                                    {% endfor %}
+                                </tbody>
+                            </table>
+                        </div>
+                    </div>
+                </div>
+            </div>
+        </div>
+        
+        <!-- Database Info -->
+        <div class="row">
+            <div class="col-12">
+                <div class="card data-card">
+                    <div class="card-header bg-info text-white">
+                        <h5 class="mb-0">
+                            <i class="fas fa-info-circle me-2"></i>ডেটাবেস তথ্য
+                        </h5>
+                    </div>
+                    <div class="card-body">
+                        <div class="row">
+                            <div class="col-md-6">
+                                <h6>ডেটাবেস ফাইল অবস্থান:</h6>
+                                <p class="text-muted">E:\Nagaribashi_express\db.sqlite3</p>
+                                
+                                <h6>ডেটাবেস টাইপ:</h6>
+                                <p class="text-muted">SQLite (Development)</p>
+                            </div>
+                            <div class="col-md-6">
+                                <h6>মোট রেকর্ড:</h6>
+                                <p class="text-muted">
+                                    ব্যবহারকারী: {{ users|length }}<br>
+                                    পণ্য: {{ products|length }}<br>
+                                    অর্ডার: {{ orders|length }}
+                                </p>
+                                
+                                <h6>সর্বশেষ আপডেট:</h6>
+                                <p class="text-muted">{{ now|date:"d M Y, H:i" }}</p>
+                            </div>
+                        </div>
+                    </div>
+                </div>
+            </div>
+        </div>
+    </div>
+
+    <!-- Footer -->
+    <footer class="bg-dark text-white py-4 mt-5">
+        <div class="container">
+            <div class="row">
+                <div class="col-md-6">
+                    <h5>নাগরীবাসী এক্সপ্রেস</h5>
+                    <p>আপনার শহরের সবচেয়ে নির্ভরযোগ্য ডেলিভারি সেবা</p>
+                </div>
+                <div class="col-md-6 text-md-end">
+                    <p>&copy; 2024 নাগরীবাসী এক্সপ্রেস. সর্বস্বত্ব সংরক্ষিত।</p>
+                </div>
+            </div>
+        </div>
+    </footer>
+
+    <!-- Bootstrap JS -->
+    <script src="https://cdn.jsdelivr.net/npm/bootstrap@5.3.3/dist/js/bootstrap.bundle.min.js"></script>
+</body>
+</html>

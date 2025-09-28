@@ -1,0 +1,220 @@
+{% load static %}
+<!DOCTYPE html>
+<html lang="bn" dir="ltr">
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <meta http-equiv="X-UA-Compatible" content="ie=edge">
+    
+    <title>{% block title %}নাগরীবাসী এক্সপ্রেস - Always at Your Service{% endblock %}</title>
+    <link rel="icon" type="image/x-icon" href="data:image/svg+xml,<svg xmlns='http://www.w3.org/2000/svg' viewBox='0 0 100 100'><text y='.9em' font-size='90'>🏍️</text></svg>">
+    
+    <!-- Bootstrap CSS -->
+    <link href="https://cdn.jsdelivr.net/npm/bootstrap@5.3.0/dist/css/bootstrap.min.css" rel="stylesheet">
+    
+    <!-- Font Awesome -->
+    <link rel="stylesheet" href="https://cdnjs.cloudflare.com/ajax/libs/font-awesome/6.4.0/css/all.min.css">
+    
+    <!-- Google Fonts - Bengali -->
+    <link rel="preconnect" href="https://fonts.googleapis.com">
+    <link rel="preconnect" href="https://fonts.gstatic.com" crossorigin>
+    <link href="https://fonts.googleapis.com/css2?family=Noto+Sans+Bengali:wght@300;400;500;600;700&display=swap" rel="stylesheet">
+    
+    <!-- Custom CSS -->
+    <link rel="stylesheet" href="{% static 'css/style.css' %}">
+    
+    {% block extra_css %}{% endblock %}
+</head>
+<body>
+    <!-- Navigation -->
+    <nav class="navbar navbar-expand-lg navbar-dark sticky-top" style="background: linear-gradient(135deg, #DC2626 0%, #B91C1C 100%);">
+        <div class="container">
+            <a class="navbar-brand d-flex align-items-center" href="{% url 'dashboard:home' %}">
+                <img src="{% static 'images/logo.svg' %}" alt="নাগরীবাসী এক্সপ্রেস" height="50" class="me-3">
+                <div>
+                    <div class="fw-bold fs-4 text-white">নাগরীবাসী এক্সপ্রেস</div>
+                    <small class="text-light">ALWAYS AT YOUR SERVICE</small>
+                </div>
+            </a>
+            
+            <button class="navbar-toggler" type="button" data-bs-toggle="collapse" data-bs-target="#navbarNav">
+                <span class="navbar-toggler-icon"></span>
+            </button>
+            
+            <div class="collapse navbar-collapse" id="navbarNav">
+                <ul class="navbar-nav me-auto">
+                    <li class="nav-item">
+                        <a class="nav-link" href="{% url 'dashboard:home' %}">
+                            <i class="fas fa-home me-1"></i>হোম
+                        </a>
+                    </li>
+                    <li class="nav-item">
+                        <a class="nav-link" href="{% url 'orders:products' %}">
+                            <i class="fas fa-shopping-bag me-1"></i>পণ্য/সেবা
+                        </a>
+                    </li>
+                    {% if not user.is_admin %}
+                    <li class="nav-item">
+                        <a class="nav-link" href="{% url 'orders:cart' %}">
+                            <i class="fas fa-shopping-cart me-1"></i>কার্ট
+                            <span class="badge bg-success ms-1" id="cart-badge" style="display: none;">0</span>
+                        </a>
+                    </li>
+                    {% endif %}
+                    <li class="nav-item">
+                        <a class="nav-link" href="{% url 'orders:order_list' %}">
+                            <i class="fas fa-list me-1"></i>অর্ডার
+                        </a>
+                    </li>
+                    <li class="nav-item">
+                        <a class="nav-link" href="{% url 'dashboard:user_dashboard' %}">
+                            <i class="fas fa-tachometer-alt me-1"></i>ড্যাশবোর্ড
+                        </a>
+                    </li>
+                    <li class="nav-item">
+                        <a class="nav-link" href="{% url 'reviews:review_list' %}">
+                            <i class="fas fa-star me-1"></i>রিভিউ
+                        </a>
+                    </li>
+                    {% if user.is_authenticated and user.is_admin %}
+                    <li class="nav-item dropdown">
+                        <a class="nav-link dropdown-toggle" href="#" role="button" data-bs-toggle="dropdown">
+                            <i class="fas fa-cog me-1"></i>অ্যাডমিন
+                        </a>
+                        <ul class="dropdown-menu">
+                            <li><a class="dropdown-item" href="{% url 'dashboard:admin_dashboard' %}">ড্যাশবোর্ড</a></li>
+                            <li><a class="dropdown-item" href="{% url 'dashboard:admin_panel' %}">পণ্য ব্যবস্থাপনা</a></li>
+                            <li><a class="dropdown-item" href="{% url 'orders:admin_order_list' %}">অর্ডার ব্যবস্থাপনা</a></li>
+                            <li><a class="dropdown-item" href="{% url 'delivery:admin_delivery_list' %}">ডেলিভারি ব্যবস্থাপনা</a></li>
+                            <li><a class="dropdown-item" href="{% url 'payments:admin_payment_list' %}">পেমেন্ট ব্যবস্থাপনা</a></li>
+                            <li><a class="dropdown-item" href="{% url 'users:user_list' %}">ব্যবহারকারী ব্যবস্থাপনা</a></li>
+                        </ul>
+                    </li>
+                    {% endif %}
+                </ul>
+                
+                <ul class="navbar-nav">
+                    {% if user.is_authenticated %}
+                        <li class="nav-item dropdown">
+                            <a class="nav-link dropdown-toggle" href="#" role="button" data-bs-toggle="dropdown">
+                                <i class="fas fa-user me-1"></i>{{ user.get_full_name|default:user.username }}
+                            </a>
+                            <ul class="dropdown-menu">
+                                <li><a class="dropdown-item" href="{% url 'users:profile' %}">প্রোফাইল</a></li>
+                                <li><a class="dropdown-item" href="{% url 'orders:order_history' %}">অর্ডার ইতিহাস</a></li>
+                                <li><a class="dropdown-item" href="{% url 'reviews:review_list' %}">আমার রিভিউ</a></li>
+                                <li><hr class="dropdown-divider"></li>
+                                <li><a class="dropdown-item" href="{% url 'users:logout' %}">লগআউট</a></li>
+                            </ul>
+                        </li>
+                    {% endif %}
+                </ul>
+            </div>
+        </div>
+    </nav>
+
+    <!-- Messages -->
+    {% if messages %}
+        <div class="container mt-3">
+            {% for message in messages %}
+                <div class="alert alert-{{ message.tags }} alert-dismissible fade show" role="alert">
+                    {{ message }}
+                    <button type="button" class="btn-close" data-bs-dismiss="alert"></button>
+                </div>
+            {% endfor %}
+        </div>
+    {% endif %}
+
+    <!-- Main Content -->
+    <main class="main-content">
+        {% block content %}{% endblock %}
+    </main>
+
+    <!-- Footer -->
+    <footer class="bg-dark text-light py-5 mt-5">
+        <div class="container">
+            <div class="row">
+                <div class="col-md-4">
+                    <h5 class="mb-3">নাগরীবাসী এক্সপ্রেস</h5>
+                    <p class="text-muted">আপনার শহরের সবচেয়ে নির্ভরযোগ্য ডেলিভারি সেবা। খাবার, ঔষধ, গ্যাস এবং আরও অনেক কিছু দ্রুত এবং নিরাপদে পৌঁছে দেওয়া।</p>
+                </div>
+                <div class="col-md-2">
+                    <h6 class="mb-3">সেবা</h6>
+                    <ul class="list-unstyled">
+                        <li><a href="{% url 'orders:product_list' %}" class="text-muted text-decoration-none">পণ্য/সেবা</a></li>
+                        <li><a href="{% url 'orders:order_list' %}" class="text-muted text-decoration-none">অর্ডার</a></li>
+                        <li><a href="{% url 'delivery:delivery_list' %}" class="text-muted text-decoration-none">ডেলিভারি</a></li>
+                        <li><a href="{% url 'payments:payment_list' %}" class="text-muted text-decoration-none">পেমেন্ট</a></li>
+                    </ul>
+                </div>
+                <div class="col-md-2">
+                    <h6 class="mb-3">সহায়তা</h6>
+                    <ul class="list-unstyled">
+                        <li><a href="{% url 'dashboard:faq' %}" class="text-muted text-decoration-none">প্রায়শই জিজ্ঞাসিত প্রশ্ন</a></li>
+                        <li><a href="{% url 'dashboard:contact' %}" class="text-muted text-decoration-none">যোগাযোগ</a></li>
+                        <li><a href="#" class="text-muted text-decoration-none">সাপোর্ট</a></li>
+                        <li><a href="#" class="text-muted text-decoration-none">শর্তাবলী</a></li>
+                    </ul>
+                </div>
+                <div class="col-md-4">
+                    <h6 class="mb-3">যোগাযোগ</h6>
+                    <p class="text-muted">
+                        <i class="fas fa-phone me-2"></i>০১৭১১-৭৪৫০০০<br>
+                        <i class="fas fa-envelope me-2"></i>nagaribashiexpress@gmail.com<br>
+                        <i class="fas fa-map-marker-alt me-2"></i>ধানমন্ডি, ঢাকা-১২০৫
+                    </p>
+                    <div class="social-links">
+                        <a href="https://www.facebook.com/nagaribashiexpress" target="_blank" class="text-muted me-3" title="Facebook">
+                            <i class="fab fa-facebook-f"></i>
+                        </a>
+                        <a href="tel:01711745000" class="text-muted me-3" title="কল করুন">
+                            <i class="fas fa-phone"></i>
+                        </a>
+                        <a href="mailto:nagaribashiexpress@gmail.com" class="text-muted me-3" title="ইমেইল করুন">
+                            <i class="fas fa-envelope"></i>
+                        </a>
+                        <a href="https://wa.me/8801711745000" target="_blank" class="text-muted me-3" title="WhatsApp">
+                            <i class="fab fa-whatsapp"></i>
+                        </a>
+                    </div>
+                </div>
+            </div>
+            <hr class="my-4">
+            <div class="row align-items-center">
+                <div class="col-md-6">
+                    <p class="mb-0 text-muted">&copy; ২০২৪ নাগরীবাসী এক্সপ্রেস। সকল অধিকার সংরক্ষিত।</p>
+                </div>
+                <div class="col-md-6 text-md-end">
+                    <p class="mb-0 text-muted">Made with <i class="fas fa-heart text-danger"></i> in Bangladesh</p>
+                </div>
+            </div>
+        </div>
+    </footer>
+
+    <!-- Bootstrap JS -->
+    <script src="https://cdn.jsdelivr.net/npm/bootstrap@5.3.0/dist/js/bootstrap.bundle.min.js"></script>
+    
+    <!-- jQuery -->
+    <script src="https://code.jquery.com/jquery-3.7.1.min.js"></script>
+    
+    <!-- Custom JS -->
+    <script src="{% static 'js/main.js' %}"></script>
+    
+    <!-- Cart functionality -->
+    <script>
+        // Update cart badge on page load
+        document.addEventListener('DOMContentLoaded', function() {
+            updateCartBadge();
+        });
+        
+        // Listen for storage changes (when cart is updated in other tabs)
+        window.addEventListener('storage', function(e) {
+            if (e.key === 'cart') {
+                updateCartBadge();
+            }
+        });
+    </script>
+    
+    {% block extra_js %}{% endblock %}
+</body>
+</html>

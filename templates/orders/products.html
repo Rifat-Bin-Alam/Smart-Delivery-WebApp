@@ -1,0 +1,353 @@
+{% extends 'base.html' %}
+{% load static %}
+
+{% block title %}পণ্য ও সেবা - নাগরীবাসী এক্সপ্রেস{% endblock %}
+
+{% block content %}
+<div class="container py-5">
+    <div class="row">
+        <div class="col-12">
+            <h2 class="text-center mb-5">
+                <i class="fas fa-shopping-bag me-2"></i>আমাদের পণ্য ও সেবা
+            </h2>
+        </div>
+    </div>
+
+    <!-- Filter Section -->
+    <div class="row mb-4">
+        <div class="col-12">
+            <div class="card">
+                <div class="card-body">
+                    <div class="row align-items-center">
+                        <div class="col-md-4">
+                            <h5 class="mb-0">ক্যাটাগরি ফিল্টার</h5>
+                        </div>
+                        <div class="col-md-4">
+                            <div class="input-group">
+                                <input type="text" class="form-control" id="search-input" placeholder="পণ্য খুঁজুন..." onkeyup="searchProducts()">
+                                <button class="btn btn-outline-secondary" type="button" onclick="clearSearch()">
+                                    <i class="fas fa-times"></i>
+                                </button>
+                            </div>
+                        </div>
+                        <div class="col-md-4">
+                            <div class="btn-group flex-wrap" role="group" id="category-filters" style="overflow-x: auto; white-space: nowrap;">
+                                <button type="button" class="btn btn-outline-primary active" onclick="filterProducts('all')">সব</button>
+                                <button type="button" class="btn btn-outline-primary" onclick="filterProducts('food')">খাবার</button>
+                                <button type="button" class="btn btn-outline-primary" onclick="filterProducts('medicine')">ঔষধ</button>
+                                <button type="button" class="btn btn-outline-primary" onclick="filterProducts('gas')">গ্যাস</button>
+                                <button type="button" class="btn btn-outline-primary" onclick="filterProducts('groceries')">মুদি সামগ্রী</button>
+                                <button type="button" class="btn btn-outline-primary" onclick="filterProducts('electronics')">ইলেকট্রনিক্স</button>
+                                <button type="button" class="btn btn-outline-primary" onclick="filterProducts('clothing')">পোশাক</button>
+                                <button type="button" class="btn btn-outline-primary" onclick="filterProducts('books')">বই</button>
+                                <button type="button" class="btn btn-outline-primary" onclick="filterProducts('other')">অন্যান্য</button>
+                            </div>
+                        </div>
+                    </div>
+                </div>
+            </div>
+        </div>
+    </div>
+
+    <!-- Products Grid -->
+    <div class="row" id="products-container">
+        {% if products %}
+            {% for product in products %}
+                <div class="col-lg-3 col-md-4 col-sm-6 mb-4 product-item" data-category="{{ product.category }}">
+                    <div class="card product-card h-100">
+                        <div class="card-body text-center">
+                            <div class="mb-3" style="font-size: 3rem;">
+                                {% if product.category == 'food' %}🍗
+                                {% elif product.category == 'medicine' %}💊
+                                {% elif product.category == 'gas' %}🔥
+                                {% elif product.category == 'groceries' %}🛒
+                                {% elif product.category == 'electronics' %}📱
+                                {% elif product.category == 'clothing' %}👕
+                                {% elif product.category == 'books' %}📚
+                                {% else %}📦{% endif %}
+                            </div>
+                            <h5 class="card-title product-name">{{ product.name }}</h5>
+                            <p class="text-muted">{{ product.get_category_display }}</p>
+                            <p class="text-muted small product-description">{{ product.description|truncatechars:50 }}</p>
+                            <h4 class="text-primary">৳ {{ product.price }}</h4>
+                            
+                            <!-- Stock Status -->
+                            {% if product.is_available and product.stock_quantity > 0 %}
+                                {% if product.stock_quantity <= 5 %}
+                                    <span class="badge bg-warning mb-2">{{ product.get_stock_status }}</span>
+                                {% else %}
+                                    <span class="badge bg-success mb-2">{{ product.get_stock_status }}</span>
+                                {% endif %}
+                            {% else %}
+                                <span class="badge bg-danger mb-2">স্টক শেষ</span>
+                            {% endif %}
+
+                            {% if product.is_available and product.stock_quantity > 0 and not user.is_admin %}
+                            <button class="btn btn-primary w-100 add-to-cart-btn" 
+                                    data-product-id="{{ product.id }}"
+                                    data-product-name="{{ product.name }}"
+                                    data-product-price="{{ product.price }}">
+                                <i class="fas fa-cart-plus me-2"></i>কার্টে যোগ করুন
+                            </button>
+                            {% elif user.is_admin %}
+                            <div class="alert alert-info text-center">
+                                <i class="fas fa-info-circle me-2"></i>
+                                অ্যাডমিন হিসেবে আপনি অর্ডার দিতে পারবেন না
+                            </div>
+                            {% elif product.stock_quantity == 0 %}
+                            <button class="btn btn-secondary w-100" disabled>
+                                <i class="fas fa-times me-2"></i>স্টক শেষ
+                            </button>
+                            {% elif not product.is_available %}
+                            <button class="btn btn-secondary w-100" disabled>
+                                <i class="fas fa-times me-2"></i>অনুপলব্ধ
+                            </button>
+                            {% endif %}
+                        </div>
+                    </div>
+                </div>
+            {% endfor %}
+        {% else %}
+            <div class="col-12 text-center py-5">
+                <i class="fas fa-box-open fa-4x text-muted mb-3"></i>
+                <h4 class="text-muted">কোন পণ্য পাওয়া যায়নি</h4>
+                <p class="text-muted">দয়া করে পরে আবার চেষ্টা করুন</p>
+            </div>
+        {% endif %}
+    </div>
+</div>
+
+<!-- Cart Modal -->
+<div class="modal fade" id="cartModal" tabindex="-1">
+    <div class="modal-dialog modal-lg">
+        <div class="modal-content">
+            <div class="modal-header">
+                <h5 class="modal-title">
+                    <i class="fas fa-shopping-cart me-2"></i>আপনার কার্ট
+                </h5>
+                <button type="button" class="btn-close" data-bs-dismiss="modal"></button>
+            </div>
+            <div class="modal-body">
+                <div id="cart-items">
+                    <!-- Cart items will be loaded here -->
+                </div>
+                <div id="empty-cart" class="text-center py-5" style="display: none;">
+                    <i class="fas fa-shopping-cart fa-3x text-muted mb-3"></i>
+                    <h5 class="text-muted">আপনার কার্ট খালি</h5>
+                    <p class="text-muted">কিছু পণ্য যোগ করুন</p>
+                </div>
+            </div>
+            <div class="modal-footer">
+                <button type="button" class="btn btn-secondary" data-bs-dismiss="modal">বন্ধ করুন</button>
+                <a href="{% url 'orders:checkout' %}" class="btn btn-primary">
+                    <i class="fas fa-credit-card me-2"></i>চেকআউট করুন
+                </a>
+            </div>
+        </div>
+    </div>
+</div>
+
+<script>
+    // Products data from Django backend
+    const products = [
+        {% for product in products %}
+        { 
+            id: {{ product.id }}, 
+            name: '{{ product.name|escapejs }}', 
+            price: {{ product.price }}, 
+            category: '{{ product.category|escapejs }}', 
+            image: '{% if product.category == "food" %}🍗{% elif product.category == "medicine" %}💊{% elif product.category == "gas" %}🔥{% elif product.category == "groceries" %}🛒{% else %}📦{% endif %}', 
+            description: '{{ product.description|escapejs|truncatechars:50 }}' 
+        }{% if not forloop.last %},{% endif %}
+        {% endfor %}
+    ];
+
+    let cart = JSON.parse(localStorage.getItem('cart')) || [];
+
+    // Initialize
+    document.addEventListener('DOMContentLoaded', function() {
+        updateCartBadge();
+        
+        // Add event listeners for add to cart buttons
+        document.querySelectorAll('.add-to-cart-btn').forEach(btn => {
+            btn.addEventListener('click', function() {
+                const productId = this.dataset.productId;
+                const productName = this.dataset.productName;
+                const productPrice = parseFloat(this.dataset.productPrice);
+                addToCart(productId, productName, productPrice);
+            });
+        });
+        
+        // Auto-refresh products every 30 seconds to show new products
+        setInterval(function() {
+            location.reload();
+        }, 30000);
+    });
+
+
+    // Add to cart
+    function addToCart(id, name, price) {
+        let existingItem = cart.find(item => item.id == id);
+        if (existingItem) {
+            existingItem.quantity += 1;
+        } else {
+            cart.push({ 
+                id: id, 
+                product_id: id,  // Add product_id for API compatibility
+                name: name, 
+                product_name: name,  // Add product_name for API compatibility
+                price: price, 
+                product_price: price,  // Add product_price for API compatibility
+                quantity: 1 
+            });
+        }
+        localStorage.setItem('cart', JSON.stringify(cart));
+        addToCartNotification(name, 1);
+        updateCartBadge();
+    }
+
+    // Update cart badge
+    function updateCartBadge() {
+        const totalItems = cart.reduce((sum, item) => sum + item.quantity, 0);
+        const cartBadge = document.getElementById('cart-badge');
+        if (cartBadge) {
+            if (totalItems > 0) {
+                cartBadge.textContent = totalItems;
+                cartBadge.style.display = 'inline';
+            } else {
+                cartBadge.style.display = 'none';
+            }
+        }
+    }
+
+    // Filter products by category
+    function filterProducts(category) {
+        const productItems = document.querySelectorAll('.product-item');
+        const filterButtons = document.querySelectorAll('.btn-group .btn');
+        
+        // Update active button
+        filterButtons.forEach(btn => {
+            btn.classList.remove('active');
+            if (btn.onclick && btn.onclick.toString().includes(`'${category}'`)) {
+                btn.classList.add('active');
+            }
+        });
+        
+        // Filter products
+        let visibleCount = 0;
+        productItems.forEach(item => {
+            const productCategory = item.getAttribute('data-category');
+            
+            if (category === 'all' || productCategory === category) {
+                item.style.display = 'block';
+                item.style.animation = 'fadeIn 0.3s ease-in';
+                visibleCount++;
+            } else {
+                item.style.display = 'none';
+            }
+        });
+        
+        // Show message if no products found
+        if (visibleCount === 0 && category !== 'all') {
+            const categoryNames = {
+                'food': 'খাবার',
+                'medicine': 'ঔষধ',
+                'gas': 'গ্যাস',
+                'groceries': 'মুদি সামগ্রী',
+                'electronics': 'ইলেকট্রনিক্স',
+                'clothing': 'পোশাক',
+                'books': 'বই',
+                'other': 'অন্যান্য'
+            };
+            const categoryName = categoryNames[category] || category;
+            showNotification(`কোন ${categoryName} পণ্য পাওয়া যায়নি।`, 'info');
+        }
+    }
+    
+    // Search products
+    function searchProducts() {
+        const searchTerm = document.getElementById('search-input').value.toLowerCase();
+        const productItems = document.querySelectorAll('.product-item');
+        
+        let visibleCount = 0;
+        productItems.forEach(item => {
+            const productName = item.querySelector('.product-name').textContent.toLowerCase();
+            const productDescription = item.querySelector('.product-description').textContent.toLowerCase();
+            
+            if (searchTerm === '' || productName.includes(searchTerm) || productDescription.includes(searchTerm)) {
+                item.style.display = 'block';
+                item.style.animation = 'fadeIn 0.3s ease-in';
+                visibleCount++;
+            } else {
+                item.style.display = 'none';
+            }
+        });
+        
+        // Show message if no products found
+        if (visibleCount === 0 && searchTerm !== '') {
+            showNotification(`"${searchTerm}" এর জন্য কোন পণ্য পাওয়া যায়নি।`, 'info');
+        }
+    }
+    
+    // Clear search
+    function clearSearch() {
+        document.getElementById('search-input').value = '';
+        // Reset all buttons
+        document.querySelectorAll('.btn-group .btn').forEach(btn => btn.classList.remove('active'));
+        // Activate "All" button
+        document.querySelector('.btn-group .btn[onclick*="all"]').classList.add('active');
+        // Show all products
+        document.querySelectorAll('.product-item').forEach(item => {
+            item.style.display = 'block';
+            item.style.animation = 'fadeIn 0.3s ease-in';
+        });
+    }
+    
+    // Show notification
+    function showNotification(message, type = 'info') {
+        const notification = document.createElement('div');
+        notification.className = `alert alert-${type === 'error' ? 'danger' : type} alert-dismissible fade show`;
+        notification.style.position = 'fixed';
+        notification.style.top = '20px';
+        notification.style.right = '20px';
+        notification.style.zIndex = '9999';
+        notification.innerHTML = `
+            ${message}
+            <button type="button" class="btn-close" data-bs-dismiss="alert"></button>
+        `;
+        
+        document.body.appendChild(notification);
+        
+        setTimeout(() => {
+            notification.remove();
+        }, 3000);
+    }
+</script>
+
+<style>
+    .product-card {
+        transition: transform 0.3s ease;
+        border: none;
+        box-shadow: 0 2px 4px rgba(0,0,0,0.1);
+    }
+    .product-card:hover {
+        transform: translateY(-5px);
+        box-shadow: 0 4px 8px rgba(0,0,0,0.15);
+    }
+    
+    @keyframes fadeIn {
+        from { opacity: 0; transform: translateY(20px); }
+        to { opacity: 1; transform: translateY(0); }
+    }
+    
+    .product-item {
+        animation: fadeIn 0.3s ease-in;
+    }
+    
+    .btn-group .btn.active {
+        background-color: var(--primary-color);
+        border-color: var(--primary-color);
+        color: white;
+    }
+</style>
+{% endblock %}

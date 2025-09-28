@@ -1,0 +1,358 @@
+{% extends 'base.html' %}
+{% load static %}
+
+{% block title %}নাগরীবাসী এক্সপ্রেস - আপনার শহরের সবচেয়ে নির্ভরযোগ্য ডেলিভারি সেবা{% endblock %}
+
+{% block content %}
+<div class="container-fluid p-0">
+    <!-- Hero Section -->
+    <section class="hero-section">
+        <div class="delivery-pattern"></div>
+        <div class="container">
+            <div class="row align-items-center">
+                <div class="col-lg-6 hero-content">
+                    <div class="mb-3">
+                        <span class="badge bg-white text-danger px-3 py-2 mb-3" style="font-size: 0.9rem;">
+                            <i class="fas fa-motorcycle me-2"></i>ALWAYS AT YOUR SERVICE
+                        </span>
+                    </div>
+                            <h1 class="display-4 fw-bold mb-4" style="color: white !important;">স্বাগতম নাগরীবাসী এক্সপ্রেসে</h1>
+                            <p class="lead mb-4" style="color: white !important;">আপনার শহরের সবচেয়ে নির্ভরযোগ্য ডেলিভারি সেবা। খাবার, ঔষধ, গ্যাস এবং আরও অনেক কিছু দ্রুত এবং নিরাপদে পৌঁছে দেওয়া।</p>
+                    <div class="d-flex gap-3">
+                        {% if not user.is_authenticated %}
+                        <a href="{% url 'users:login' %}" class="btn btn-light btn-lg">
+                            <i class="fas fa-sign-in-alt me-2"></i>লগইন করুন
+                        </a>
+                        <a href="{% url 'users:signup' %}" class="btn btn-outline-light btn-lg">
+                            <i class="fas fa-user-plus me-2"></i>সাইনআপ করুন
+                        </a>
+                        {% else %}
+                        <a href="{% url 'orders:product_list' %}" class="btn btn-light btn-lg">
+                            <i class="fas fa-shopping-cart me-2"></i>পণ্য দেখুন
+                        </a>
+                        <a href="{% url 'dashboard:user_dashboard' %}" class="btn btn-outline-light btn-lg">
+                            <i class="fas fa-tachometer-alt me-2"></i>ড্যাশবোর্ড
+                        </a>
+                        {% endif %}
+                    </div>
+                </div>
+                        <div class="col-lg-6 text-center hero-content">
+                            <div class="position-relative">
+                                <div class="logo-container position-relative d-inline-block">
+                                    <img src="{% static 'images/logo.svg' %}" alt="নাগরীবাসী এক্সপ্রেস" style="width: 200px; height: auto; filter: drop-shadow(0 10px 20px rgba(0,0,0,0.3));">
+                                    <div class="position-absolute top-0 start-0 w-100 h-100">
+                                        <div class="motion-trail position-absolute" style="
+                                            width: 120px; 
+                                            height: 4px; 
+                                            background: rgba(255,255,255,0.8); 
+                                            top: 50%; 
+                                            left: -100px; 
+                                            border-radius: 2px;
+                                            animation: trail 2s ease-in-out infinite;
+                                        "></div>
+                                        <div class="motion-trail position-absolute" style="
+                                            width: 80px; 
+                                            height: 3px; 
+                                            background: rgba(255,255,255,0.6); 
+                                            top: 45%; 
+                                            left: -70px; 
+                                            border-radius: 2px;
+                                            animation: trail 2.5s ease-in-out infinite;
+                                        "></div>
+                                    </div>
+                                </div>
+                                <div class="mt-4">
+                                    <h3 class="text-white fw-bold" style="color: white !important;">দ্রুত ডেলিভারি</h3>
+                                    <p class="text-white" style="color: white !important;">৩০ মিনিটের মধ্যে আপনার দরজায়</p>
+                                </div>
+                            </div>
+                        </div>
+            </div>
+        </div>
+    </section>
+
+    <!-- Statistics Section -->
+    <section class="py-5">
+        <div class="container">
+            <div class="row text-center">
+                <div class="col-md-3 mb-4">
+                    <div class="stat-card">
+                        <div class="stat-number text-primary">50+</div>
+                        <div class="stat-label">পণ্য/সেবা</div>
+                    </div>
+                </div>
+                <div class="col-md-3 mb-4">
+                    <div class="stat-card">
+                        <div class="stat-number text-success">1000+</div>
+                        <div class="stat-label">সফল অর্ডার</div>
+                    </div>
+                </div>
+                <div class="col-md-3 mb-4">
+                    <div class="stat-card">
+                        <div class="stat-number text-info">500+</div>
+                        <div class="stat-label">সন্তুষ্ট গ্রাহক</div>
+                    </div>
+                </div>
+                <div class="col-md-3 mb-4">
+                    <div class="stat-card">
+                        <div class="stat-number text-warning">25+</div>
+                        <div class="stat-label">ডেলিভারি এজেন্ট</div>
+                    </div>
+                </div>
+            </div>
+        </div>
+    </section>
+
+    <!-- Services Section -->
+    <section class="py-5 bg-light">
+        <div class="container">
+            <div class="row">
+                <div class="col-12 text-center mb-5">
+                    <h2 class="display-5 fw-bold">আমাদের সেবা</h2>
+                    <p class="lead text-muted">আপনার সব প্রয়োজনীয় জিনিস এক জায়গায়</p>
+                </div>
+            </div>
+            <div class="row">
+                <div class="col-lg-3 col-md-6 mb-4">
+                    <div class="card service-card h-100 text-center">
+                        <div class="card-body">
+                            <i class="fas fa-utensils fa-3x text-primary mb-3"></i>
+                            <h5 class="card-title">খাবার ডেলিভারি</h5>
+                            <p class="card-text">তাজা এবং সুস্বাদু খাবার আপনার দরজায়</p>
+                        </div>
+                    </div>
+                </div>
+                <div class="col-lg-3 col-md-6 mb-4">
+                    <div class="card service-card h-100 text-center">
+                        <div class="card-body">
+                            <i class="fas fa-pills fa-3x text-success mb-3"></i>
+                            <h5 class="card-title">ঔষধ ডেলিভারি</h5>
+                            <p class="card-text">জরুরি ঔষধ দ্রুত এবং নিরাপদে পৌঁছে দেওয়া</p>
+                        </div>
+                    </div>
+                </div>
+                <div class="col-lg-3 col-md-6 mb-4">
+                    <div class="card service-card h-100 text-center">
+                        <div class="card-body">
+                            <i class="fas fa-fire fa-3x text-warning mb-3"></i>
+                            <h5 class="card-title">গ্যাস ডেলিভারি</h5>
+                            <p class="card-text">রান্নার গ্যাস নিরাপদে এবং সময়মতো</p>
+                        </div>
+                    </div>
+                </div>
+                <div class="col-lg-3 col-md-6 mb-4">
+                    <div class="card service-card h-100 text-center">
+                        <div class="card-body">
+                            <i class="fas fa-shopping-bag fa-3x text-info mb-3"></i>
+                            <h5 class="card-title">মুদি সামগ্রী</h5>
+                            <p class="card-text">দৈনন্দিন প্রয়োজনীয় জিনিসপত্র</p>
+                        </div>
+                    </div>
+                </div>
+            </div>
+        </div>
+    </section>
+
+    <!-- Featured Products Section -->
+    {% if featured_products %}
+    <section class="py-5 bg-light">
+        <div class="container">
+            <div class="row">
+                <div class="col-12 text-center mb-5">
+                    <h2 class="display-5 fw-bold">জনপ্রিয় পণ্য</h2>
+                    <p class="lead text-muted">আমাদের সবচেয়ে জনপ্রিয় পণ্যগুলো দেখুন</p>
+                </div>
+            </div>
+            <div class="row">
+                {% for product in featured_products %}
+                <div class="col-lg-4 col-md-6 mb-4">
+                    <div class="card product-card h-100">
+                        {% if product.image %}
+                        <img src="{{ product.image.url }}" class="card-img-top product-image" alt="{{ product.name }}">
+                        {% else %}
+                        <div class="card-img-top product-image bg-light d-flex align-items-center justify-content-center">
+                            <i class="fas fa-box fa-3x text-muted"></i>
+                        </div>
+                        {% endif %}
+                        
+                        <div class="card-body d-flex flex-column">
+                            <div class="d-flex justify-content-between align-items-start mb-2">
+                                <h5 class="card-title">{{ product.name }}</h5>
+                                <span class="badge bg-secondary">{{ product.get_category_display }}</span>
+                            </div>
+                            
+                            <p class="card-text text-muted flex-grow-1">
+                                {{ product.description|truncatechars:80 }}
+                            </p>
+                            
+                            <div class="mt-auto">
+                                <div class="d-flex justify-content-between align-items-center mb-3">
+                                    <span class="h5 text-primary">৳{{ product.price }}</span>
+                                    {% if product.is_available %}
+                                        <span class="badge bg-success">উপলব্ধ</span>
+                                    {% else %}
+                                        <span class="badge bg-danger">অনুপলব্ধ</span>
+                                    {% endif %}
+                                </div>
+                                
+                                <div class="d-grid gap-2">
+                                    <a href="{% url 'orders:product_detail' product.pk %}" class="btn btn-primary">
+                                        <i class="fas fa-eye me-2"></i>বিস্তারিত দেখুন
+                                    </a>
+                                </div>
+                            </div>
+                        </div>
+                    </div>
+                </div>
+                {% endfor %}
+            </div>
+            <div class="row">
+                <div class="col-12 text-center">
+                    <a href="{% url 'orders:product_list' %}" class="btn btn-outline-primary btn-lg">
+                        <i class="fas fa-th-large me-2"></i>সব পণ্য দেখুন
+                    </a>
+                </div>
+            </div>
+        </div>
+    </section>
+    {% endif %}
+
+    <!-- CTA Section -->
+    <section class="py-5 text-white" style="background: linear-gradient(135deg, #DC2626 0%, #B91C1C 100%);">
+        <div class="container">
+            <div class="row">
+                <div class="col-12 text-center">
+                    <h2 class="mb-4" style="color: white !important;">আজই শুরু করুন</h2>
+                    <p class="lead mb-4" style="color: white !important;">নাগরীবাসী এক্সপ্রেসের সাথে আপনার শহরে দ্রুত এবং নির্ভরযোগ্য ডেলিভারি সেবা পান</p>
+                    {% if not user.is_authenticated %}
+                            <a href="{% url 'orders:product_list' %}" class="btn btn-light btn-lg me-3">
+                                <i class="fas fa-shopping-cart me-2"></i>পণ্য দেখুন
+                            </a>
+                            <a href="{% url 'users:signup' %}" class="btn btn-outline-light btn-lg me-3">
+                                <i class="fas fa-user-plus me-2"></i>এখনই সাইনআপ করুন
+                            </a>
+                            <a href="{% url 'users:login' %}" class="btn btn-outline-light btn-lg me-3">
+                                <i class="fas fa-sign-in-alt me-2"></i>লগইন করুন
+                            </a>
+                            <a href="{% url 'dashboard:contact' %}" class="btn btn-outline-light btn-lg">
+                                <i class="fas fa-phone me-2"></i>যোগাযোগ
+                            </a>
+                    {% else %}
+                            <a href="{% url 'orders:product_list' %}" class="btn btn-light btn-lg me-3">
+                                <i class="fas fa-shopping-cart me-2"></i>পণ্য দেখুন
+                            </a>
+                            <a href="{% url 'dashboard:user_dashboard' %}" class="btn btn-outline-light btn-lg me-3">
+                                <i class="fas fa-tachometer-alt me-2"></i>ড্যাশবোর্ড
+                            </a>
+                            <a href="{% url 'orders:order_list' %}" class="btn btn-outline-light btn-lg me-3">
+                                <i class="fas fa-list me-2"></i>আমার অর্ডার
+                            </a>
+                            <a href="{% url 'dashboard:contact' %}" class="btn btn-outline-light btn-lg">
+                                <i class="fas fa-phone me-2"></i>যোগাযোগ
+                            </a>
+                    {% endif %}
+                </div>
+            </div>
+        </div>
+    </section>
+</div>
+
+<style>
+    .hero-section {
+        background: linear-gradient(135deg, #DC2626 0%, #B91C1C 50%, #991B1B 100%);
+        color: white;
+        padding: 80px 0;
+        position: relative;
+        overflow: hidden;
+    }
+    .hero-section::before {
+        content: '';
+        position: absolute;
+        top: -50px;
+        right: -100px;
+        width: 300px;
+        height: 300px;
+        background: rgba(255, 255, 255, 0.1);
+        border-radius: 50%;
+        z-index: 1;
+    }
+    .hero-section::after {
+        content: '';
+        position: absolute;
+        bottom: -80px;
+        left: -150px;
+        width: 400px;
+        height: 400px;
+        background: rgba(255, 255, 255, 0.05);
+        border-radius: 50%;
+        z-index: 1;
+    }
+    .hero-content {
+        position: relative;
+        z-index: 2;
+    }
+    .service-card {
+        transition: transform 0.3s ease;
+        border: none;
+        box-shadow: 0 4px 6px rgba(0,0,0,0.1);
+        border-top: 4px solid #dc3545;
+    }
+    .service-card:hover {
+        transform: translateY(-5px);
+        box-shadow: 0 8px 15px rgba(220, 53, 69, 0.2);
+    }
+    .product-card {
+        border: none;
+        box-shadow: 0 4px 6px rgba(0, 0, 0, 0.1);
+        transition: transform 0.3s ease, box-shadow 0.3s ease;
+    }
+    .product-card:hover {
+        transform: translateY(-5px);
+        box-shadow: 0 8px 15px rgba(0, 0, 0, 0.2);
+    }
+    .product-image {
+        height: 200px;
+        object-fit: cover;
+    }
+    .stat-card {
+        background: white;
+        border-radius: 10px;
+        padding: 30px;
+        text-align: center;
+        box-shadow: 0 4px 6px rgba(0,0,0,0.1);
+        border-top: 4px solid #dc3545;
+    }
+    .stat-number {
+        font-size: 2.5rem;
+        font-weight: bold;
+        margin-bottom: 10px;
+        color: #dc3545;
+    }
+    .scooter-icon {
+        font-size: 4rem;
+        color: rgba(255, 255, 255, 0.8);
+        animation: float 3s ease-in-out infinite;
+    }
+    @keyframes float {
+        0%, 100% { transform: translateY(0px); }
+        50% { transform: translateY(-10px); }
+    }
+    @keyframes trail {
+        0% { opacity: 0; transform: translateX(0px); }
+        50% { opacity: 1; }
+        100% { opacity: 0; transform: translateX(-20px); }
+    }
+    .delivery-pattern {
+        position: absolute;
+        top: 0;
+        left: 0;
+        right: 0;
+        bottom: 0;
+        background-image: 
+            radial-gradient(circle at 20% 80%, rgba(255,255,255,0.1) 0%, transparent 50%),
+            radial-gradient(circle at 80% 20%, rgba(255,255,255,0.1) 0%, transparent 50%),
+            radial-gradient(circle at 40% 40%, rgba(255,255,255,0.05) 0%, transparent 50%);
+        z-index: 1;
+    }
+</style>
+{% endblock %}

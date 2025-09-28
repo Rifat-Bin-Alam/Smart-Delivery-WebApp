@@ -1,0 +1,244 @@
+{% extends 'base.html' %}
+{% load static %}
+
+{% block title %}হোম - নগরবাসী এক্সপ্রেস{% endblock %}
+
+{% block content %}
+<!-- Hero Section -->
+<section class="hero-section bg-primary text-white py-5">
+    <div class="container">
+        <div class="row align-items-center">
+            <div class="col-lg-6">
+                <h1 class="display-4 fw-bold mb-4">স্বাগতম নগরবাসী এক্সপ্রেসে</h1>
+                <p class="lead mb-4">আপনার শহরের সবচেয়ে নির্ভরযোগ্য ডেলিভারি সেবা। খাবার, ঔষধ, গ্যাস এবং আরও অনেক কিছু দ্রুত এবং নিরাপদে পৌঁছে দেওয়া।</p>
+                <div class="d-flex gap-3">
+                    <a href="{% url 'orders:order_create' %}" class="btn btn-light btn-lg">
+                        <i class="fas fa-shopping-cart me-2"></i>অর্ডার করুন
+                    </a>
+                    <a href="{% url 'orders:product_list' %}" class="btn btn-outline-light btn-lg">
+                        <i class="fas fa-eye me-2"></i>পণ্য দেখুন
+                    </a>
+                </div>
+            </div>
+            <div class="col-lg-6">
+                <img src="{% static 'images/delivery-hero.png' %}" alt="ডেলিভারি সেবা" class="img-fluid">
+            </div>
+        </div>
+    </div>
+</section>
+
+<!-- Statistics Section -->
+<section class="py-5">
+    <div class="container">
+        <div class="row text-center">
+            <div class="col-md-3 mb-4">
+                <div class="card stat-card h-100">
+                    <div class="card-body">
+                        <div class="stat-number text-primary">{{ total_products }}</div>
+                        <div class="stat-label">পণ্য/সেবা</div>
+                    </div>
+                </div>
+            </div>
+            <div class="col-md-3 mb-4">
+                <div class="card stat-card h-100">
+                    <div class="card-body">
+                        <div class="stat-number text-success">{{ total_orders }}</div>
+                        <div class="stat-label">সফল অর্ডার</div>
+                    </div>
+                </div>
+            </div>
+            <div class="col-md-3 mb-4">
+                <div class="card stat-card h-100">
+                    <div class="card-body">
+                        <div class="stat-number text-info">{{ total_customers }}</div>
+                        <div class="stat-label">সন্তুষ্ট গ্রাহক</div>
+                    </div>
+                </div>
+            </div>
+            <div class="col-md-3 mb-4">
+                <div class="card stat-card h-100">
+                    <div class="card-body">
+                        <div class="stat-number text-warning">{{ total_delivery_agents }}</div>
+                        <div class="stat-label">ডেলিভারি এজেন্ট</div>
+                    </div>
+                </div>
+            </div>
+        </div>
+    </div>
+</section>
+
+<!-- Featured Products Section -->
+<section class="py-5 bg-light">
+    <div class="container">
+        <div class="row">
+            <div class="col-12">
+                <h2 class="text-center mb-5">জনপ্রিয় পণ্য/সেবা</h2>
+            </div>
+        </div>
+        <div class="row">
+            {% for product in featured_products %}
+            <div class="col-lg-4 col-md-6 mb-4">
+                <div class="card product-card h-100">
+                    {% if product.image %}
+                    <img src="{{ product.image.url }}" class="card-img-top product-image" alt="{{ product.name }}">
+                    {% else %}
+                    <div class="card-img-top product-image bg-light d-flex align-items-center justify-content-center">
+                        <i class="fas fa-box fa-3x text-muted"></i>
+                    </div>
+                    {% endif %}
+                    <div class="card-body d-flex flex-column">
+                        <h5 class="card-title">{{ product.name }}</h5>
+                        <p class="card-text text-muted">{{ product.description|truncatechars:100 }}</p>
+                        <div class="mt-auto">
+                            <div class="d-flex justify-content-between align-items-center">
+                                <span class="h5 text-primary currency">{{ product.price }}</span>
+                                <span class="badge bg-secondary">{{ product.get_category_display }}</span>
+                            </div>
+                            <div class="mt-3">
+                                <a href="{% url 'orders:product_detail' product.pk %}" class="btn btn-primary w-100">
+                                    <i class="fas fa-eye me-2"></i>বিস্তারিত দেখুন
+                                </a>
+                            </div>
+                        </div>
+                    </div>
+                </div>
+            </div>
+            {% empty %}
+            <div class="col-12">
+                <div class="text-center py-5">
+                    <i class="fas fa-box fa-3x text-muted mb-3"></i>
+                    <h4 class="text-muted">কোন পণ্য পাওয়া যায়নি</h4>
+                    <p class="text-muted">শীঘ্রই নতুন পণ্য যোগ করা হবে</p>
+                </div>
+            </div>
+            {% endfor %}
+        </div>
+        <div class="row">
+            <div class="col-12 text-center">
+                <a href="{% url 'orders:product_list' %}" class="btn btn-outline-primary btn-lg">
+                    <i class="fas fa-th-large me-2"></i>সব পণ্য দেখুন
+                </a>
+            </div>
+        </div>
+    </div>
+</section>
+
+<!-- Services Section -->
+<section class="py-5">
+    <div class="container">
+        <div class="row">
+            <div class="col-12">
+                <h2 class="text-center mb-5">আমাদের সেবা</h2>
+            </div>
+        </div>
+        <div class="row">
+            <div class="col-lg-3 col-md-6 mb-4">
+                <div class="card text-center h-100">
+                    <div class="card-body">
+                        <i class="fas fa-utensils fa-3x text-primary mb-3"></i>
+                        <h5 class="card-title">খাবার ডেলিভারি</h5>
+                        <p class="card-text">তাজা এবং সুস্বাদু খাবার আপনার দরজায়</p>
+                    </div>
+                </div>
+            </div>
+            <div class="col-lg-3 col-md-6 mb-4">
+                <div class="card text-center h-100">
+                    <div class="card-body">
+                        <i class="fas fa-pills fa-3x text-success mb-3"></i>
+                        <h5 class="card-title">ঔষধ ডেলিভারি</h5>
+                        <p class="card-text">জরুরি ঔষধ দ্রুত এবং নিরাপদে পৌঁছে দেওয়া</p>
+                    </div>
+                </div>
+            </div>
+            <div class="col-lg-3 col-md-6 mb-4">
+                <div class="card text-center h-100">
+                    <div class="card-body">
+                        <i class="fas fa-fire fa-3x text-warning mb-3"></i>
+                        <h5 class="card-title">গ্যাস ডেলিভারি</h5>
+                        <p class="card-text">রান্নার গ্যাস নিরাপদে এবং সময়মতো</p>
+                    </div>
+                </div>
+            </div>
+            <div class="col-lg-3 col-md-6 mb-4">
+                <div class="card text-center h-100">
+                    <div class="card-body">
+                        <i class="fas fa-shopping-bag fa-3x text-info mb-3"></i>
+                        <h5 class="card-title">মুদি সামগ্রী</h5>
+                        <p class="card-text">দৈনন্দিন প্রয়োজনীয় জিনিসপত্র</p>
+                    </div>
+                </div>
+            </div>
+        </div>
+    </div>
+</section>
+
+<!-- Recent Reviews Section -->
+{% if recent_reviews %}
+<section class="py-5 bg-light">
+    <div class="container">
+        <div class="row">
+            <div class="col-12">
+                <h2 class="text-center mb-5">গ্রাহকদের মতামত</h2>
+            </div>
+        </div>
+        <div class="row">
+            {% for review in recent_reviews %}
+            <div class="col-lg-4 col-md-6 mb-4">
+                <div class="card h-100">
+                    <div class="card-body">
+                        <div class="d-flex align-items-center mb-3">
+                            <div class="rating me-3">
+                                {% for i in "12345" %}
+                                    {% if forloop.counter <= review.rating %}
+                                        <i class="fas fa-star"></i>
+                                    {% else %}
+                                        <i class="far fa-star"></i>
+                                    {% endif %}
+                                {% endfor %}
+                            </div>
+                            <small class="text-muted">{{ review.created_at|date:"d M Y" }}</small>
+                        </div>
+                        <h6 class="card-title">{{ review.product.name }}</h6>
+                        <p class="card-text">{{ review.comment|truncatechars:100 }}</p>
+                        <small class="text-muted">- {{ review.customer.get_full_name|default:review.customer.username }}</small>
+                    </div>
+                </div>
+            </div>
+            {% endfor %}
+        </div>
+        <div class="row">
+            <div class="col-12 text-center">
+                <a href="{% url 'reviews:review_list' %}" class="btn btn-outline-primary btn-lg">
+                    <i class="fas fa-star me-2"></i>সব রিভিউ দেখুন
+                </a>
+            </div>
+        </div>
+    </div>
+</section>
+{% endif %}
+
+<!-- CTA Section -->
+<section class="py-5 bg-primary text-white">
+    <div class="container">
+        <div class="row">
+            <div class="col-12 text-center">
+                <h2 class="mb-4">আজই শুরু করুন</h2>
+                <p class="lead mb-4">নগরবাসী এক্সপ্রেসের সাথে আপনার শহরে দ্রুত এবং নির্ভরযোগ্য ডেলিভারি সেবা পান</p>
+                {% if not user.is_authenticated %}
+                <a href="{% url 'users:signup' %}" class="btn btn-light btn-lg me-3">
+                    <i class="fas fa-user-plus me-2"></i>এখনই সাইনআপ করুন
+                </a>
+                <a href="{% url 'users:login' %}" class="btn btn-outline-light btn-lg">
+                    <i class="fas fa-sign-in-alt me-2"></i>লগইন করুন
+                </a>
+                {% else %}
+                <a href="{% url 'orders:order_create' %}" class="btn btn-light btn-lg">
+                    <i class="fas fa-shopping-cart me-2"></i>অর্ডার করুন
+                </a>
+                {% endif %}
+            </div>
+        </div>
+    </div>
+</section>
+{% endblock %}
+

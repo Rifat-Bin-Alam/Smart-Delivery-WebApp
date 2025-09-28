@@ -1,0 +1,328 @@
+{% load static %}
+<!DOCTYPE html>
+<html lang="bn">
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title>পণ্য/সেবা - নগরবাসী এক্সপ্রেস</title>
+    
+    <!-- Bootstrap CSS -->
+    <link href="https://cdn.jsdelivr.net/npm/bootstrap@5.3.3/dist/css/bootstrap.min.css" rel="stylesheet">
+    
+    <!-- Google Fonts for Bangla -->
+    <link rel="preconnect" href="https://fonts.googleapis.com">
+    <link rel="preconnect" href="https://fonts.gstatic.com" crossorigin>
+    <link href="https://fonts.googleapis.com/css2?family=Hind+Siliguri:wght@300;400;500;600;700&display=swap" rel="stylesheet">
+    
+    <!-- Font Awesome -->
+    <link rel="stylesheet" href="https://cdnjs.cloudflare.com/ajax/libs/font-awesome/6.4.0/css/all.min.css">
+    
+    <style>
+        body { 
+            font-family: 'Hind Siliguri', sans-serif; 
+            background-color: #f8f9fa;
+        }
+        .product-card {
+            transition: transform 0.3s ease;
+            border: none;
+            box-shadow: 0 4px 6px rgba(0,0,0,0.1);
+            border-top: 4px solid #dc3545;
+        }
+        .product-card:hover {
+            transform: translateY(-5px);
+            box-shadow: 0 8px 15px rgba(220, 53, 69, 0.2);
+        }
+        .product-image {
+            height: 200px;
+            object-fit: cover;
+        }
+        .navbar-brand {
+            color: #dc3545 !important;
+            font-weight: 700;
+        }
+        .btn-primary {
+            background-color: #dc3545;
+            border-color: #dc3545;
+        }
+        .btn-primary:hover {
+            background-color: #c82333;
+            border-color: #c82333;
+        }
+        .text-primary {
+            color: #dc3545 !important;
+        }
+        .badge {
+            background-color: #dc3545 !important;
+        }
+    </style>
+</head>
+<body>
+    <!-- Navigation -->
+    <nav class="navbar navbar-expand-lg navbar-light bg-white shadow-sm">
+        <div class="container">
+            <a class="navbar-brand fw-bold" href="/">
+                <i class="fas fa-motorcycle me-2" style="color: #dc3545;"></i>নাগরীবাসী এক্সপ্রেস
+            </a>
+            <button class="navbar-toggler" type="button" data-bs-toggle="collapse" data-bs-target="#navbarNav">
+                <span class="navbar-toggler-icon"></span>
+            </button>
+            <div class="collapse navbar-collapse" id="navbarNav">
+                <ul class="navbar-nav ms-auto">
+                    <li class="nav-item">
+                        <a class="nav-link" href="/">হোম</a>
+                    </li>
+                    <li class="nav-item">
+                        <a class="nav-link active" href="/orders/">পণ্য</a>
+                    </li>
+                    <li class="nav-item">
+                        <a class="nav-link" href="/users/login/">লগইন</a>
+                    </li>
+                    <li class="nav-item">
+                        <a class="nav-link" href="/users/signup/">সাইনআপ</a>
+                    </li>
+                </ul>
+            </div>
+        </div>
+    </nav>
+
+    <!-- Header Section -->
+    <div class="container py-4">
+        <div class="row mb-4">
+            <div class="col-12">
+                <h2 class="text-center mb-3">
+                    <i class="fas fa-shopping-cart me-2"></i>পণ্য ও সেবা
+                </h2>
+                <p class="text-center text-muted">আপনার প্রয়োজনীয় সব কিছু এক জায়গায়</p>
+            </div>
+        </div>
+        
+        <!-- Sample Products -->
+        <div class="row">
+            <div class="col-lg-4 col-md-6 mb-4">
+                <div class="card product-card h-100">
+                    <div class="card-img-top bg-light d-flex align-items-center justify-content-center" style="height: 200px;">
+                        <i class="fas fa-utensils fa-3x text-muted"></i>
+                    </div>
+                    <div class="card-body d-flex flex-column">
+                        <h5 class="card-title">বিরিয়ানি (চিকেন)</h5>
+                        <p class="card-text text-muted">সুস্বাদু চিকেন বিরিয়ানি - বিশেষ মসলা দিয়ে রান্না</p>
+                        <div class="mt-auto">
+                            <div class="d-flex justify-content-between align-items-center mb-3">
+                                <span class="h5 text-primary">৳ 250</span>
+                                <span class="badge bg-secondary">খাবার</span>
+                            </div>
+                            <button class="btn btn-primary w-100" onclick="addToCart('biriyani', 'বিরিয়ানি (চিকেন)', 250)">
+                                <i class="fas fa-cart-plus me-2"></i>কার্টে যোগ করুন
+                            </button>
+                        </div>
+                    </div>
+                </div>
+            </div>
+            
+            <div class="col-lg-4 col-md-6 mb-4">
+                <div class="card product-card h-100">
+                    <div class="card-img-top bg-light d-flex align-items-center justify-content-center" style="height: 200px;">
+                        <i class="fas fa-pills fa-3x text-muted"></i>
+                    </div>
+                    <div class="card-body d-flex flex-column">
+                        <h5 class="card-title">প্যারাসিটামল ৫০০মিগ্রা</h5>
+                        <p class="card-text text-muted">জ্বর ও ব্যথার ঔষধ - ডাক্তারের পরামর্শ অনুযায়ী সেবন করুন</p>
+                        <div class="mt-auto">
+                            <div class="d-flex justify-content-between align-items-center mb-3">
+                                <span class="h5 text-primary">৳ 2</span>
+                                <span class="badge bg-secondary">ঔষধ</span>
+                            </div>
+                            <button class="btn btn-primary w-100" onclick="addToCart('medicine', 'প্যারাসিটামল ৫০০মিগ্রা', 2)">
+                                <i class="fas fa-cart-plus me-2"></i>কার্টে যোগ করুন
+                            </button>
+                        </div>
+                    </div>
+                </div>
+            </div>
+            
+            <div class="col-lg-4 col-md-6 mb-4">
+                <div class="card product-card h-100">
+                    <div class="card-img-top bg-light d-flex align-items-center justify-content-center" style="height: 200px;">
+                        <i class="fas fa-fire fa-3x text-muted"></i>
+                    </div>
+                    <div class="card-body d-flex flex-column">
+                        <h5 class="card-title">এলপিজি গ্যাস (১২ কেজি)</h5>
+                        <p class="card-text text-muted">রান্নার গ্যাস - নিরাপদ ডেলিভারি</p>
+                        <div class="mt-auto">
+                            <div class="d-flex justify-content-between align-items-center mb-3">
+                                <span class="h5 text-primary">৳ 1,200</span>
+                                <span class="badge bg-secondary">গ্যাস</span>
+                            </div>
+                            <button class="btn btn-primary w-100" onclick="addToCart('gas', 'এলপিজি গ্যাস (১২ কেজি)', 1200)">
+                                <i class="fas fa-cart-plus me-2"></i>কার্টে যোগ করুন
+                            </button>
+                        </div>
+                    </div>
+                </div>
+            </div>
+            
+            <div class="col-lg-4 col-md-6 mb-4">
+                <div class="card product-card h-100">
+                    <div class="card-img-top bg-light d-flex align-items-center justify-content-center" style="height: 200px;">
+                        <i class="fas fa-shopping-bag fa-3x text-muted"></i>
+                    </div>
+                    <div class="card-body d-flex flex-column">
+                        <h5 class="card-title">চাল (৫ কেজি)</h5>
+                        <p class="card-text text-muted">উচ্চমানের চাল - দৈনন্দিন রান্নার জন্য</p>
+                        <div class="mt-auto">
+                            <div class="d-flex justify-content-between align-items-center mb-3">
+                                <span class="h5 text-primary">৳ 300</span>
+                                <span class="badge bg-secondary">মুদি</span>
+                            </div>
+                            <button class="btn btn-primary w-100" onclick="addToCart('rice', 'চাল (৫ কেজি)', 300)">
+                                <i class="fas fa-cart-plus me-2"></i>কার্টে যোগ করুন
+                            </button>
+                        </div>
+                    </div>
+                </div>
+            </div>
+            
+            <div class="col-lg-4 col-md-6 mb-4">
+                <div class="card product-card h-100">
+                    <div class="card-img-top bg-light d-flex align-items-center justify-content-center" style="height: 200px;">
+                        <i class="fas fa-laptop fa-3x text-muted"></i>
+                    </div>
+                    <div class="card-body d-flex flex-column">
+                        <h5 class="card-title">স্মার্টফোন (স্যামসাং)</h5>
+                        <p class="card-text text-muted">লেটেস্ট স্মার্টফোন - সব ফিচার সহ</p>
+                        <div class="mt-auto">
+                            <div class="d-flex justify-content-between align-items-center mb-3">
+                                <span class="h5 text-primary">৳ 25,000</span>
+                                <span class="badge bg-secondary">ইলেকট্রনিক্স</span>
+                            </div>
+                            <button class="btn btn-primary w-100" onclick="addToCart('phone', 'স্মার্টফোন (স্যামসাং)', 25000)">
+                                <i class="fas fa-cart-plus me-2"></i>কার্টে যোগ করুন
+                            </button>
+                        </div>
+                    </div>
+                </div>
+            </div>
+            
+            <div class="col-lg-4 col-md-6 mb-4">
+                <div class="card product-card h-100">
+                    <div class="card-img-top bg-light d-flex align-items-center justify-content-center" style="height: 200px;">
+                        <i class="fas fa-tshirt fa-3x text-muted"></i>
+                    </div>
+                    <div class="card-body d-flex flex-column">
+                        <h5 class="card-title">শার্ট (কটন)</h5>
+                        <p class="card-text text-muted">সুতি শার্ট - আরামদায়ক ও টেকসই</p>
+                        <div class="mt-auto">
+                            <div class="d-flex justify-content-between align-items-center mb-3">
+                                <span class="h5 text-primary">৳ 800</span>
+                                <span class="badge bg-secondary">পোশাক</span>
+                            </div>
+                            <button class="btn btn-primary w-100">
+                                <i class="fas fa-cart-plus me-2"></i>কার্টে যোগ করুন
+                            </button>
+                        </div>
+                    </div>
+                </div>
+            </div>
+        </div>
+        
+        <!-- CTA Section -->
+        <div class="row">
+            <div class="col-12 text-center py-5">
+                <h3>আরও পণ্য দেখতে চান?</h3>
+                <p class="text-muted">শীঘ্রই আরও অনেক পণ্য যোগ করা হবে</p>
+                <a href="/users/signup/" class="btn btn-primary btn-lg">
+                    <i class="fas fa-user-plus me-2"></i>এখনই সাইনআপ করুন
+                </a>
+            </div>
+        </div>
+    </div>
+
+    <!-- Footer -->
+    <footer class="bg-dark text-white py-4">
+        <div class="container">
+            <div class="row">
+                <div class="col-md-6">
+                    <h5>নাগরীবাসী এক্সপ্রেস</h5>
+                    <p>আপনার শহরের সবচেয়ে নির্ভরযোগ্য ডেলিভারি সেবা</p>
+                </div>
+                <div class="col-md-6 text-md-end">
+                    <p>&copy; 2024 নাগরীবাসী এক্সপ্রেস. সর্বস্বত্ব সংরক্ষিত।</p>
+                </div>
+            </div>
+        </div>
+    </footer>
+
+    <!-- Bootstrap JS -->
+    <script src="https://cdn.jsdelivr.net/npm/bootstrap@5.3.3/dist/js/bootstrap.bundle.min.js"></script>
+    
+    <script>
+        // Cart functionality
+        let cart = JSON.parse(localStorage.getItem('cart')) || [];
+        
+        function addToCart(id, name, price) {
+            // Check if item already exists in cart
+            let existingItem = cart.find(item => item.id === id);
+            
+            if (existingItem) {
+                existingItem.quantity += 1;
+            } else {
+                cart.push({
+                    id: id,
+                    name: name,
+                    price: price,
+                    quantity: 1
+                });
+            }
+            
+            // Save to localStorage
+            localStorage.setItem('cart', JSON.stringify(cart));
+            
+            // Show success message
+            showNotification(`${name} কার্টে যোগ করা হয়েছে!`, 'success');
+            
+            // Update cart count
+            updateCartCount();
+        }
+        
+        function updateCartCount() {
+            let totalItems = cart.reduce((sum, item) => sum + item.quantity, 0);
+            // Update cart badge if it exists
+            const cartBadge = document.getElementById('cart-badge');
+            if (cartBadge) {
+                if (totalItems > 0) {
+                    cartBadge.textContent = totalItems;
+                    cartBadge.style.display = 'inline';
+                } else {
+                    cartBadge.style.display = 'none';
+                }
+            }
+            console.log('Cart items:', totalItems);
+        }
+        
+        function showNotification(message, type = 'info') {
+            // Create notification element
+            const notification = document.createElement('div');
+            notification.className = `alert alert-${type === 'success' ? 'success' : 'info'} alert-dismissible fade show position-fixed`;
+            notification.style.cssText = 'top: 20px; right: 20px; z-index: 9999; min-width: 300px;';
+            notification.innerHTML = `
+                ${message}
+                <button type="button" class="btn-close" data-bs-dismiss="alert"></button>
+            `;
+            
+            document.body.appendChild(notification);
+            
+            // Auto remove after 3 seconds
+            setTimeout(() => {
+                if (notification.parentNode) {
+                    notification.parentNode.removeChild(notification);
+                }
+            }, 3000);
+        }
+        
+        // Initialize cart count on page load
+        document.addEventListener('DOMContentLoaded', function() {
+            updateCartCount();
+        });
+    </script>
+</body>
+</html>

@@ -1,0 +1,410 @@
+{% extends 'base.html' %}
+{% load static %}
+
+{% block title %}চেকআউট - নাগরীবাসী এক্সপ্রেস{% endblock %}
+
+{% block content %}
+<div class="container py-5">
+    <div class="row">
+        <div class="col-12">
+            <h2 class="mb-4">
+                <i class="fas fa-credit-card me-2"></i>চেকআউট
+            </h2>
+        </div>
+    </div>
+
+    <div class="row">
+        <div class="col-md-8">
+            <!-- Delivery Information -->
+            <div class="card mb-4">
+                <div class="card-header">
+                    <h5><i class="fas fa-truck me-2"></i>ডেলিভারি তথ্য</h5>
+                </div>
+                <div class="card-body">
+                    <form id="checkout-form">
+                        {% csrf_token %}
+                        <div class="row">
+                            <div class="col-md-6 mb-3">
+                                <label class="form-label">নাম *</label>
+                                <input type="text" class="form-control" id="customer-name" required>
+                            </div>
+                            <div class="col-md-6 mb-3">
+                                <label class="form-label">ফোন নম্বর *</label>
+                                <input type="tel" class="form-control" id="customer-phone" required>
+                            </div>
+                        </div>
+                        <div class="mb-3">
+                            <label class="form-label">ঠিকানা *</label>
+                            <textarea class="form-control" id="delivery-address" rows="3" required></textarea>
+                        </div>
+                        <div class="mb-3">
+                            <label class="form-label">বিশেষ নির্দেশনা</label>
+                            <textarea class="form-control" id="special-instructions" rows="2" placeholder="ডেলিভারি সম্পর্কে বিশেষ নির্দেশনা (ঐচ্ছিক)"></textarea>
+                        </div>
+                        <div class="row">
+                            <div class="col-md-6 mb-3">
+                                <label class="form-label">এলাকা *</label>
+                                <select class="form-select" id="delivery-area" required>
+                                    <option value="">এলাকা নির্বাচন করুন</option>
+                                    <option value="dhaka">ঢাকা</option>
+                                    <option value="chittagong">চট্টগ্রাম</option>
+                                    <option value="sylhet">সিলেট</option>
+                                    <option value="rajshahi">রাজশাহী</option>
+                                    <option value="khulna">খুলনা</option>
+                                </select>
+                            </div>
+                            <div class="col-md-6 mb-3">
+                                <label class="form-label">ডেলিভারি সময় *</label>
+                                <select class="form-select" id="delivery-time" required>
+                                    <option value="">সময় নির্বাচন করুন</option>
+                                    <option value="asap">যত তাড়াতাড়ি সম্ভব</option>
+                                    <option value="morning">সকাল (৯-১২টা)</option>
+                                    <option value="afternoon">দুপুর (১২-৫টা)</option>
+                                    <option value="evening">সন্ধ্যা (৫-৮টা)</option>
+                                </select>
+                            </div>
+                        </div>
+                    </form>
+                </div>
+            </div>
+
+            <!-- Payment Method Selection -->
+            <div class="card">
+                <div class="card-header">
+                    <h5><i class="fas fa-credit-card me-2"></i>পেমেন্ট পদ্ধতি</h5>
+                </div>
+                <div class="card-body">
+                    <div class="row">
+                        <div class="col-md-6 mb-3">
+                            <div class="card payment-method" onclick="selectPayment('cod')">
+                                <div class="card-body text-center">
+                                    <i class="fas fa-money-bill-wave fa-2x text-success mb-2"></i>
+                                    <h6>ক্যাশ অন ডেলিভারি</h6>
+                                    <small class="text-muted">ডেলিভারি সময়ে নগদ পেমেন্ট</small>
+                                </div>
+                            </div>
+                        </div>
+                        <div class="col-md-6 mb-3">
+                            <div class="card payment-method" onclick="selectPayment('bkash')">
+                                <div class="card-body text-center">
+                                    <i class="fas fa-mobile-alt fa-2x text-primary mb-2"></i>
+                                    <h6>bKash</h6>
+                                    <small class="text-muted">মোবাইল পেমেন্ট</small>
+                                </div>
+                            </div>
+                        </div>
+                        <div class="col-md-6 mb-3">
+                            <div class="card payment-method" onclick="selectPayment('nagad')">
+                                <div class="card-body text-center">
+                                    <i class="fas fa-mobile-alt fa-2x text-warning mb-2"></i>
+                                    <h6>Nagad</h6>
+                                    <small class="text-muted">মোবাইল পেমেন্ট</small>
+                                </div>
+                            </div>
+                        </div>
+                        <div class="col-md-6 mb-3">
+                            <div class="card payment-method" onclick="selectPayment('rocket')">
+                                <div class="card-body text-center">
+                                    <i class="fas fa-mobile-alt fa-2x text-info mb-2"></i>
+                                    <h6>Rocket</h6>
+                                    <small class="text-muted">মোবাইল পেমেন্ট</small>
+                                </div>
+                            </div>
+                        </div>
+                    </div>
+
+                    <!-- Payment Details Form -->
+                    <div id="payment-details" style="display: none;">
+                        <hr>
+                        <h6>পেমেন্ট বিবরণ</h6>
+                        <div class="row">
+                            <div class="col-md-6 mb-3">
+                                <label class="form-label">মোবাইল নম্বর</label>
+                                <input type="tel" class="form-control" id="payment-phone">
+                            </div>
+                            <div class="col-md-6 mb-3">
+                                <label class="form-label">ট্রানজেকশন ID</label>
+                                <input type="text" class="form-control" id="transaction-id">
+                            </div>
+                        </div>
+                    </div>
+                </div>
+            </div>
+        </div>
+        
+        <div class="col-md-4">
+            <!-- Order Summary -->
+            <div class="card">
+                <div class="card-header">
+                    <h5>অর্ডার সারাংশ</h5>
+                </div>
+                <div class="card-body">
+                    <div id="checkout-items">
+                        <!-- Checkout items will be loaded here -->
+                    </div>
+                    <hr>
+                    <div class="d-flex justify-content-between">
+                        <span>মোট পণ্য:</span>
+                        <span id="checkout-subtotal">৳ 0</span>
+                    </div>
+                    <div class="d-flex justify-content-between">
+                        <span>ডেলিভারি চার্জ:</span>
+                        <span id="checkout-delivery">৳ 50</span>
+                    </div>
+                    <div class="d-flex justify-content-between">
+                        <span>ভ্যাট (৫%):</span>
+                        <span id="checkout-vat">৳ 0</span>
+                    </div>
+                    <div class="d-flex justify-content-between" id="processing-fee-row" style="display: none;">
+                        <span>প্রসেসিং ফি:</span>
+                        <span id="checkout-processing">৳ 0</span>
+                    </div>
+                    <hr>
+                    <div class="d-flex justify-content-between fw-bold">
+                        <span>মোট পরিমাণ:</span>
+                        <span id="checkout-total">৳ 0</span>
+                    </div>
+                    <div class="d-grid gap-2 mt-3">
+                        <button class="btn btn-success" id="place-order-btn" onclick="placeOrder()">
+                            <i class="fas fa-check me-2"></i>অর্ডার নিশ্চিত করুন
+                        </button>
+                        <a href="{% url 'orders:cart' %}" class="btn btn-outline-secondary">
+                            <i class="fas fa-arrow-left me-2"></i>কার্টে ফিরুন
+                        </a>
+                    </div>
+                </div>
+            </div>
+        </div>
+    </div>
+</div>
+
+<script>
+    let cart = JSON.parse(localStorage.getItem('cart')) || [];
+    let selectedPayment = 'cod';
+
+    document.addEventListener('DOMContentLoaded', function() {
+        if (cart.length === 0) {
+            alert('কার্টে কোন পণ্য নেই!');
+            window.location.href = "{% url 'orders:products' %}";
+            return;
+        }
+        loadCheckoutItems();
+        selectPayment('cod');
+    });
+
+    function loadCheckoutItems() {
+        const checkoutItems = document.getElementById('checkout-items');
+        if (cart.length === 0) {
+            checkoutItems.innerHTML = '<p class="text-muted">কার্টে কোন পণ্য নেই</p>';
+            return;
+        }
+        
+        checkoutItems.innerHTML = cart.map(item => `
+            <div class="d-flex justify-content-between mb-2">
+                <span>${item.product_name || item.name} x${item.quantity}</span>
+                <span>৳ ${(item.product_price || item.price) * item.quantity}</span>
+            </div>
+        `).join('');
+        
+        updateCheckoutTotal();
+    }
+
+    function updateCheckoutTotal() {
+        const subtotal = cart.reduce((sum, item) => sum + ((item.product_price || item.price) * item.quantity), 0);
+        const delivery = 50;
+        const vat = Math.round(subtotal * 0.05);
+        let processingFee = 0;
+        
+        if (selectedPayment !== 'cod') {
+            processingFee = Math.round(subtotal * 0.02); // 2% processing fee for digital payments
+        }
+        
+        const total = subtotal + delivery + vat + processingFee;
+        
+        document.getElementById('checkout-subtotal').textContent = `৳ ${subtotal}`;
+        document.getElementById('checkout-delivery').textContent = `৳ ${delivery}`;
+        document.getElementById('checkout-vat').textContent = `৳ ${vat}`;
+        document.getElementById('checkout-processing').textContent = `৳ ${processingFee}`;
+        document.getElementById('checkout-total').textContent = `৳ ${total}`;
+        
+        if (processingFee > 0) {
+            document.getElementById('processing-fee-row').style.display = 'flex';
+        } else {
+            document.getElementById('processing-fee-row').style.display = 'none';
+        }
+    }
+
+    function selectPayment(method) {
+        selectedPayment = method;
+        
+        // Update visual selection
+        document.querySelectorAll('.payment-method').forEach(card => {
+            card.classList.remove('border-primary', 'bg-light');
+        });
+        event.currentTarget.classList.add('border-primary', 'bg-light');
+        
+        // Show/hide payment details
+        const paymentDetails = document.getElementById('payment-details');
+        if (method === 'cod') {
+            paymentDetails.style.display = 'none';
+        } else {
+            paymentDetails.style.display = 'block';
+        }
+        
+        updateCheckoutTotal();
+    }
+
+    function placeOrder() {
+        if (cart.length === 0) {
+            showNotification('কার্টে কোন পণ্য নেই!', 'error');
+            return;
+        }
+        
+        const name = document.getElementById('customer-name').value;
+        const phone = document.getElementById('customer-phone').value;
+        const address = document.getElementById('delivery-address').value;
+        const area = document.getElementById('delivery-area').value;
+        const time = document.getElementById('delivery-time').value;
+        
+        if (!name || !phone || !address || !area || !time) {
+            showNotification('সব তথ্য পূরণ করুন!', 'error');
+            return;
+        }
+        
+        if (selectedPayment !== 'cod') {
+            const paymentPhone = document.getElementById('payment-phone').value;
+            const transactionId = document.getElementById('transaction-id').value;
+            
+            if (!paymentPhone || !transactionId) {
+                showNotification('পেমেন্ট বিবরণ পূরণ করুন!', 'error');
+                return;
+            }
+        }
+        
+        // Show loading
+        const submitBtn = document.getElementById('place-order-btn');
+        const originalText = submitBtn.innerHTML;
+        submitBtn.innerHTML = '<i class="fas fa-spinner fa-spin me-2"></i>অর্ডার দেওয়া হচ্ছে...';
+        submitBtn.disabled = true;
+        
+        // Prepare order data for server
+        const orderData = {
+            cart_items: cart.map(item => ({
+                id: item.product_id || item.id,
+                quantity: item.quantity,
+                name: item.product_name || item.name,
+                price: item.product_price || item.price
+            })),
+            delivery_address: address,
+            delivery_city: area,
+            special_instructions: document.getElementById('special-instructions').value || '',
+            payment_method: selectedPayment
+        };
+        
+        // Get CSRF token from form
+        const csrfToken = document.querySelector('[name=csrfmiddlewaretoken]').value;
+        
+        // Send order to server
+        fetch('{% url "orders:create_order_api" %}', {
+            method: 'POST',
+            headers: {
+                'Content-Type': 'application/json',
+                'X-CSRFToken': csrfToken
+            },
+            body: JSON.stringify(orderData)
+        })
+        .then(response => response.json())
+        .then(data => {
+            if (data.success) {
+                // Clear cart
+                cart = [];
+                localStorage.removeItem('cart');
+                updateCartBadge();
+                
+                // Show success message
+                showNotification(`অর্ডার সফলভাবে দেওয়া হয়েছে! অর্ডার নম্বর: ${data.order_number}`, 'success');
+                
+                // Redirect to order list
+                setTimeout(() => {
+                    window.location.href = '{% url "orders:order_list" %}';
+                }, 2000);
+            } else {
+                showNotification(data.message || 'অর্ডার দেওয়ার সময় সমস্যা হয়েছে।', 'error');
+            }
+        })
+        .catch(error => {
+            console.error('Error:', error);
+            showNotification('অর্ডার দেওয়ার সময় সমস্যা হয়েছে।', 'error');
+        })
+        .finally(() => {
+            // Reset button
+            submitBtn.innerHTML = originalText;
+            submitBtn.disabled = false;
+        });
+    }
+    
+    // Get CSRF token
+    function getCookie(name) {
+        let cookieValue = null;
+        if (document.cookie && document.cookie !== '') {
+            const cookies = document.cookie.split(';');
+            for (let i = 0; i < cookies.length; i++) {
+                const cookie = cookies[i].trim();
+                if (cookie.substring(0, name.length + 1) === (name + '=')) {
+                    cookieValue = decodeURIComponent(cookie.substring(name.length + 1));
+                    break;
+                }
+            }
+        }
+        return cookieValue;
+    }
+
+    function updateCartBadge() {
+        const totalItems = cart.reduce((sum, item) => sum + item.quantity, 0);
+        const cartBadge = document.getElementById('cart-badge');
+        if (cartBadge) {
+            if (totalItems > 0) {
+                cartBadge.textContent = totalItems;
+                cartBadge.style.display = 'inline';
+            } else {
+                cartBadge.style.display = 'none';
+            }
+        }
+    }
+
+    function showNotification(message, type = 'info') {
+        const notification = document.createElement('div');
+        notification.className = `alert alert-${type === 'error' ? 'danger' : type} alert-dismissible fade show`;
+        notification.style.position = 'fixed';
+        notification.style.top = '20px';
+        notification.style.right = '20px';
+        notification.style.zIndex = '9999';
+        notification.innerHTML = `
+            ${message}
+            <button type="button" class="btn-close" data-bs-dismiss="alert"></button>
+        `;
+        
+        document.body.appendChild(notification);
+        
+        setTimeout(() => {
+            notification.remove();
+        }, 3000);
+    }
+</script>
+
+<style>
+    .payment-method {
+        cursor: pointer;
+        transition: all 0.3s ease;
+        border: 2px solid transparent;
+    }
+    .payment-method:hover {
+        border-color: #007bff;
+        transform: translateY(-2px);
+    }
+    .payment-method.border-primary {
+        border-color: #007bff !important;
+        background-color: #f8f9fa !important;
+    }
+</style>
+{% endblock %}

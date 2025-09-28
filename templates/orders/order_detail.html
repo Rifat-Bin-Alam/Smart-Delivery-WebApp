@@ -1,0 +1,319 @@
+{% extends 'base.html' %}
+{% load static %}
+
+{% block title %}অর্ডার বিস্তারিত - নাগরীবাসী এক্সপ্রেস{% endblock %}
+
+{% block content %}
+<div class="container-fluid py-4">
+    <div class="row">
+        <div class="col-12">
+            <div class="d-flex justify-content-between align-items-center mb-4">
+                <h2 class="mb-0">
+                    <i class="fas fa-receipt me-2"></i>অর্ডার বিস্তারিত #{{ order.id }}
+                </h2>
+                <div>
+                    <a href="{% url 'orders:order_list' %}" class="btn btn-outline-secondary me-2">
+                        <i class="fas fa-arrow-left me-1"></i>ফিরে যান
+                    </a>
+                    <a href="{% url 'orders:order_track' order.pk %}" class="btn btn-primary">
+                        <i class="fas fa-truck me-1"></i>ট্র্যাক করুন
+                    </a>
+                </div>
+            </div>
+
+            <div class="row">
+                <!-- Order Information -->
+                <div class="col-lg-8">
+                    <div class="card mb-4">
+                        <div class="card-header">
+                            <h5 class="mb-0">
+                                <i class="fas fa-info-circle me-2"></i>অর্ডার তথ্য
+                            </h5>
+                        </div>
+                        <div class="card-body">
+                            <div class="row">
+                                <div class="col-md-6">
+                                    <div class="mb-3">
+                                        <label class="form-label fw-bold">অর্ডার নম্বর</label>
+                                        <p class="mb-0">#{{ order.id }}</p>
+                                    </div>
+                                    <div class="mb-3">
+                                        <label class="form-label fw-bold">অর্ডার তারিখ</label>
+                                        <p class="mb-0">{{ order.created_at|date:"d M Y, h:i A" }}</p>
+                                    </div>
+                                    <div class="mb-3">
+                                        <label class="form-label fw-bold">অবস্থা</label>
+                                        <p class="mb-0">
+                                            <span class="badge 
+                                                {% if order.status == 'pending' %}bg-warning
+                                                {% elif order.status == 'confirmed' %}bg-info
+                                                {% elif order.status == 'preparing' %}bg-primary
+                                                {% elif order.status == 'ready' %}bg-success
+                                                {% elif order.status == 'delivered' %}bg-success
+                                                {% elif order.status == 'cancelled' %}bg-danger
+                                                {% else %}bg-secondary{% endif %}">
+                                                {% if order.status == 'pending' %}অপেক্ষমান
+                                                {% elif order.status == 'confirmed' %}নিশ্চিত
+                                                {% elif order.status == 'preparing' %}প্রস্তুত হচ্ছে
+                                                {% elif order.status == 'ready' %}প্রস্তুত
+                                                {% elif order.status == 'delivered' %}ডেলিভারি সম্পন্ন
+                                                {% elif order.status == 'cancelled' %}বাতিল
+                                                {% else %}{{ order.status }}{% endif %}
+                                            </span>
+                                        </p>
+                                    </div>
+                                </div>
+                                <div class="col-md-6">
+                                    <div class="mb-3">
+                                        <label class="form-label fw-bold">গ্রাহক</label>
+                                        <p class="mb-0">{{ order.customer.get_full_name|default:order.customer.username }}</p>
+                                    </div>
+                                    <div class="mb-3">
+                                        <label class="form-label fw-bold">যোগাযোগ</label>
+                                        <p class="mb-0">{{ order.customer.phone|default:"নাই" }}</p>
+                                    </div>
+                                    <div class="mb-3">
+                                        <label class="form-label fw-bold">মোট মূল্য</label>
+                                        <p class="mb-0 h5 text-primary">৳{{ order.total_amount }}</p>
+                                    </div>
+                                </div>
+                            </div>
+                        </div>
+                    </div>
+
+                    <!-- Cancellation Information -->
+                    {% if order.status == 'cancelled' %}
+                    <div class="card mb-4 border-danger">
+                        <div class="card-header bg-danger text-white">
+                            <h5 class="mb-0">
+                                <i class="fas fa-times-circle me-2"></i>বাতিলের তথ্য
+                            </h5>
+                        </div>
+                        <div class="card-body">
+                            <div class="row">
+                                <div class="col-md-6">
+                                    <div class="mb-3">
+                                        <label class="form-label fw-bold">বাতিলের কারণ</label>
+                                        <p class="mb-0">
+                                            {% if order.cancellation_reason %}
+                                                {% if order.cancellation_reason == 'changed_mind' %}মনের পরিবর্তন হয়েছে
+                                                {% elif order.cancellation_reason == 'wrong_order' %}ভুল অর্ডার দেওয়া হয়েছে
+                                                {% elif order.cancellation_reason == 'delivery_issue' %}ডেলিভারি সমস্যা
+                                                {% elif order.cancellation_reason == 'price_issue' %}দাম বেশি মনে হচ্ছে
+                                                {% elif order.cancellation_reason == 'found_elsewhere' %}অন্য জায়গায় পেয়ে গেছি
+                                                {% elif order.cancellation_reason == 'no_longer_needed' %}আর প্রয়োজন নেই
+                                                {% elif order.cancellation_reason == 'payment_issue' %}পেমেন্ট সমস্যা
+                                                {% elif order.cancellation_reason == 'delivery_time_issue' %}ডেলিভারি সময় সমস্যা
+                                                {% elif order.cancellation_reason == 'product_quality_concern' %}পণ্যের মান নিয়ে উদ্বেগ
+                                                {% elif order.cancellation_reason == 'other' %}অন্যান্য
+                                                {% else %}{{ order.cancellation_reason }}{% endif %}
+                                            {% else %}
+                                                <span class="text-muted">নির্দিষ্ট করা হয়নি</span>
+                                            {% endif %}
+                                        </p>
+                                    </div>
+                                    <div class="mb-3">
+                                        <label class="form-label fw-bold">বাতিলের তারিখ</label>
+                                        <p class="mb-0">
+                                            {% if order.cancelled_at %}
+                                                {{ order.cancelled_at|date:"d M Y, h:i A" }}
+                                            {% else %}
+                                                <span class="text-muted">নির্দিষ্ট করা হয়নি</span>
+                                            {% endif %}
+                                        </p>
+                                    </div>
+                                </div>
+                                <div class="col-md-6">
+                                    <div class="mb-3">
+                                        <label class="form-label fw-bold">বাতিল করেছেন</label>
+                                        <p class="mb-0">
+                                            {% if order.cancelled_by %}
+                                                {{ order.cancelled_by.get_full_name|default:order.cancelled_by.username }}
+                                            {% else %}
+                                                <span class="text-muted">নির্দিষ্ট করা হয়নি</span>
+                                            {% endif %}
+                                        </p>
+                                    </div>
+                                    <div class="mb-3">
+                                        <label class="form-label fw-bold">রিফান্ড পছন্দ</label>
+                                        <p class="mb-0">
+                                            {% if order.refund_preference %}
+                                                {% if order.refund_preference == 'refund_to_payment_method' %}মূল পেমেন্ট পদ্ধতিতে রিফান্ড
+                                                {% elif order.refund_preference == 'refund_to_wallet' %}ওয়ালেটে রিফান্ড
+                                                {% elif order.refund_preference == 'no_refund_needed' %}রিফান্ড প্রয়োজন নেই
+                                                {% else %}{{ order.refund_preference }}{% endif %}
+                                            {% else %}
+                                                <span class="text-muted">নির্দিষ্ট করা হয়নি</span>
+                                            {% endif %}
+                                        </p>
+                                    </div>
+                                </div>
+                            </div>
+                            {% if order.cancellation_notes %}
+                            <div class="mb-3">
+                                <label class="form-label fw-bold">বাতিলের নোট</label>
+                                <p class="mb-0">{{ order.cancellation_notes }}</p>
+                            </div>
+                            {% endif %}
+                        </div>
+                    </div>
+                    {% endif %}
+
+                    <!-- Order Items -->
+                    <div class="card mb-4">
+                        <div class="card-header">
+                            <h5 class="mb-0">
+                                <i class="fas fa-shopping-bag me-2"></i>অর্ডারকৃত পণ্য
+                            </h5>
+                        </div>
+                        <div class="card-body">
+                            {% if order.items.all %}
+                                <div class="table-responsive">
+                                    <table class="table table-hover">
+                                        <thead>
+                                            <tr>
+                                                <th>পণ্যের নাম</th>
+                                                <th>পরিমাণ</th>
+                                                <th>একক মূল্য</th>
+                                                <th>মোট মূল্য</th>
+                                            </tr>
+                                        </thead>
+                                        <tbody>
+                                            {% for item in order.items.all %}
+                                                <tr>
+                                                    <td>
+                                                        <div class="d-flex align-items-center">
+                                                            {% if item.product.image %}
+                                                                <img src="{{ item.product.image.url }}" alt="{{ item.product.name }}" class="me-3" style="width: 50px; height: 50px; object-fit: cover; border-radius: 8px;">
+                                                            {% else %}
+                                                                <div class="me-3 bg-light d-flex align-items-center justify-content-center" style="width: 50px; height: 50px; border-radius: 8px;">
+                                                                    <i class="fas fa-image text-muted"></i>
+                                                                </div>
+                                                            {% endif %}
+                                                            <div>
+                                                                <h6 class="mb-0">{{ item.product.name }}</h6>
+                                                                {% if item.product.description %}
+                                                                    <small class="text-muted">{{ item.product.description|truncatechars:50 }}</small>
+                                                                {% endif %}
+                                                            </div>
+                                                        </div>
+                                                    </td>
+                                                    <td>
+                                                        <span class="badge bg-primary">{{ item.quantity }}</span>
+                                                    </td>
+                                                    <td>৳{{ item.unit_price }}</td>
+                                                    <td class="fw-bold">৳{{ item.total_price }}</td>
+                                                </tr>
+                                            {% endfor %}
+                                        </tbody>
+                                    </table>
+                                </div>
+                            {% else %}
+                                <div class="text-center py-4">
+                                    <i class="fas fa-shopping-bag fa-3x text-muted mb-3"></i>
+                                    <p class="text-muted">কোন পণ্য পাওয়া যায়নি</p>
+                                </div>
+                            {% endif %}
+                        </div>
+                    </div>
+                </div>
+
+                <!-- Order Summary -->
+                <div class="col-lg-4">
+                    <div class="card mb-4">
+                        <div class="card-header">
+                            <h5 class="mb-0">
+                                <i class="fas fa-map-marker-alt me-2"></i>ডেলিভারি তথ্য
+                            </h5>
+                        </div>
+                        <div class="card-body">
+                            {% if order.delivery_address %}
+                                <div class="mb-3">
+                                    <label class="form-label fw-bold">ঠিকানা</label>
+                                    <p class="mb-0">{{ order.delivery_address }}</p>
+                                </div>
+                            {% endif %}
+                            
+                            {% if order.delivery_instructions %}
+                                <div class="mb-3">
+                                    <label class="form-label fw-bold">নির্দেশনা</label>
+                                    <p class="mb-0">{{ order.delivery_instructions }}</p>
+                                </div>
+                            {% endif %}
+
+                            {% if order.delivery_time %}
+                                <div class="mb-3">
+                                    <label class="form-label fw-bold">ডেলিভারি সময়</label>
+                                    <p class="mb-0">{{ order.delivery_time }}</p>
+                                </div>
+                            {% endif %}
+                        </div>
+                    </div>
+
+                    <div class="card mb-4">
+                        <div class="card-header">
+                            <h5 class="mb-0">
+                                <i class="fas fa-calculator me-2"></i>মূল্য বিবরণ
+                            </h5>
+                        </div>
+                        <div class="card-body">
+                            <div class="d-flex justify-content-between mb-2">
+                                <span>পণ্যের মূল্য:</span>
+                                <span>৳{{ order.subtotal }}</span>
+                            </div>
+                            <div class="d-flex justify-content-between mb-2">
+                                <span>ডেলিভারি চার্জ:</span>
+                                <span>৳{{ order.delivery_fee|default:0 }}</span>
+                            </div>
+                            {% if order.discount_amount %}
+                                <div class="d-flex justify-content-between mb-2 text-success">
+                                    <span>ছাড়:</span>
+                                    <span>-৳{{ order.discount_amount }}</span>
+                                </div>
+                            {% endif %}
+                            <hr>
+                            <div class="d-flex justify-content-between fw-bold h5">
+                                <span>মোট:</span>
+                                <span class="text-primary">৳{{ order.total_amount }}</span>
+                            </div>
+                        </div>
+                    </div>
+
+                    {% if order.notes %}
+                        <div class="card mb-4">
+                            <div class="card-header">
+                                <h5 class="mb-0">
+                                    <i class="fas fa-sticky-note me-2"></i>নোট
+                                </h5>
+                            </div>
+                            <div class="card-body">
+                                <p class="mb-0">{{ order.notes }}</p>
+                            </div>
+                        </div>
+                    {% endif %}
+
+                    <!-- Action Buttons -->
+                    <div class="card">
+                        <div class="card-body">
+                            <h6 class="card-title">অ্যাকশন</h6>
+                            <div class="d-grid gap-2">
+                                <a href="{% url 'orders:order_track' order.pk %}" class="btn btn-primary">
+                                    <i class="fas fa-truck me-1"></i>ট্র্যাক করুন
+                                </a>
+                                {% if order.can_be_cancelled %}
+                                    <a href="{% url 'orders:order_cancel' order.pk %}" class="btn btn-outline-danger">
+                                        <i class="fas fa-times me-1"></i>অর্ডার বাতিল
+                                    </a>
+                                {% endif %}
+                                <a href="{% url 'orders:invoice' order.id %}" class="btn btn-outline-info">
+                                    <i class="fas fa-file-invoice me-1"></i>ইনভয়েস
+                                </a>
+                            </div>
+                        </div>
+                    </div>
+                </div>
+            </div>
+        </div>
+    </div>
+</div>
+{% endblock %}

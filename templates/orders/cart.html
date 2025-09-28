@@ -1,0 +1,299 @@
+{% extends 'base.html' %}
+{% load static %}
+
+{% block title %}কার্ট - নাগরীবাসী এক্সপ্রেস{% endblock %}
+
+{% block extra_css %}
+<style>
+    .cart-item {
+        border-bottom: 1px solid #eee;
+        padding: 15px 0;
+    }
+    .cart-item:last-child {
+        border-bottom: none;
+    }
+    .cart-item img {
+        width: 60px;
+        height: 60px;
+        object-fit: cover;
+        border-radius: 8px;
+    }
+</style>
+{% endblock %}
+
+{% block content %}
+<div class="container py-5">
+    <div class="row">
+        <div class="col-12">
+            <h2 class="mb-4">
+                <i class="fas fa-shopping-cart me-2"></i>আপনার কার্ট
+            </h2>
+        </div>
+    </div>
+
+    <div class="row">
+        <div class="col-md-8">
+            <div class="card">
+                <div class="card-body">
+                    <div id="cart-items">
+                        <!-- Cart items will be loaded here by JavaScript -->
+                    </div>
+                    <div id="empty-cart" class="text-center py-5" style="display: none;">
+                        <i class="fas fa-shopping-cart fa-3x text-muted mb-3"></i>
+                        <h5 class="text-muted">আপনার কার্ট খালি</h5>
+                        <p class="text-muted">কিছু পণ্য যোগ করুন</p>
+                        <a href="{% url 'orders:products' %}" class="btn btn-primary">
+                            <i class="fas fa-shopping-bag me-2"></i>পণ্য দেখুন
+                        </a>
+                    </div>
+                    
+                    <!-- Debug Info (remove in production) -->
+                    <div class="alert alert-info mt-3" id="debug-info" style="display: none;">
+                        <strong>Debug Info:</strong>
+                        <div id="debug-content"></div>
+                    </div>
+                </div>
+            </div>
+        </div>
+        
+        <div class="col-md-4">
+            <div class="card">
+                <div class="card-header">
+                    <h5>অর্ডার সারাংশ</h5>
+                </div>
+                <div class="card-body">
+                    <div class="d-flex justify-content-between mb-2">
+                        <span>মোট পণ্য:</span>
+                        <span id="cart-subtotal">৳ 0</span>
+                    </div>
+                    <div class="d-flex justify-content-between mb-2">
+                        <span>ডেলিভারি চার্জ:</span>
+                        <span id="cart-delivery">৳ 50</span>
+                    </div>
+                    <div class="d-flex justify-content-between mb-2">
+                        <span>ভ্যাট (10%):</span>
+                        <span id="cart-vat">৳ 0</span>
+                    </div>
+                    <hr>
+                    <div class="d-flex justify-content-between fw-bold">
+                        <span>মোট পরিমাণ:</span>
+                        <span id="cart-total">৳ 0</span>
+                    </div>
+                    <div class="d-grid gap-2 mt-3">
+                        <button class="btn btn-success" id="checkout-btn" style="display: none;" onclick="validateStockAndCheckout()">
+                            <i class="fas fa-credit-card me-2"></i>চেকআউট করুন
+                        </button>
+                        <a href="{% url 'orders:products' %}" class="btn btn-outline-primary">
+                            <i class="fas fa-shopping-bag me-2"></i>পণ্য দেখুন
+                        </a>
+                    </div>
+                    
+                    <!-- Out of Stock Alert -->
+                    <div id="out-of-stock-alert" class="alert alert-danger mt-3" style="display: none;">
+                        <i class="fas fa-exclamation-triangle me-2"></i>
+                        <strong>স্টক সমস্যা:</strong>
+                        <div id="out-of-stock-message"></div>
+                    </div>
+                </div>
+            </div>
+        </div>
+    </div>
+</div>
+
+<script>
+    let cart = JSON.parse(localStorage.getItem('cart')) || [];
+
+    document.addEventListener('DOMContentLoaded', function() {
+        console.log('Cart page loaded');
+        console.log('Cart data:', cart);
+        
+        // Show debug info
+        const debugInfo = document.getElementById('debug-info');
+        const debugContent = document.getElementById('debug-content');
+        if (debugInfo && debugContent) {
+            debugContent.innerHTML = `
+                <p>Cart items: ${cart.length}</p>
+                <p>User authenticated: ${document.body.dataset.userAuthenticated || 'unknown'}</p>
+                <p>Local storage cart: ${localStorage.getItem('cart')}</p>
+            `;
+            debugInfo.style.display = 'block';
+        }
+        
+        loadCartItems();
+        updateCartBadge();
+    });
+
+    function loadCartItems() {
+        const cartItems = document.getElementById('cart-items');
+        const emptyCart = document.getElementById('empty-cart');
+        const checkoutBtn = document.getElementById('checkout-btn');
+        
+        if (cart.length === 0) {
+            cartItems.style.display = 'none';
+            emptyCart.style.display = 'block';
+            checkoutBtn.style.display = 'none';
+        } else {
+            cartItems.style.display = 'block';
+            emptyCart.style.display = 'none';
+            checkoutBtn.style.display = 'block';
+            
+            cartItems.innerHTML = cart.map(item => `
+                <div class="cart-item">
+                    <div class="row align-items-center">
+                        <div class="col-md-6">
+                            <h6>${item.name || item.product_name}</h6>
+                            <p class="text-muted mb-0">৳ ${item.price || item.product_price} প্রতি</p>
+                        </div>
+                        <div class="col-md-3">
+                            <div class="input-group">
+                                <button class="btn btn-outline-secondary" onclick="updateQuantity('${item.id || item.product_id}', -1)">-</button>
+                                <input type="number" class="form-control text-center" value="${item.quantity}" min="1" readonly>
+                                <button class="btn btn-outline-secondary" onclick="updateQuantity('${item.id || item.product_id}', 1)">+</button>
+                            </div>
+                        </div>
+                        <div class="col-md-2">
+                            <h6>৳ ${(item.price || item.product_price) * item.quantity}</h6>
+                        </div>
+                        <div class="col-md-1">
+                            <button class="btn btn-outline-danger" onclick="removeItem('${item.id || item.product_id}')">
+                                <i class="fas fa-trash"></i>
+                            </button>
+                        </div>
+                    </div>
+                </div>
+            `).join('');
+            
+            updateCartTotal();
+        }
+    }
+
+    function updateQuantity(itemId, change) {
+        const item = cart.find(item => item.id == itemId || item.product_id == itemId);
+        if (item) {
+            item.quantity += change;
+            if (item.quantity <= 0) {
+                removeItem(itemId);
+            } else {
+                localStorage.setItem('cart', JSON.stringify(cart));
+                loadCartItems();
+                updateCartBadge();
+            }
+        }
+    }
+
+    function removeItem(itemId) {
+        cart = cart.filter(item => item.id != itemId && item.product_id != itemId);
+        localStorage.setItem('cart', JSON.stringify(cart));
+        loadCartItems();
+        updateCartBadge();
+    }
+
+    function updateCartTotal() {
+        const subtotal = cart.reduce((sum, item) => sum + ((item.price || item.product_price) * item.quantity), 0);
+        const delivery = 50;
+        const vat = Math.round(subtotal * 0.05);
+        const total = subtotal + delivery + vat;
+        
+        document.getElementById('cart-subtotal').textContent = `৳ ${subtotal}`;
+        document.getElementById('cart-delivery').textContent = `৳ ${delivery}`;
+        document.getElementById('cart-vat').textContent = `৳ ${vat}`;
+        document.getElementById('cart-total').textContent = `৳ ${total}`;
+    }
+
+    function updateCartBadge() {
+        const totalItems = cart.reduce((sum, item) => sum + item.quantity, 0);
+        const cartBadge = document.getElementById('cart-badge');
+        if (cartBadge) {
+            if (totalItems > 0) {
+                cartBadge.textContent = totalItems;
+                cartBadge.style.display = 'inline';
+            } else {
+                cartBadge.style.display = 'none';
+            }
+        }
+    }
+    
+    function getCookie(name) {
+        let cookieValue = null;
+        if (document.cookie && document.cookie !== '') {
+            const cookies = document.cookie.split(';');
+            for (let i = 0; i < cookies.length; i++) {
+                const cookie = cookies[i].trim();
+                if (cookie.substring(0, name.length + 1) === (name + '=')) {
+                    cookieValue = decodeURIComponent(cookie.substring(name.length + 1));
+                    break;
+                }
+            }
+        }
+        return cookieValue;
+    }
+    
+    function validateStockAndCheckout() {
+        const cart = JSON.parse(localStorage.getItem('cart')) || [];
+        if (cart.length === 0) {
+            alert('আপনার কার্ট খালি');
+            return;
+        }
+        
+        // Show loading state
+        const checkoutBtn = document.getElementById('checkout-btn');
+        const originalText = checkoutBtn.innerHTML;
+        checkoutBtn.innerHTML = '<i class="fas fa-spinner fa-spin me-2"></i>স্টক চেক হচ্ছে...';
+        checkoutBtn.disabled = true;
+        
+        // Hide previous alerts
+        document.getElementById('out-of-stock-alert').style.display = 'none';
+        
+        // Validate stock by attempting to create order
+        fetch('{% url "orders:create_order_from_cart" %}', {
+            method: 'POST',
+            headers: {
+                'Content-Type': 'application/json',
+                'X-CSRFToken': getCookie('csrftoken')
+            },
+            body: JSON.stringify({
+                cart_items: cart,
+                delivery_address: 'Checkout validation',
+                delivery_city: 'Dhaka',
+                special_instructions: ''
+            })
+        })
+        .then(response => response.json())
+        .then(data => {
+            if (data.success) {
+                // Stock is valid, proceed to checkout
+                window.location.href = '{% url "orders:checkout" %}';
+            } else {
+                // Show out of stock message
+                const alertDiv = document.getElementById('out-of-stock-alert');
+                const messageDiv = document.getElementById('out-of-stock-message');
+                
+                messageDiv.innerHTML = data.message.replace(/\n/g, '<br>');
+                alertDiv.style.display = 'block';
+                
+                // Scroll to alert
+                alertDiv.scrollIntoView({ behavior: 'smooth' });
+            }
+        })
+        .catch(error => {
+            console.error('Error:', error);
+            alert('স্টক চেক করতে সমস্যা হয়েছে। দয়া করে আবার চেষ্টা করুন।');
+        })
+        .finally(() => {
+            // Reset button
+            checkoutBtn.innerHTML = originalText;
+            checkoutBtn.disabled = false;
+        });
+    }
+</script>
+
+<style>
+    .cart-item {
+        border-bottom: 1px solid #eee;
+        padding: 15px 0;
+    }
+    .cart-item:last-child {
+        border-bottom: none;
+    }
+</style>
+{% endblock %}

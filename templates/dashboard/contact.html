@@ -1,0 +1,241 @@
+{% extends 'base.html' %}
+{% load static %}
+
+{% block title %}যোগাযোগ - নাগরীবাসী এক্সপ্রেস{% endblock %}
+
+{% block content %}
+<div class="container-fluid py-5">
+    <div class="container">
+        <div class="row">
+            <div class="col-12 text-center mb-5">
+                <h1 class="display-4 fw-bold text-danger mb-3">
+                    <i class="fas fa-phone me-3"></i>যোগাযোগ করুন
+                </h1>
+                <p class="lead text-muted">আমাদের সাথে যোগাযোগ করে আপনার প্রয়োজনীয় সেবা নিন</p>
+            </div>
+        </div>
+
+        <div class="row">
+            <!-- Contact Information -->
+            <div class="col-lg-4 mb-4">
+                <div class="card h-100 shadow-sm">
+                    <div class="card-header bg-danger text-white">
+                        <h5 class="mb-0">
+                            <i class="fas fa-info-circle me-2"></i>যোগাযোগের তথ্য
+                        </h5>
+                    </div>
+                    <div class="card-body">
+                        <div class="contact-item mb-4">
+                            <div class="d-flex align-items-center">
+                                <div class="contact-icon me-3">
+                                    <i class="fas fa-phone fa-2x text-danger"></i>
+                                </div>
+                                <div>
+                                    <h6 class="mb-1">ফোন নম্বর</h6>
+                                    <p class="mb-0">
+                                        <a href="tel:01711745000" class="text-decoration-none text-dark">
+                                            ০১৭১১-৭৪৫০০০
+                                        </a>
+                                    </p>
+                                </div>
+                            </div>
+                        </div>
+
+                        <div class="contact-item mb-4">
+                            <div class="d-flex align-items-center">
+                                <div class="contact-icon me-3">
+                                    <i class="fas fa-envelope fa-2x text-danger"></i>
+                                </div>
+                                <div>
+                                    <h6 class="mb-1">ইমেইল</h6>
+                                    <p class="mb-0">
+                                        <a href="mailto:nagaribashiexpress@gmail.com" class="text-decoration-none text-dark">
+                                            nagaribashiexpress@gmail.com
+                                        </a>
+                                    </p>
+                                </div>
+                            </div>
+                        </div>
+
+                        <div class="contact-item mb-4">
+                            <div class="d-flex align-items-center">
+                                <div class="contact-icon me-3">
+                                    <i class="fab fa-facebook fa-2x text-danger"></i>
+                                </div>
+                                <div>
+                                    <h6 class="mb-1">ফেসবুক</h6>
+                                    <p class="mb-0">
+                                        <a href="https://www.facebook.com/nagaribashiexpress" target="_blank" class="text-decoration-none text-dark">
+                                            facebook.com/nagaribashiexpress
+                                        </a>
+                                    </p>
+                                </div>
+                            </div>
+                        </div>
+
+                        <div class="contact-item mb-4">
+                            <div class="d-flex align-items-center">
+                                <div class="contact-icon me-3">
+                                    <i class="fas fa-map-marker-alt fa-2x text-danger"></i>
+                                </div>
+                                <div>
+                                    <h6 class="mb-1">ঠিকানা</h6>
+                                    <p class="mb-0">ধানমন্ডি, ঢাকা-১২০৫</p>
+                                </div>
+                            </div>
+                        </div>
+
+                        <div class="contact-item">
+                            <div class="d-flex align-items-center">
+                                <div class="contact-icon me-3">
+                                    <i class="fas fa-clock fa-2x text-danger"></i>
+                                </div>
+                                <div>
+                                    <h6 class="mb-1">সেবার সময়</h6>
+                                    <p class="mb-0">২৪/৭ সেবা</p>
+                                </div>
+                            </div>
+                        </div>
+                    </div>
+                </div>
+            </div>
+
+            <!-- Contact Form -->
+            <div class="col-lg-8 mb-4">
+                <div class="card h-100 shadow-sm">
+                    <div class="card-header bg-danger text-white">
+                        <h5 class="mb-0">
+                            <i class="fas fa-paper-plane me-2"></i>মেসেজ পাঠান
+                        </h5>
+                    </div>
+                    <div class="card-body">
+                        <form>
+                            <div class="row">
+                                <div class="col-md-6 mb-3">
+                                    <label for="name" class="form-label">নাম *</label>
+                                    <input type="text" class="form-control" id="name" required>
+                                </div>
+                                <div class="col-md-6 mb-3">
+                                    <label for="phone" class="form-label">ফোন নম্বর *</label>
+                                    <input type="tel" class="form-control" id="phone" required>
+                                </div>
+                            </div>
+                            <div class="mb-3">
+                                <label for="email" class="form-label">ইমেইল</label>
+                                <input type="email" class="form-control" id="email">
+                            </div>
+                            <div class="mb-3">
+                                <label for="subject" class="form-label">বিষয় *</label>
+                                <select class="form-select" id="subject" required>
+                                    <option value="">বিষয় নির্বাচন করুন</option>
+                                    <option value="order">অর্ডার সম্পর্কিত</option>
+                                    <option value="delivery">ডেলিভারি সম্পর্কিত</option>
+                                    <option value="payment">পেমেন্ট সম্পর্কিত</option>
+                                    <option value="complaint">অভিযোগ</option>
+                                    <option value="suggestion">পরামর্শ</option>
+                                    <option value="other">অন্যান্য</option>
+                                </select>
+                            </div>
+                            <div class="mb-3">
+                                <label for="message" class="form-label">মেসেজ *</label>
+                                <textarea class="form-control" id="message" rows="5" required placeholder="আপনার মেসেজ লিখুন..."></textarea>
+                            </div>
+                            <div class="d-grid">
+                                <button type="submit" class="btn btn-danger btn-lg">
+                                    <i class="fas fa-paper-plane me-2"></i>মেসেজ পাঠান
+                                </button>
+                            </div>
+                        </form>
+                    </div>
+                </div>
+            </div>
+        </div>
+
+        <!-- Quick Contact Buttons -->
+        <div class="row mt-5">
+            <div class="col-12">
+                <div class="card">
+                    <div class="card-body text-center">
+                        <h5 class="card-title mb-4">দ্রুত যোগাযোগ</h5>
+                        <div class="row">
+                            <div class="col-md-3 mb-3">
+                                <a href="tel:01711745000" class="btn btn-outline-danger btn-lg w-100">
+                                    <i class="fas fa-phone me-2"></i>কল করুন
+                                </a>
+                            </div>
+                            <div class="col-md-3 mb-3">
+                                <a href="https://wa.me/8801711745000" target="_blank" class="btn btn-outline-success btn-lg w-100">
+                                    <i class="fab fa-whatsapp me-2"></i>WhatsApp
+                                </a>
+                            </div>
+                            <div class="col-md-3 mb-3">
+                                <a href="mailto:nagaribashiexpress@gmail.com" class="btn btn-outline-primary btn-lg w-100">
+                                    <i class="fas fa-envelope me-2"></i>ইমেইল
+                                </a>
+                            </div>
+                            <div class="col-md-3 mb-3">
+                                <a href="https://www.facebook.com/nagaribashiexpress" target="_blank" class="btn btn-outline-info btn-lg w-100">
+                                    <i class="fab fa-facebook me-2"></i>ফেসবুক
+                                </a>
+                            </div>
+                        </div>
+                    </div>
+                </div>
+            </div>
+        </div>
+    </div>
+</div>
+
+<style>
+.contact-item {
+    padding: 1rem 0;
+    border-bottom: 1px solid #f0f0f0;
+}
+
+.contact-item:last-child {
+    border-bottom: none;
+}
+
+.contact-icon {
+    width: 50px;
+    text-align: center;
+}
+
+.btn-lg {
+    padding: 0.75rem 1.5rem;
+    font-size: 1.1rem;
+}
+
+.card {
+    border: none;
+    border-radius: 15px;
+}
+
+.card-header {
+    border-radius: 15px 15px 0 0 !important;
+    border: none;
+}
+
+.form-control, .form-select {
+    border-radius: 10px;
+    border: 2px solid #e9ecef;
+    transition: all 0.3s ease;
+}
+
+.form-control:focus, .form-select:focus {
+    border-color: #DC2626;
+    box-shadow: 0 0 0 0.2rem rgba(220, 38, 38, 0.25);
+}
+
+.btn {
+    border-radius: 10px;
+    font-weight: 600;
+    transition: all 0.3s ease;
+}
+
+.btn:hover {
+    transform: translateY(-2px);
+    box-shadow: 0 4px 15px rgba(0,0,0,0.2);
+}
+</style>
+{% endblock %}
