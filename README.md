@@ -252,23 +252,13 @@ coverage html
 4. Push to the branch
 5. Create a Pull Request
 
-## লাইসেন্স (License)
 
-This project is licensed under the MIT License.
-
-## যোগাযোগ (Contact)
-
-- **Email**: info@nagaribashiexpress.com
-- **Phone**: +৮৮০ ১৭১১-২৩৪৫৬৭
-- **Address**: ধানমন্ডি, ঢাকা-১২০৫
-
-## সমর্থন (Support)
-
-যদি আপনার কোন সমস্যা থাকে বা সাহায্যের প্রয়োজন হয়, দয়া করে আমাদের সাথে যোগাযোগ করুন।
 
 ---
 
 **Made with ❤️ in Bangladesh**
-#   S m a r t - D e l i v e r y - W e b A p p  
- #   S m a r t - D e l i v e r y - W e b A p p  
+#   S m a r t - D e l i v e r y - W e b A p p 
+ 
+ #   S m a r t - D e l i v e r y - W e b A p p 
+ 
  
