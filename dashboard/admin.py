@@ -15,14 +15,14 @@ class DashboardWidgetAdmin(admin.ModelAdmin):
     readonly_fields = ('created_at',)
     
     fieldsets = (
-        (_('উইজেট তথ্য'), {
+        (_('Widget Information'), {
             'fields': ('name', 'widget_type', 'description', 'is_active', 'position')
         }),
-        (_('কনফিগারেশন'), {
+        (_('Configuration'), {
             'fields': ('config',),
             'classes': ('collapse',)
         }),
-        (_('সময়'), {
+        (_('Timestamps'), {
             'fields': ('created_at',),
             'classes': ('collapse',)
         }),
@@ -40,14 +40,14 @@ class AnalyticsDataAdmin(admin.ModelAdmin):
     readonly_fields = ('created_at',)
     
     fieldsets = (
-        (_('মেট্রিক তথ্য'), {
+        (_('Metric Information'), {
             'fields': ('metric_type', 'date', 'value')
         }),
-        (_('মেটাডেটা'), {
+        (_('Metadata'), {
             'fields': ('metadata',),
             'classes': ('collapse',)
         }),
-        (_('সময়'), {
+        (_('Timestamps'), {
             'fields': ('created_at',),
             'classes': ('collapse',)
         }),
@@ -65,20 +65,20 @@ class NotificationAdmin(admin.ModelAdmin):
     readonly_fields = ('created_at', 'read_at')
     
     fieldsets = (
-        (_('নোটিফিকেশন তথ্য'), {
+        (_('Notification Information'), {
             'fields': ('title', 'message', 'notification_type', 'priority', 'recipient')
         }),
-        (_('অবস্থা'), {
+        (_('Status'), {
             'fields': ('is_read', 'read_at')
         }),
-        (_('অ্যাকশন'), {
+        (_('Action'), {
             'fields': ('action_url',)
         }),
-        (_('মেটাডেটা'), {
+        (_('Metadata'), {
             'fields': ('metadata',),
             'classes': ('collapse',)
         }),
-        (_('সময়'), {
+        (_('Timestamps'), {
             'fields': ('created_at',),
             'classes': ('collapse',)
         }),
@@ -99,18 +99,18 @@ class SystemLogAdmin(admin.ModelAdmin):
     readonly_fields = ('created_at',)
     
     fieldsets = (
-        (_('লগ তথ্য'), {
+        (_('Log Information'), {
             'fields': ('user', 'action', 'model_name', 'object_id', 'message', 'level')
         }),
-        (_('নেটওয়ার্ক'), {
+        (_('Network'), {
             'fields': ('ip_address', 'user_agent'),
             'classes': ('collapse',)
         }),
-        (_('মেটাডেটা'), {
+        (_('Metadata'), {
             'fields': ('metadata',),
             'classes': ('collapse',)
         }),
-        (_('সময়'), {
+        (_('Timestamps'), {
             'fields': ('created_at',),
             'classes': ('collapse',)
         }),
@@ -132,10 +132,10 @@ class FAQAdmin(admin.ModelAdmin):
     readonly_fields = ('created_at', 'updated_at')
     
     fieldsets = (
-        (_('প্রশ্নোত্তর'), {
+        (_('FAQ Details'), {
             'fields': ('question', 'answer', 'category', 'is_active', 'order')
         }),
-        (_('সময়'), {
+        (_('Timestamps'), {
             'fields': ('created_at', 'updated_at'),
             'classes': ('collapse',)
         }),

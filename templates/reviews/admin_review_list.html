@@ -1,0 +1,95 @@
+{% extends 'base.html' %}
+{% load static %}
+
+{% block title %}Review Moderation - SwiftDrop Admin{% endblock %}
+
+{% block content %}
+<div class="container-fluid px-lg-5 py-4">
+    <div class="d-flex justify-content-between align-items-center mb-4">
+        <div>
+            <h2 class="fw-bold text-navy mb-0">
+                <i class="fas fa-star-half-alt text-warning me-2"></i>Customer Review Moderation
+            </h2>
+            <p class="text-muted small mb-0">Manage community feedback, visibility, and verified ratings</p>
+        </div>
+        <a href="{% url 'dashboard:admin_dashboard' %}" class="btn btn-outline-secondary btn-sm rounded-pill px-3">
+            <i class="fas fa-arrow-left me-1"></i> Admin Dashboard
+        </a>
+    </div>
+
+    <div class="card border-0 shadow-sm rounded-4 overflow-hidden mb-4">
+        <div class="table-responsive">
+            <table class="table table-hover align-middle mb-0">
+                <thead class="table-light small text-muted">
+                    <tr>
+                        <th class="ps-4">Customer</th>
+                        <th>Product</th>
+                        <th>Rating</th>
+                        <th>Review Content</th>
+                        <th>Visibility</th>
+                        <th>Date</th>
+                        <th class="text-end pe-4">Moderation Action</th>
+                    </tr>
+                </thead>
+                <tbody>
+                    {% for rev in reviews %}
+                        <tr>
+                            <td class="ps-4">
+                                <div class="fw-bold text-navy">{{ rev.customer.get_full_name|default:rev.customer.username }}</div>
+                                <small class="text-muted">{{ rev.customer.email }}</small>
+                            </td>
+                            <td>
+                                <span class="fw-semibold text-navy">{{ rev.product.name|default:"General Delivery" }}</span>
+                                {% if rev.order %}
+                                    <div class="small text-muted">Order #{{ rev.order.order_number }}</div>
+                                {% endif %}
+                            </td>
+                            <td>
+                                <span class="text-warning fw-bold">
+                                    ★ {{ rev.rating }}
+                                </span>
+                            </td>
+                            <td>
+                                {% if rev.title %}<strong>{{ rev.title }}</strong><br>{% endif %}
+                                <small class="text-muted d-inline-block" style="max-width: 320px;">
+                                    {{ rev.comment }}
+                                </small>
+                            </td>
+                            <td>
+                                {% if rev.is_public %}
+                                    <span class="badge bg-success-subtle text-success">Visible</span>
+                                {% else %}
+                                    <span class="badge bg-secondary-subtle text-secondary">Hidden</span>
+                                {% endif %}
+                            </td>
+                            <td class="small text-muted">{{ rev.created_at|date:"M d, Y" }}</td>
+                            <td class="text-end pe-4">
+                                <div class="d-inline-flex gap-1">
+                                    <form method="post" class="d-inline">
+                                        {% csrf_token %}
+                                        <input type="hidden" name="review_id" value="{{ rev.id }}">
+                                        <input type="hidden" name="action" value="toggle_visibility">
+                                        <button type="submit" class="btn btn-sm btn-outline-secondary rounded-pill">
+                                            {% if rev.is_public %}Hide{% else %}Show{% endif %}
+                                        </button>
+                                    </form>
+                                    <form method="post" class="d-inline" onsubmit="return confirm('Permanently remove this review?');">
+                                        {% csrf_token %}
+                                        <input type="hidden" name="review_id" value="{{ rev.id }}">
+                                        <input type="hidden" name="action" value="delete">
+                                        <button type="submit" class="btn btn-sm btn-outline-danger rounded-pill">
+                                            <i class="fas fa-trash-alt"></i>
+                                        </button>
+                                    </form>
+                                </div>
+                            </td>
+                        </tr>
+                    {% empty %}
+                        <tr><td colspan="7" class="text-center py-5 text-muted">No reviews in the moderation queue.</td></tr>
+                    {% endfor %}
+                </tbody>
+            </table>
+        </div>
+    </div>
+</div>
+{% endblock %}

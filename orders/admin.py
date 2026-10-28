@@ -30,13 +30,13 @@ class ProductServiceAdmin(admin.ModelAdmin):
     readonly_fields = ('created_at', 'updated_at')
     
     fieldsets = (
-        (_('মূল তথ্য'), {
+        (_('Basic Information'), {
             'fields': ('name', 'description', 'category', 'price', 'is_available')
         }),
-        (_('স্টক ও ছবি'), {
+        (_('Stock & Image'), {
             'fields': ('stock_quantity', 'image')
         }),
-        (_('সময়'), {
+        (_('Timestamps'), {
             'fields': ('created_at', 'updated_at'),
             'classes': ('collapse',)
         }),
@@ -55,20 +55,20 @@ class OrderAdmin(admin.ModelAdmin):
     inlines = [OrderItemInline, OrderStatusHistoryInline]
     
     fieldsets = (
-        (_('অর্ডার তথ্য'), {
+        (_('Order Information'), {
             'fields': ('order_number', 'customer', 'delivery_type', 'scheduled_delivery_time')
         }),
-        (_('ডেলিভারি তথ্য'), {
+        (_('Delivery Information'), {
             'fields': ('delivery_address', 'delivery_city', 'delivery_instructions')
         }),
-        (_('অবস্থা ও পরিমাণ'), {
+        (_('Status & Totals'), {
             'fields': ('status', 'total_amount', 'delivery_fee', 'special_instructions')
         }),
-        (_('বাতিলের তথ্য'), {
+        (_('Cancellation Information'), {
             'fields': ('cancellation_reason', 'cancellation_notes', 'cancelled_at', 'cancelled_by', 'refund_preference'),
             'classes': ('collapse',)
         }),
-        (_('সময়'), {
+        (_('Timestamps'), {
             'fields': ('created_at', 'updated_at'),
             'classes': ('collapse',)
         }),

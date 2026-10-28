@@ -1,0 +1,74 @@
+{% extends 'base.html' %}
+{% load static %}
+
+{% block title %}Fleet Assignments - SwiftDrop Admin{% endblock %}
+
+{% block content %}
+<div class="container-fluid px-lg-5 py-4">
+    <div class="d-flex justify-content-between align-items-center mb-4">
+        <div>
+            <h2 class="fw-bold text-navy mb-0">
+                <i class="fas fa-shipping-fast text-primary me-2"></i>Courier Delivery Tasks
+            </h2>
+            <p class="text-muted small mb-0">Active and completed delivery assignments</p>
+        </div>
+        <div class="d-flex gap-2">
+            <a href="{% url 'delivery:admin_delivery_agent_list' %}" class="btn btn-outline-primary btn-sm rounded-pill px-3">
+                <i class="fas fa-users me-1"></i> Delivery Agents
+            </a>
+            <a href="{% url 'dashboard:admin_dashboard' %}" class="btn btn-outline-secondary btn-sm rounded-pill px-3">
+                <i class="fas fa-arrow-left me-1"></i> Admin Dashboard
+            </a>
+        </div>
+    </div>
+
+    <div class="card border-0 shadow-sm rounded-4 overflow-hidden mb-4">
+        <div class="table-responsive">
+            <table class="table table-hover align-middle mb-0">
+                <thead class="table-light small text-muted">
+                    <tr>
+                        <th class="ps-4">Task ID</th>
+                        <th>Order #</th>
+                        <th>Courier</th>
+                        <th>Assigned Time</th>
+                        <th>Status</th>
+                        <th class="text-end pe-4">Details</th>
+                    </tr>
+                </thead>
+                <tbody>
+                    {% for del in deliveries %}
+                        <tr>
+                            <td class="ps-4 fw-bold text-navy">#{{ del.id }}</td>
+                            <td>
+                                <a href="{% url 'orders:admin_order_detail' del.order.pk %}" class="fw-semibold text-primary text-decoration-none">
+                                    #{{ del.order.order_number }}
+                                </a>
+                            </td>
+                            <td>
+                                <div class="fw-bold text-navy">{{ del.delivery_agent.get_full_name|default:del.delivery_agent.username }}</div>
+                                <small class="text-muted">{{ del.delivery_agent.phone_number|default:"-" }}</small>
+                            </td>
+                            <td class="small text-muted">{{ del.assigned_at|date:"M d, H:i" }}</td>
+                            <td>
+                                <span class="badge rounded-pill 
+                                    {% if del.status == 'delivered' %}bg-success-subtle text-success border border-success-subtle
+                                    {% elif del.status == 'in_transit' or del.status == 'picked_up' %}bg-primary-subtle text-primary border border-primary-subtle
+                                    {% else %}bg-warning-subtle text-warning border border-warning-subtle{% endif %}">
+                                    {{ del.get_status_display }}
+                                </span>
+                            </td>
+                            <td class="text-end pe-4">
+                                <a href="{% url 'orders:admin_order_detail' del.order.pk %}" class="btn btn-outline-primary btn-sm rounded-pill px-3">
+                                    Order
+                                </a>
+                            </td>
+                        </tr>
+                    {% empty %}
+                        <tr><td colspan="6" class="text-center py-5 text-muted">No courier delivery assignments recorded yet.</td></tr>
+                    {% endfor %}
+                </tbody>
+            </table>
+        </div>
+    </div>
+</div>
+{% endblock %}

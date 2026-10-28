@@ -1,0 +1,65 @@
+{% extends 'base.html' %}
+{% load static %}
+
+{% block title %}User Detail - SwiftDrop Admin{% endblock %}
+
+{% block content %}
+<div class="container py-4">
+    <div class="d-flex justify-content-between align-items-center mb-4">
+        <div>
+            <h3 class="fw-bold text-navy mb-0">User Profile: {{ user_detail.get_full_name|default:user_detail.username }}</h3>
+            <span class="badge bg-primary-subtle text-primary border border-primary-subtle mt-1">{{ user_detail.get_user_type_display }}</span>
+        </div>
+        <div>
+            <a href="{% url 'users:user_list' %}" class="btn btn-outline-secondary btn-sm rounded-pill">
+                <i class="fas fa-arrow-left me-1"></i> Back to Users
+            </a>
+        </div>
+    </div>
+
+    <div class="row g-4">
+        <div class="col-md-6">
+            <div class="card border-0 shadow-sm rounded-4 p-4">
+                <h5 class="fw-bold text-navy mb-3">Personal & Contact Info</h5>
+                <dl class="row mb-0 small">
+                    <dt class="col-sm-4 text-muted">Username</dt>
+                    <dd class="col-sm-8 fw-semibold text-navy">{{ user_detail.username }}</dd>
+
+                    <dt class="col-sm-4 text-muted">Email</dt>
+                    <dd class="col-sm-8 fw-semibold text-navy">{{ user_detail.email }}</dd>
+
+                    <dt class="col-sm-4 text-muted">Phone Number</dt>
+                    <dd class="col-sm-8 fw-semibold text-navy">{{ user_detail.phone_number|default:"-" }}</dd>
+
+                    <dt class="col-sm-4 text-muted">Joined Date</dt>
+                    <dd class="col-sm-8 text-muted">{{ user_detail.date_joined|date:"F d, Y H:i" }}</dd>
+
+                    <dt class="col-sm-4 text-muted">Last Login</dt>
+                    <dd class="col-sm-8 text-muted">{{ user_detail.last_login|date:"F d, Y H:i"|default:"Never" }}</dd>
+                </dl>
+            </div>
+        </div>
+
+        <div class="col-md-6">
+            <div class="card border-0 shadow-sm rounded-4 p-4">
+                <h5 class="fw-bold text-navy mb-3">Address & Delivery Area</h5>
+                <dl class="row mb-0 small">
+                    <dt class="col-sm-4 text-muted">Street Address</dt>
+                    <dd class="col-sm-8 fw-semibold text-navy">{{ user_detail.address|default:"-" }}</dd>
+
+                    <dt class="col-sm-4 text-muted">City / Zone</dt>
+                    <dd class="col-sm-8 fw-semibold text-navy">{{ user_detail.city|default:"-" }}</dd>
+
+                    <dt class="col-sm-4 text-muted">Postal Code</dt>
+                    <dd class="col-sm-8 fw-semibold text-navy">{{ user_detail.postal_code|default:"-" }}</dd>
+
+                    <dt class="col-sm-4 text-muted">Staff Access</dt>
+                    <dd class="col-sm-8">
+                        {% if user_detail.is_staff %}<span class="badge bg-success">Yes</span>{% else %}<span class="badge bg-secondary">No</span>{% endif %}
+                    </dd>
+                </dl>
+            </div>
+        </div>
+    </div>
+</div>
+{% endblock %}

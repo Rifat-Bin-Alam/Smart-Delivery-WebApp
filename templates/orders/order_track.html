@@ -1,0 +1,147 @@
+{% extends 'base.html' %}
+{% load static %}
+
+{% block title %}Track Order #{{ order.order_number }} — SwiftDrop{% endblock %}
+
+{% block content %}
+<div class="container py-4">
+    <!-- Breadcrumb -->
+    <nav aria-label="breadcrumb">
+        <ol class="breadcrumb small">
+            <li class="breadcrumb-item"><a href="{% url 'dashboard:home' %}">Home</a></li>
+            <li class="breadcrumb-item"><a href="{% url 'orders:order_list' %}">Orders</a></li>
+            <li class="breadcrumb-item"><a href="{% url 'orders:order_detail' order.id %}">#{{ order.order_number }}</a></li>
+            <li class="breadcrumb-item active" aria-current="page">Live Tracker</li>
+        </ol>
+    </nav>
+
+    <div class="card border shadow-sm rounded-4 mb-4">
+        <div class="card-body p-lg-5 p-4">
+            <div class="d-flex flex-column flex-md-row justify-content-between align-items-md-center gap-3 border-bottom pb-4 mb-4">
+                <div>
+                    <h2 class="fw-bold mb-1 text-dark">
+                        <i class="fas fa-route text-primary me-2"></i>Order Delivery Progress
+                    </h2>
+                    <p class="text-muted small mb-0">Reference: <strong class="font-monospace text-dark">#{{ order.order_number }}</strong></p>
+                </div>
+                <div class="d-flex align-items-center gap-2">
+                    <span class="badge-status status-{{ order.status }} fs-6">
+                        {{ order.get_status_display }}
+                    </span>
+                    <a href="{% url 'orders:order_detail' order.id %}" class="btn btn-outline-secondary btn-sm rounded-pill px-3">
+                        Order Details
+                    </a>
+                </div>
+            </div>
+
+            <!-- Visual Progression Tracker -->
+            <div class="sd-timeline my-5">
+                <!-- Step 1: Placed -->
+                <div class="sd-timeline-step {% if order.status in 'pending confirmed processing dispatched delivered' %}completed{% endif %}">
+                    <div class="sd-timeline-icon">
+                        <i class="fas fa-receipt"></i>
+                    </div>
+                    <div class="sd-timeline-title">Placed</div>
+                    <div class="sd-timeline-date">{{ order.created_at|date:"h:i A" }}</div>
+                </div>
+
+                <!-- Step 2: Confirmed -->
+                <div class="sd-timeline-step {% if order.status in 'confirmed processing dispatched delivered' %}completed{% elif order.status == 'pending' %}active{% endif %}">
+                    <div class="sd-timeline-icon">
+                        <i class="fas fa-check"></i>
+                    </div>
+                    <div class="sd-timeline-title">Confirmed</div>
+                    <div class="sd-timeline-date">Order accepted</div>
+                </div>
+
+                <!-- Step 3: Packed -->
+                <div class="sd-timeline-step {% if order.status in 'processing dispatched delivered' %}completed{% elif order.status == 'confirmed' %}active{% endif %}">
+                    <div class="sd-timeline-icon">
+                        <i class="fas fa-box-open"></i>
+                    </div>
+                    <div class="sd-timeline-title">Packed</div>
+                    <div class="sd-timeline-date">Fulfillment ready</div>
+                </div>
+
+                <!-- Step 4: Out for Delivery -->
+                <div class="sd-timeline-step {% if order.status in 'dispatched delivered' %}completed{% elif order.status == 'processing' %}active{% endif %}">
+                    <div class="sd-timeline-icon">
+                        <i class="fas fa-motorcycle"></i>
+                    </div>
+                    <div class="sd-timeline-title">In Transit</div>
+                    <div class="sd-timeline-date">With courier</div>
+                </div>
+
+                <!-- Step 5: Delivered -->
+                <div class="sd-timeline-step {% if order.status == 'delivered' %}completed{% elif order.status == 'dispatched' %}active{% endif %}">
+                    <div class="sd-timeline-icon">
+                        <i class="fas fa-hand-holding-heart"></i>
+                    </div>
+                    <div class="sd-timeline-title">Delivered</div>
+                    <div class="sd-timeline-date">Doorstep drop</div>
+                </div>
+            </div>
+
+            {% if order.status == 'cancelled' %}
+            <div class="alert alert-danger d-flex align-items-center mb-4 rounded-3" role="alert">
+                <i class="fas fa-ban me-3 fs-4"></i>
+                <div>
+                    <h6 class="fw-bold mb-1">This order was cancelled</h6>
+                    <div class="small">Reason: {{ order.cancellation_reason|default:"Requested by customer" }}. Stock has been restored.</div>
+                </div>
+            </div>
+            {% endif %}
+
+            <!-- Destination & Fleet Cards -->
+            <div class="row g-4 pt-3">
+                <div class="col-md-6">
+                    <div class="p-3 bg-light rounded-3 h-100 border">
+                        <h6 class="fw-bold text-dark mb-2"><i class="fas fa-map-marker-alt text-danger me-2"></i>Destination</h6>
+                        <div class="text-dark small fw-semibold">{{ order.delivery_city }}</div>
+                        <p class="text-muted small mb-0">{{ order.delivery_address }}</p>
+                    </div>
+                </div>
+
+                <div class="col-md-6">
+                    <div class="p-3 bg-light rounded-3 h-100 border">
+                        <h6 class="fw-bold text-dark mb-2"><i class="fas fa-user-shield text-primary me-2"></i>Assigned Delivery Rider</h6>
+                        {% if assignment %}
+                        <div class="d-flex align-items-center gap-3">
+                            <div class="rounded-circle bg-primary text-white d-flex align-items-center justify-content-center fw-bold" style="width: 40px; height: 40px;">
+                                {{ assignment.delivery_agent.first_name|default:"R"|make_list|first|upper }}
+                            </div>
+                            <div>
+                                <div class="fw-bold text-dark">{{ assignment.delivery_agent.get_full_name|default:assignment.delivery_agent.username }}</div>
+                                <div class="small text-muted"><i class="fas fa-phone-alt me-1"></i> {{ assignment.delivery_agent.phone_number }}</div>
+                            </div>
+                        </div>
+                        {% else %}
+                        <p class="text-muted small mb-0">Rider will be allocated once packaging is completed.</p>
+                        {% endif %}
+                    </div>
+                </div>
+            </div>
+
+            <!-- Detailed Event Logs -->
+            <div class="mt-4 pt-4 border-top">
+                <h6 class="fw-bold text-dark mb-3">Timeline Events & Checkpoints</h6>
+                <div class="border rounded-3 overflow-hidden">
+                    {% for h in history %}
+                    <div class="p-3 d-flex justify-content-between align-items-center {% if not forloop.last %}border-bottom{% endif %} bg-white">
+                        <div class="d-flex align-items-center gap-2">
+                            <span class="badge-status status-{{ h.status }} py-1 px-2" style="font-size: 0.72rem;">
+                                {{ h.get_status_display }}
+                            </span>
+                            <span class="text-dark small">{{ h.notes|default:"Checkpoint reached" }}</span>
+                        </div>
+                        <small class="text-muted">{{ h.created_at|date:"M d, Y • h:i A" }}</small>
+                    </div>
+                    {% empty %}
+                    <div class="p-3 text-muted small text-center">No checkpoints logged.</div>
+                    {% endfor %}
+                </div>
+            </div>
+        </div>
+    </div>
+</div>
+{% endblock %}

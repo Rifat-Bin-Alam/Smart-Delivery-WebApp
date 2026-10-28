@@ -1,0 +1,150 @@
+{% extends 'base.html' %}
+{% load static %}
+
+{% block title %}Order Operations Console - SwiftDrop Admin{% endblock %}
+
+{% block content %}
+<div class="container-fluid px-lg-5 py-4">
+    <!-- Header -->
+    <div class="d-flex flex-wrap justify-content-between align-items-center mb-4 gap-3">
+        <div>
+            <h2 class="fw-bold text-navy mb-0">
+                <i class="fas fa-tasks text-primary me-2"></i>Order Operations Console
+            </h2>
+            <p class="text-muted small mb-0">Dispatch, assign riders, and monitor delivery fulfillment in real time</p>
+        </div>
+        <div>
+            <a href="{% url 'dashboard:admin_dashboard' %}" class="btn btn-outline-secondary btn-sm rounded-pill px-3">
+                <i class="fas fa-arrow-left me-1"></i> Operations Center
+            </a>
+        </div>
+    </div>
+
+    <!-- Filters & Search Toolbar -->
+    <div class="card border-0 shadow-sm rounded-4 mb-4">
+        <div class="card-body p-3">
+            <form method="get" class="row g-2 align-items-center">
+                <div class="col-md-5">
+                    <div class="input-group input-group-sm">
+                        <span class="input-group-text bg-light border-end-0"><i class="fas fa-search text-muted"></i></span>
+                        <input type="text" name="q" value="{{ request.GET.q }}" class="form-control" placeholder="Search order #, customer, email, phone...">
+                    </div>
+                </div>
+                <div class="col-md-3">
+                    <select name="status" class="form-select form-select-sm">
+                        <option value="">All Fulfillment Statuses</option>
+                        <option value="pending" {% if request.GET.status == 'pending' %}selected{% endif %}>Pending</option>
+                        <option value="confirmed" {% if request.GET.status == 'confirmed' %}selected{% endif %}>Confirmed</option>
+                        <option value="processing" {% if request.GET.status == 'processing' %}selected{% endif %}>Processing</option>
+                        <option value="dispatched" {% if request.GET.status == 'dispatched' %}selected{% endif %}>Dispatched / Out for Delivery</option>
+                        <option value="delivered" {% if request.GET.status == 'delivered' %}selected{% endif %}>Delivered</option>
+                        <option value="cancelled" {% if request.GET.status == 'cancelled' %}selected{% endif %}>Cancelled</option>
+                    </select>
+                </div>
+                <div class="col-md-2">
+                    <button type="submit" class="btn btn-primary btn-sm w-100 rounded-pill">Apply Filter</button>
+                </div>
+                {% if request.GET.q or request.GET.status %}
+                    <div class="col-md-2">
+                        <a href="{% url 'orders:admin_order_list' %}" class="btn btn-light btn-sm w-100 rounded-pill">Reset</a>
+                    </div>
+                {% endif %}
+            </form>
+        </div>
+    </div>
+
+    <!-- Orders Table -->
+    <div class="card border-0 shadow-sm rounded-4 overflow-hidden mb-4">
+        <div class="table-responsive">
+            <table class="table table-hover align-middle mb-0">
+                <thead class="table-light small text-muted">
+                    <tr>
+                        <th class="ps-4">Order Ref</th>
+                        <th>Date & Time</th>
+                        <th>Customer</th>
+                        <th>Delivery Zone</th>
+                        <th>Total (BDT)</th>
+                        <th>Payment</th>
+                        <th>Status</th>
+                        <th class="text-end pe-4">Action</th>
+                    </tr>
+                </thead>
+                <tbody>
+                    {% for order in orders %}
+                        <tr>
+                            <td class="ps-4 fw-bold text-navy">
+                                <a href="{% url 'orders:admin_order_detail' order.pk %}" class="text-decoration-none text-navy">
+                                    #{{ order.order_number }}
+                                </a>
+                            </td>
+                            <td class="small text-muted">
+                                {{ order.created_at|date:"M d, Y" }}
+                                <div style="font-size: 0.75rem;">{{ order.created_at|date:"H:i" }}</div>
+                            </td>
+                            <td>
+                                <div class="fw-semibold text-navy">{{ order.customer.get_full_name|default:order.customer.username }}</div>
+                                <small class="text-muted">{{ order.customer.phone_number|default:order.customer.email }}</small>
+                            </td>
+                            <td>
+                                <span class="badge bg-light text-navy border">
+                                    {{ order.delivery_city }}
+                                </span>
+                            </td>
+                            <td class="fw-bold text-navy">
+                                ৳{{ order.total_amount|floatformat:2 }}
+                            </td>
+                            <td>
+                                <span class="badge bg-light text-navy border">
+                                    {{ order.get_payment_method_display }}
+                                </span>
+                            </td>
+                            <td>
+                                <span class="badge rounded-pill 
+                                    {% if order.status == 'delivered' %}bg-success-subtle text-success border border-success-subtle
+                                    {% elif order.status == 'cancelled' %}bg-danger-subtle text-danger border border-danger-subtle
+                                    {% elif order.status == 'dispatched' or order.status == 'processing' %}bg-primary-subtle text-primary border border-primary-subtle
+                                    {% else %}bg-warning-subtle text-warning border border-warning-subtle{% endif %}">
+                                    {{ order.get_status_display }}
+                                </span>
+                            </td>
+                            <td class="text-end pe-4">
+                                <a href="{% url 'orders:admin_order_detail' order.pk %}" class="btn btn-primary btn-sm rounded-pill px-3">
+                                    Manage
+                                </a>
+                            </td>
+                        </tr>
+                    {% empty %}
+                        <tr>
+                            <td colspan="8" class="text-center py-5 text-muted">
+                                <i class="fas fa-inbox fa-3x mb-2 d-block text-secondary opacity-50"></i>
+                                No orders matching the selected criteria.
+                            </td>
+                        </tr>
+                    {% endfor %}
+                </tbody>
+            </table>
+        </div>
+    </div>
+
+    <!-- Pagination -->
+    {% if is_paginated %}
+        <nav class="d-flex justify-content-center">
+            <ul class="pagination pagination-sm">
+                {% if page_obj.has_previous %}
+                    <li class="page-item">
+                        <a class="page-link" href="?page={{ page_obj.previous_page_number }}{% if request.GET.q %}&q={{ request.GET.q }}{% endif %}{% if request.GET.status %}&status={{ request.GET.status }}{% endif %}">&laquo;</a>
+                    </li>
+                {% endif %}
+                <li class="page-item active">
+                    <span class="page-link">Page {{ page_obj.number }} of {{ page_obj.paginator.num_pages }}</span>
+                </li>
+                {% if page_obj.has_next %}
+                    <li class="page-item">
+                        <a class="page-link" href="?page={{ page_obj.next_page_number }}{% if request.GET.q %}&q={{ request.GET.q }}{% endif %}{% if request.GET.status %}&status={{ request.GET.status }}{% endif %}">&raquo;</a>
+                    </li>
+                {% endif %}
+            </ul>
+        </nav>
+    {% endif %}
+</div>
+{% endblock %}

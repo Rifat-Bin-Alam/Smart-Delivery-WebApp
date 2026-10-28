@@ -1,185 +1,118 @@
-{% extends 'base.html' %}
-{% load static %}
+<!DOCTYPE html>
+<html lang="en">
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title>Invoice #{{ order.order_number }} — SwiftDrop</title>
+    <!-- Bootstrap CSS -->
+    <link href="https://cdn.jsdelivr.net/npm/bootstrap@5.3.3/dist/css/bootstrap.min.css" rel="stylesheet">
+    <link rel="stylesheet" href="https://cdnjs.cloudflare.com/ajax/libs/font-awesome/6.5.1/css/all.min.css">
+    <style>
+        body { font-family: 'Inter', -apple-system, BlinkMacSystemFont, "Segoe UI", Roboto, sans-serif; background: #f8fafc; color: #0f172a; padding: 2rem 0; }
+        .invoice-card { max-width: 800px; margin: 0 auto; background: #fff; padding: 3rem; border: 1px solid #e2e8f0; border-radius: 12px; box-shadow: 0 4px 12px rgba(15,23,42,0.06); }
+        .invoice-header { border-bottom: 2px solid #0f172a; padding-bottom: 1.5rem; margin-bottom: 2rem; }
+        @media print {
+            body { background: #fff; padding: 0; }
+            .invoice-card { box-shadow: none; border: none; padding: 0; }
+            .no-print { display: none !important; }
+        }
+    </style>
+</head>
+<body>
+    <div class="container">
+        <!-- Print / Back Controls -->
+        <div class="max-w-800 mx-auto text-end mb-3 no-print" style="max-width: 800px;">
+            <button onclick="window.print()" class="btn btn-primary rounded-pill px-4 shadow-sm">
+                <i class="fas fa-print me-1"></i> Print Invoice
+            </button>
+            <a href="{% url 'orders:order_detail' order.id %}" class="btn btn-outline-secondary rounded-pill px-3 ms-2">
+                Back to Order
+            </a>
+        </div>
 
-{% block title %}ইনভয়েস - নাগরীবাসী এক্সপ্রেস{% endblock %}
+        <div class="invoice-card">
+            <!-- Header -->
+            <div class="invoice-header d-flex justify-content-between align-items-center">
+                <div>
+                    <h2 class="fw-extrabold mb-0" style="color: #0f172a;">Swift<span style="color: #2563eb;">Drop</span></h2>
+                    <div class="small text-muted">Your Essentials. Delivered Smarter.</div>
+                    <div class="small text-muted">support@swiftdrop.com • +880 1711-000000</div>
+                </div>
+                <div class="text-end">
+                    <h4 class="fw-bold mb-1 text-uppercase">Tax Invoice</h4>
+                    <div class="small font-monospace">REF: #{{ order.order_number }}</div>
+                    <div class="small text-muted">Date: {{ order.created_at|date:"F d, Y" }}</div>
+                </div>
+            </div>
 
-{% block content %}
-<div class="container py-5">
-    <div class="row justify-content-center">
-        <div class="col-md-8">
-            <div class="card">
-                <div class="card-header bg-success text-white text-center">
-                    <h4 class="mb-0">
-                        <i class="fas fa-check-circle me-2"></i>অর্ডার সফল!
-                    </h4>
+            <!-- Client & Delivery Info -->
+            <div class="row g-4 mb-4">
+                <div class="col-6">
+                    <small class="text-muted text-uppercase fw-bold" style="font-size: 0.72rem;">Billed To:</small>
+                    <div class="fw-bold fs-6">{{ order.customer.get_full_name|default:order.customer.username }}</div>
+                    <div class="small text-muted">{{ order.customer.email }}</div>
+                    <div class="small text-muted">{{ order.customer.phone_number }}</div>
                 </div>
-                <div class="card-body">
-                    <div id="invoice-content">
-                        <!-- Invoice content will be loaded here by JavaScript -->
+                <div class="col-6 text-end">
+                    <small class="text-muted text-uppercase fw-bold" style="font-size: 0.72rem;">Delivered To:</small>
+                    <div class="fw-bold fs-6">{{ order.delivery_city }} Zone</div>
+                    <div class="small text-muted">{{ order.delivery_address }}</div>
+                    <div class="small text-muted">Status: <strong class="text-capitalize">{{ order.get_status_display }}</strong></div>
+                </div>
+            </div>
+
+            <!-- Items Table -->
+            <table class="table table-bordered mb-4">
+                <thead class="table-light">
+                    <tr>
+                        <th>#</th>
+                        <th>Item Description</th>
+                        <th class="text-center">Unit Price</th>
+                        <th class="text-center">Qty</th>
+                        <th class="text-end">Total Amount</th>
+                    </tr>
+                </thead>
+                <tbody>
+                    {% for item in order.items.all %}
+                    <tr>
+                        <td class="text-muted small">{{ forloop.counter }}</td>
+                        <td>
+                            <strong>{{ item.product.name }}</strong>
+                            <div class="small text-muted">{{ item.product.get_category_display }}</div>
+                        </td>
+                        <td class="text-center">৳ {{ item.unit_price }}</td>
+                        <td class="text-center">{{ item.quantity }}</td>
+                        <td class="text-end fw-semibold">৳ {{ item.total_price }}</td>
+                    </tr>
+                    {% endfor %}
+                </tbody>
+            </table>
+
+            <!-- Totals -->
+            <div class="row justify-content-end mb-4">
+                <div class="col-md-5">
+                    <div class="d-flex justify-content-between mb-2">
+                        <span class="text-muted">Subtotal:</span>
+                        <span class="fw-semibold">৳ {{ order.subtotal }}</span>
                     </div>
-                    
-                    <div class="text-center mt-4">
-                        <button class="btn btn-primary me-2" onclick="window.print()">
-                            <i class="fas fa-print me-2"></i>প্রিন্ট করুন
-                        </button>
-                        <a href="{% url 'orders:products' %}" class="btn btn-outline-primary">
-                            <i class="fas fa-shopping-bag me-2"></i>আরও পণ্য দেখুন
-                        </a>
+                    <div class="d-flex justify-content-between mb-2">
+                        <span class="text-muted">Delivery Charge:</span>
+                        <span class="fw-semibold">৳ {{ order.delivery_fee }}</span>
+                    </div>
+                    <hr>
+                    <div class="d-flex justify-content-between fs-5 fw-bold text-dark">
+                        <span>Total Paid / Payable:</span>
+                        <span class="text-primary">৳ {{ order.total_amount }}</span>
                     </div>
                 </div>
+            </div>
+
+            <!-- Footer Notes -->
+            <div class="border-top pt-4 mt-5 text-center text-muted small">
+                <p class="mb-1">Thank you for choosing <strong>SwiftDrop</strong> for your delivery essentials.</p>
+                <p class="mb-0">This document serves as an official electronic delivery invoice. Dhaka, Bangladesh.</p>
             </div>
         </div>
     </div>
-</div>
-
-<script>
-    document.addEventListener('DOMContentLoaded', function() {
-        loadInvoice();
-    });
-
-    function loadInvoice() {
-        const orderData = JSON.parse(localStorage.getItem('currentOrder'));
-        if (!orderData) {
-            document.getElementById('invoice-content').innerHTML = '<p class="text-muted">কোন অর্ডার ডেটা পাওয়া যায়নি</p>';
-            return;
-        }
-
-        const subtotal = orderData.items.reduce((sum, item) => sum + (item.price * item.quantity), 0);
-        const delivery = 50;
-        const vat = Math.round(subtotal * 0.05);
-        const processingFee = orderData.payment !== 'cod' ? Math.round(subtotal * 0.02) : 0;
-        const total = subtotal + delivery + vat + processingFee;
-
-        document.getElementById('invoice-content').innerHTML = `
-            <!-- Company Header -->
-            <div class="text-center mb-4">
-                <h3 class="text-primary">নাগরীবাসী এক্সপ্রেস</h3>
-                <p class="text-muted">আপনার শহরের সবচেয়ে নির্ভরযোগ্য ডেলিভারি সেবা</p>
-                <hr>
-            </div>
-
-            <!-- Order Info -->
-            <div class="row mb-4">
-                <div class="col-md-6">
-                    <h6>অর্ডার তথ্য</h6>
-                    <p><strong>অর্ডার ID:</strong> ${orderData.id}</p>
-                    <p><strong>তারিখ:</strong> ${orderData.date}</p>
-                    <p><strong>পেমেন্ট:</strong> ${getPaymentMethodName(orderData.payment)}</p>
-                </div>
-                <div class="col-md-6">
-                    <h6>গ্রাহক তথ্য</h6>
-                    <p><strong>নাম:</strong> ${orderData.customer.name}</p>
-                    <p><strong>ফোন:</strong> ${orderData.customer.phone}</p>
-                    <p><strong>এলাকা:</strong> ${orderData.customer.area}</p>
-                </div>
-            </div>
-
-            <!-- Delivery Address -->
-            <div class="mb-4">
-                <h6>ডেলিভারি ঠিকানা</h6>
-                <p class="border p-3 bg-light">${orderData.customer.address}</p>
-                <p><strong>ডেলিভারি সময়:</strong> ${orderData.customer.time}</p>
-            </div>
-
-            <!-- Order Items -->
-            <div class="mb-4">
-                <h6>অর্ডার আইটেম</h6>
-                <div class="table-responsive">
-                    <table class="table table-bordered">
-                        <thead>
-                            <tr>
-                                <th>পণ্য</th>
-                                <th>পরিমাণ</th>
-                                <th>দর</th>
-                                <th>মোট</th>
-                            </tr>
-                        </thead>
-                        <tbody>
-                            ${orderData.items.map(item => `
-                                <tr>
-                                    <td>${item.name}</td>
-                                    <td>${item.quantity}</td>
-                                    <td>৳ ${item.price}</td>
-                                    <td>৳ ${item.price * item.quantity}</td>
-                                </tr>
-                            `).join('')}
-                        </tbody>
-                    </table>
-                </div>
-            </div>
-
-            <!-- Order Summary -->
-            <div class="row">
-                <div class="col-md-6 offset-md-6">
-                    <div class="border p-3">
-                        <div class="d-flex justify-content-between mb-2">
-                            <span>মোট পণ্য:</span>
-                            <span>৳ ${subtotal}</span>
-                        </div>
-                        <div class="d-flex justify-content-between mb-2">
-                            <span>ডেলিভারি চার্জ:</span>
-                            <span>৳ ${delivery}</span>
-                        </div>
-                        <div class="d-flex justify-content-between mb-2">
-                            <span>ভ্যাট (৫%):</span>
-                            <span>৳ ${vat}</span>
-                        </div>
-                        ${processingFee > 0 ? `
-                            <div class="d-flex justify-content-between mb-2">
-                                <span>প্রসেসিং ফি:</span>
-                                <span>৳ ${processingFee}</span>
-                            </div>
-                        ` : ''}
-                        <hr>
-                        <div class="d-flex justify-content-between fw-bold">
-                            <span>মোট পরিমাণ:</span>
-                            <span>৳ ${total}</span>
-                        </div>
-                    </div>
-                </div>
-            </div>
-
-            <!-- Payment Instructions -->
-            ${orderData.payment !== 'cod' ? `
-                <div class="alert alert-info mt-4">
-                    <h6>পেমেন্ট নির্দেশনা</h6>
-                    <p>অনুগ্রহ করে ${getPaymentMethodName(orderData.payment)} এর মাধ্যমে পেমেন্ট করুন এবং ট্রানজেকশন ID সংরক্ষণ করুন।</p>
-                </div>
-            ` : `
-                <div class="alert alert-success mt-4">
-                    <h6>পেমেন্ট নির্দেশনা</h6>
-                    <p>আপনার অর্ডার ক্যাশ অন ডেলিভারি হিসেবে নিবন্ধিত হয়েছে। ডেলিভারি সময়ে নগদ পেমেন্ট করুন।</p>
-                </div>
-            `}
-
-            <!-- Thank You Message -->
-            <div class="text-center mt-4">
-                <h5 class="text-success">ধন্যবাদ! আপনার অর্ডার গ্রহণ করা হয়েছে</h5>
-                <p class="text-muted">আমাদের ডেলিভারি এজেন্ট শীঘ্রই আপনার সাথে যোগাযোগ করবে</p>
-            </div>
-        `;
-    }
-
-    function getPaymentMethodName(method) {
-        const methods = {
-            'cod': 'ক্যাশ অন ডেলিভারি',
-            'bkash': 'bKash',
-            'nagad': 'Nagad',
-            'rocket': 'Rocket'
-        };
-        return methods[method] || method;
-    }
-</script>
-
-<style>
-    @media print {
-        .btn, .card-header {
-            display: none !important;
-        }
-        .card {
-            border: none !important;
-            box-shadow: none !important;
-        }
-    }
-</style>
-{% endblock %}
+</body>
+</html>

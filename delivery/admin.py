@@ -23,13 +23,13 @@ class DeliveryAssignmentAdmin(admin.ModelAdmin):
     inlines = [DeliveryStatusInline]
     
     fieldsets = (
-        (_('নির্ধারণ তথ্য'), {
+        (_('Assignment Information'), {
             'fields': ('order', 'delivery_agent', 'assigned_by', 'assigned_at')
         }),
-        (_('সময়'), {
+        (_('Timestamps'), {
             'fields': ('estimated_delivery_time', 'actual_delivery_time')
         }),
-        (_('নোট'), {
+        (_('Notes'), {
             'fields': ('delivery_notes',)
         }),
     )
@@ -64,13 +64,13 @@ class DeliveryAreaAdmin(admin.ModelAdmin):
     readonly_fields = ('created_at',)
     
     fieldsets = (
-        (_('এলাকা তথ্য'), {
+        (_('Area Information'), {
             'fields': ('name', 'description', 'is_active')
         }),
-        (_('ফি ও সময়'), {
+        (_('Fee & Timing'), {
             'fields': ('delivery_fee', 'estimated_delivery_time')
         }),
-        (_('সময়'), {
+        (_('Timestamps'), {
             'fields': ('created_at',),
             'classes': ('collapse',)
         }),

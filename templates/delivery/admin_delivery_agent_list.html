@@ -1,0 +1,79 @@
+{% extends 'base.html' %}
+{% load static %}
+
+{% block title %}Fleet Couriers - SwiftDrop Admin{% endblock %}
+
+{% block content %}
+<div class="container-fluid px-lg-5 py-4">
+    <div class="d-flex justify-content-between align-items-center mb-4">
+        <div>
+            <h2 class="fw-bold text-navy mb-0">
+                <i class="fas fa-motorcycle text-primary me-2"></i>Active Delivery Fleet
+            </h2>
+            <p class="text-muted small mb-0">Riders, couriers, vehicles, and live availability status</p>
+        </div>
+        <div class="d-flex gap-2">
+            <a href="{% url 'delivery:admin_delivery_list' %}" class="btn btn-outline-primary btn-sm rounded-pill px-3">
+                <i class="fas fa-tasks me-1"></i> Delivery Tasks
+            </a>
+            <a href="{% url 'dashboard:admin_dashboard' %}" class="btn btn-outline-secondary btn-sm rounded-pill px-3">
+                <i class="fas fa-arrow-left me-1"></i> Admin Dashboard
+            </a>
+        </div>
+    </div>
+
+    <div class="card border-0 shadow-sm rounded-4 overflow-hidden mb-4">
+        <div class="table-responsive">
+            <table class="table table-hover align-middle mb-0">
+                <thead class="table-light small text-muted">
+                    <tr>
+                        <th class="ps-4">Rider</th>
+                        <th>Phone</th>
+                        <th>Vehicle Type</th>
+                        <th>Vehicle Reg #</th>
+                        <th>Duty State</th>
+                        <th>Deliveries</th>
+                        <th>Score</th>
+                        <th class="text-end pe-4">Action</th>
+                    </tr>
+                </thead>
+                <tbody>
+                    {% for agent in delivery_agents %}
+                        <tr>
+                            <td class="ps-4 fw-bold text-navy">
+                                {{ agent.get_full_name|default:agent.username }}
+                                <div class="small text-muted fw-normal">@{{ agent.username }}</div>
+                            </td>
+                            <td class="small">{{ agent.phone_number|default:agent.email }}</td>
+                            <td>
+                                {% if agent.delivery_agent_profile %}
+                                    <span class="badge bg-light text-navy border">
+                                        {{ agent.delivery_agent_profile.get_vehicle_type_display }}
+                                    </span>
+                                {% else %}-{% endif %}
+                            </td>
+                            <td class="small">{{ agent.delivery_agent_profile.vehicle_number|default:"-" }}</td>
+                            <td>
+                                {% if agent.delivery_agent_profile.is_available %}
+                                    <span class="badge bg-success-subtle text-success">Online / Duty</span>
+                                {% else %}
+                                    <span class="badge bg-secondary-subtle text-secondary">Offline</span>
+                                {% endif %}
+                            </td>
+                            <td class="fw-bold text-navy">{{ agent.delivery_agent_profile.total_deliveries|default:0 }}</td>
+                            <td class="text-warning fw-bold">★ {{ agent.delivery_agent_profile.rating|default:"5.0" }}</td>
+                            <td class="text-end pe-4">
+                                <a href="{% url 'users:delivery_agent_detail' agent.pk %}" class="btn btn-outline-primary btn-sm rounded-pill px-3">
+                                    Manage
+                                </a>
+                            </td>
+                        </tr>
+                    {% empty %}
+                        <tr><td colspan="8" class="text-center py-5 text-muted">No delivery couriers registered.</td></tr>
+                    {% endfor %}
+                </tbody>
+            </table>
+        </div>
+    </div>
+</div>
+{% endblock %}

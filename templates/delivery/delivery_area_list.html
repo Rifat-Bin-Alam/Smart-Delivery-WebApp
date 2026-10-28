@@ -1,0 +1,60 @@
+{% extends 'base.html' %}
+{% load static %}
+
+{% block title %}Delivery Coverage Areas & Rates - {{ BRAND_NAME }}{% endblock %}
+
+{% block content %}
+<div class="container py-5">
+    <div class="text-center mb-5">
+        <span class="badge bg-primary-subtle text-primary border border-primary-subtle rounded-pill px-3 py-1 fw-semibold mb-2">
+            Coverage Map & Rates
+        </span>
+        <h2 class="display-6 fw-bold text-navy mb-2">Service Zones & Delivery Charges</h2>
+        <p class="text-muted">SwiftDrop serves multiple hubs across the city with transparent, flat delivery rates.</p>
+    </div>
+
+    <div class="row g-4 justify-content-center">
+        {% for area in areas %}
+            <div class="col-md-6 col-lg-4">
+                <div class="card border-0 shadow-sm rounded-4 h-100 p-4">
+                    <div class="d-flex justify-content-between align-items-start mb-3">
+                        <div class="rounded-circle bg-primary-subtle text-primary p-3">
+                            <i class="fas fa-map-pin fa-lg"></i>
+                        </div>
+                        <span class="badge bg-success-subtle text-success border border-success-subtle px-3 py-1 rounded-pill">
+                            Active Zone
+                        </span>
+                    </div>
+                    <h4 class="fw-bold text-navy mb-1">{{ area.name }}</h4>
+                    <p class="text-muted small mb-3">{{ area.description|default:"Full coverage for food, grocery, medicine & parcel delivery." }}</p>
+                    
+                    <div class="mt-auto pt-3 border-top d-flex justify-content-between align-items-center">
+                        <div>
+                            <span class="text-muted small d-block">Delivery Fee</span>
+                            <span class="fs-4 fw-bold text-navy">৳{{ area.delivery_fee|floatformat:0 }}</span>
+                        </div>
+                        <div class="text-end">
+                            <span class="text-muted small d-block">Est. Time</span>
+                            <span class="fw-semibold text-primary">{{ area.estimated_delivery_time|default:"30-45 mins" }}</span>
+                        </div>
+                    </div>
+                </div>
+            </div>
+        {% empty %}
+            <div class="col-12 text-center py-5 text-muted">
+                No active delivery zones found.
+            </div>
+        {% endfor %}
+    </div>
+
+    <div class="card border-0 shadow-sm rounded-4 bg-gradient-navy text-white mt-5 p-4 p-md-5 text-center">
+        <h3 class="fw-bold mb-2">Need Rapid Delivery to Your Doorstep?</h3>
+        <p class="opacity-75 mb-4">Place your order now and have essentials delivered in under 45 minutes.</p>
+        <div>
+            <a href="{% url 'orders:product_list' %}" class="btn btn-primary rounded-pill px-4 py-2 fw-semibold shadow-sm">
+                <i class="fas fa-shopping-bag me-2"></i>Browse Products
+            </a>
+        </div>
+    </div>
+</div>
+{% endblock %}

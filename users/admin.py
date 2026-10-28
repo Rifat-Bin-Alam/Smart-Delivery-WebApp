@@ -7,7 +7,7 @@ from .models import User, CustomerProfile, DeliveryAgentProfile
 @admin.register(User)
 class UserAdmin(BaseUserAdmin):
     """
-    Custom User Admin with Bengali support
+    Custom User Admin for SwiftDrop
     """
     list_display = ('username', 'email', 'first_name', 'last_name', 'user_type', 'phone_number', 'is_verified', 'is_active', 'date_joined')
     list_filter = ('user_type', 'is_verified', 'is_active', 'is_staff', 'is_superuser', 'date_joined')
@@ -16,9 +16,9 @@ class UserAdmin(BaseUserAdmin):
     
     fieldsets = (
         (None, {'fields': ('username', 'password')}),
-        (_('ব্যক্তিগত তথ্য'), {'fields': ('first_name', 'last_name', 'email', 'phone_number')}),
-        (_('অনুমতি'), {'fields': ('is_active', 'is_staff', 'is_superuser', 'groups', 'user_permissions')}),
-        (_('অতিরিক্ত তথ্য'), {'fields': ('user_type', 'address', 'city', 'postal_code', 'profile_picture', 'is_verified', 'last_login', 'date_joined')}),
+        (_('Personal Information'), {'fields': ('first_name', 'last_name', 'email', 'phone_number')}),
+        (_('Permissions'), {'fields': ('is_active', 'is_staff', 'is_superuser', 'groups', 'user_permissions')}),
+        (_('Additional Information'), {'fields': ('user_type', 'address', 'city', 'postal_code', 'profile_picture', 'is_verified', 'last_login', 'date_joined')}),
     )
     
     add_fieldsets = (
@@ -41,7 +41,7 @@ class CustomerProfileAdmin(admin.ModelAdmin):
     search_fields = ('user__username', 'user__first_name', 'user__last_name', 'user__email')
     
     fieldsets = (
-        (_('গ্রাহক তথ্য'), {
+        (_('Customer Information'), {
             'fields': ('user', 'preferred_language', 'emergency_contact', 'delivery_instructions')
         }),
     )
@@ -58,10 +58,10 @@ class DeliveryAgentProfileAdmin(admin.ModelAdmin):
     readonly_fields = ('rating', 'total_deliveries')
     
     fieldsets = (
-        (_('এজেন্ট তথ্য'), {
+        (_('Agent Information'), {
             'fields': ('user', 'license_number', 'vehicle_type', 'vehicle_number')
         }),
-        (_('অবস্থা'), {
+        (_('Status'), {
             'fields': ('is_available', 'rating', 'total_deliveries')
         }),
     )

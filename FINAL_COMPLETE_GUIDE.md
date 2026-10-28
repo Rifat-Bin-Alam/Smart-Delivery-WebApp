@@ -1,276 +1,81 @@
-# 🎉 নাগরীবাসী এক্সপ্রেস - সম্পূর্ণ ওয়েবসাইট গাইড
+# SwiftDrop — Complete Operations & Developer Manual
 
-## ✅ **সমস্ত সমস্যার সমাধান সম্পন্ন!**
-
-আপনার **নাগরীবাসী এক্সপ্রেস** ওয়েবসাইট এখন সম্পূর্ণভাবে কাজ করছে! সব ফিচার যোগ করা হয়েছে এবং সব সমস্যা সমাধান করা হয়েছে।
-
----
-
-## 🚀 **সার্ভার চালু করার উপায়**
-
-```bash
-# 1. প্রজেক্ট ফোল্ডারে যান
-cd E:\Nagaribashi_express
-
-# 2. সার্ভার চালু করুন
-python manage.py runserver
-
-# 3. ব্রাউজারে যান
-# http://127.0.0.1:8000/
-```
+> **Tagline:** Your Essentials. Delivered Smarter.  
+> **Repository:** [https://github.com/Rifat-Bin-Alam/Smart-Delivery-WebApp](https://github.com/Rifat-Bin-Alam/Smart-Delivery-WebApp)  
+> **Author & Developer:** [Rifat Bin Alam](https://rifat-bin-alam.vercel.app/)  
+> **Contact Email:** [rifat5566123@gmail.com](mailto:rifat5566123@gmail.com)
 
 ---
 
-## 🌐 **সম্পূর্ণ পেজ তালিকা**
+## 1. Executive Overview
 
-| পেজ | URL | বর্ণনা | স্ট্যাটাস |
-|-----|-----|--------|-----------|
-| 🏠 হোম | http://127.0.0.1:8000/ | মূল পেজ | ✅ কাজ করছে |
-| 🛍️ পণ্য | http://127.0.0.1:8000/orders/ | পণ্য তালিকা | ✅ কাজ করছে |
-| 🛒 কার্ট | http://127.0.0.1:8000/orders/cart/ | শপিং কার্ট | ✅ কাজ করছে |
-| 💳 চেকআউট | http://127.0.0.1:8000/orders/checkout/ | পেমেন্ট পেজ | ✅ কাজ করছে |
-| ✅ সফল অর্ডার | http://127.0.0.1:8000/orders/success/ | অর্ডার সফল | ✅ কাজ করছে |
-| 🔍 অর্ডার ট্র্যাক | http://127.0.0.1:8000/orders/12345/track/ | অর্ডার ট্র্যাকিং | ✅ কাজ করছে |
-| 👤 লগইন | http://127.0.0.1:8000/users/login/ | লগইন পেজ | ✅ কাজ করছে |
-| 📝 সাইনআপ | http://127.0.0.1:8000/users/signup/ | নতুন অ্যাকাউন্ট | ✅ কাজ করছে |
-| 📊 ইউজার ড্যাশবোর্ড | http://127.0.0.1:8000/users/dashboard/ | ইউজার প্যানেল | ✅ কাজ করছে |
-| ⚙️ অ্যাডমিন ড্যাশবোর্ড | http://127.0.0.1:8000/admin-dashboard/ | অ্যাডমিন প্যানেল | ✅ কাজ করছে |
-| 🗄️ ডেটাবেস ভিউয়ার | http://127.0.0.1:8000/database-viewer/ | ডেটা দেখুন | ✅ কাজ করছে |
-| ⭐ রিভিউ | http://127.0.0.1:8000/reviews/ | গ্রাহক রিভিউ | ✅ কাজ করছে |
-| 🔧 Django Admin | http://127.0.0.1:8000/admin/ | সম্পূর্ণ অ্যাডমিন | ✅ কাজ করছে |
+**SwiftDrop** is a full-featured on-demand delivery web platform designed for rapid metropolitan dispatch. It connects customers seeking high-priority essentials (cooked meals, pharmaceuticals, cooking gas, and groceries) with logistics dispatchers and couriers.
 
 ---
 
-## 🔑 **লগইন তথ্য**
+## 2. Complete Platform Sitemap & Route Directory
 
-### **অ্যাডমিন:**
-- **ইউজারনেম**: `admin`
-- **পাসওয়ার্ড**: `admin123`
-
-### **স্যাম্পল গ্রাহক:**
-- **ইউজারনেম**: `customer1`
-- **পাসওয়ার্ড**: `customer123`
-
----
-
-## 🛒 **কার্ট সিস্টেম - সম্পূর্ণ!**
-
-### **কার্ট পেজ:**
-- **URL**: http://127.0.0.1:8000/orders/cart/
-- **ফিচার**:
-  - ✅ পণ্য যোগ/বিয়োগ
-  - ✅ পরিমাণ পরিবর্তন
-  - ✅ আইটেম মুছে ফেলা
-  - ✅ মোট পরিমাণ গণনা
-  - ✅ ডেলিভারি চার্জ
-  - ✅ ভ্যাট গণনা
+| Module | URL Endpoint | Description | Access Level |
+|---|---|---|---|
+| **Home** | `/` | Main landing page, hero search, metrics & features | Public |
+| **Catalog** | `/orders/products/` | Interactive catalog with category filters & cart integration | Public |
+| **Product Detail** | `/orders/product/<pk>/` | Detailed view, stock availability, specifications | Public |
+| **Cart** | `/orders/cart/` | Review selected items, adjust quantities, fee estimate | Public |
+| **Checkout** | `/orders/checkout/` | Address entry, delivery zone selection, order creation | Authenticated |
+| **Order History** | `/orders/` | List of customer's previous orders & current statuses | Authenticated |
+| **Order Detail** | `/orders/<pk>/` | Itemized order breakdown, invoice link, cancellation trigger | Authenticated |
+| **Live Tracking** | `/orders/<pk>/track/` | 4-step progressive timeline tracking fulfillment | Authenticated |
+| **Invoice** | `/orders/invoice/<order_number>/` | Printable official billing receipt | Authenticated |
+| **Cancel Order** | `/orders/<pk>/cancel/` | Customer cancellation with reason and stock restoral | Authenticated |
+| **Customer Hub** | `/users/dashboard/` | Account overview, active orders, saved addresses | Authenticated |
+| **Courier Hub** | `/delivery/` | Delivery agent duty toggle, assigned deliveries, status logs | Delivery Agent |
+| **Operations Hub**| `/dashboard/admin/` | High-level analytics, pending deliveries, fleet overview | Staff / Admin |
+| **Admin Catalog** | `/orders/admin/` | Inventory management, order status update tools | Staff / Admin |
+| **Review Moderation**| `/reviews/admin/` | Moderation queue for submitted customer ratings | Staff / Admin |
+| **Django Admin** | `/admin/` | Comprehensive low-level ORM administration portal | Superuser |
 
 ---
 
-## 💳 **পেমেন্ট সিস্টেম - সম্পূর্ণ!**
+## 3. Pre-Configured Demo Accounts
 
-### **চেকআউট পেজ:**
-- **URL**: http://127.0.0.1:8000/orders/checkout/
-- **পেমেন্ট পদ্ধতি**:
-  - ✅ **ক্যাশ অন ডেলিভারি** (COD)
-  - ✅ **bKash** মোবাইল ব্যাংকিং
-  - ✅ **Nagad** মোবাইল ব্যাংকিং
-  - ✅ **Rocket** মোবাইল ব্যাংকিং
+For local evaluation, grading, and testing:
 
-### **পেমেন্ট ফিচার:**
-- ✅ ডেলিভারি তথ্য ফর্ম
-- ✅ পেমেন্ট পদ্ধতি নির্বাচন
-- ✅ মোবাইল পেমেন্ট ডিটেইল
-- ✅ প্রসেসিং চার্জ গণনা
-- ✅ অর্ডার নিশ্চিতকরণ
+| Role | Email Address | Password | Functionality |
+|---|---|---|---|
+| **Customer** | `rifat@gmail.com` | `123456` | Catalog shopping, cart management, checkout, live tracking, reviews, order cancellation |
+| **Administrator** | `rifatadmin@gmail.com` | `123456` | Full platform control, inventory management, fleet management, operations metrics |
 
 ---
 
-## 📊 **ড্যাশবোর্ড সিস্টেম - সম্পূর্ণ!**
+## 4. Customer User Guide
 
-### **ইউজার ড্যাশবোর্ড:**
-- **URL**: http://127.0.0.1:8000/users/dashboard/
-- **ফিচার**:
-  - ✅ অর্ডার স্ট্যাটিস্টিক্স
-  - ✅ সাম্প্রতিক অর্ডার
-  - ✅ প্রোফাইল তথ্য
-  - ✅ নোটিফিকেশন
-  - ✅ দ্রুত কাজের বাটন
+### 4.1. Selecting Essentials
+1. Browse categories from the homepage or go directly to `/orders/products/`.
+2. Filter by category pills (Food, Medicine, Gas, Groceries, Electronics, Books).
+3. Click "Add to Cart" to immediately append the item to your active session.
 
-### **অ্যাডমিন ড্যাশবোর্ড:**
-- **URL**: http://127.0.0.1:8000/admin-dashboard/
-- **ফিচার**:
-  - ✅ ব্যবস্থাপনা স্ট্যাটিস্টিক্স
-  - ✅ পণ্য ব্যবস্থাপনা
-  - ✅ ব্যবহারকারী ব্যবস্থাপনা
-  - ✅ অর্ডার ব্যবস্থাপনা
-  - ✅ ডেলিভারি ব্যবস্থাপনা
-  - ✅ পেমেন্ট ব্যবস্থাপনা
-  - ✅ রিভিউ ব্যবস্থাপনা
+### 4.2. Checkout & Order Finalization
+1. Navigate to `/orders/cart/` to verify items and quantities.
+2. Click "Proceed to Checkout" (`/orders/checkout/`).
+3. Enter your street address, select your delivery area, and choose a payment method.
+4. Click "Confirm & Place Order". The order is created atomically and inventory is reserved.
+
+### 4.3. Tracking & Receipts
+1. Immediately upon ordering, click "Track Order" or visit `/orders/<pk>/track/`.
+2. Access your printable PDF/HTML invoice via `/orders/invoice/<order_number>/`.
+
+### 4.4. Ratings & Feedback
+Once your order status changes to `delivered`, click the "Review" button on your order details page to submit a 1 to 5 star rating with feedback.
 
 ---
 
-## 🔍 **অর্ডার ট্র্যাকিং - সম্পূর্ণ!**
+## 5. Operations & Administration Guide
 
-### **ট্র্যাকিং পেজ:**
-- **URL**: http://127.0.0.1:8000/orders/12345/track/
-- **ফিচার**:
-  - ✅ অর্ডার স্ট্যাটাস
-  - ✅ ডেলিভারি সময়
-  - ✅ স্ট্যাটাস আপডেট
-  - ✅ ডেলিভারি এজেন্ট তথ্য
+1. Log in with `rifatadmin@gmail.com`.
+2. Access the **Operations Control Center** at `/dashboard/admin/` or via the top navigation bar.
+3. Use the **Inventory Hub** (`/orders/admin/`) to monitor stock levels. Items with stock $\le 5$ are highlighted with low-stock badges.
+4. To assign an agent to an order, navigate to `/delivery/assignments/` and select a verified rider.
 
 ---
 
-## ⭐ **রিভিউ সিস্টেম - সম্পূর্ণ!**
-
-### **রিভিউ পেজ:**
-- **URL**: http://127.0.0.1:8000/reviews/
-- **ফিচার**:
-  - ✅ গ্রাহক রিভিউ দেখুন
-  - ✅ রেটিং সিস্টেম
-  - ✅ রিভিউ স্ট্যাটিস্টিক্স
-  - ✅ সাম্প্রতিক রিভিউ
-
----
-
-## 🎯 **কিভাবে ব্যবহার করবেন**
-
-### **1. পণ্য অর্ডার করার প্রক্রিয়া:**
-1. **পণ্য দেখুন**: http://127.0.0.1:8000/orders/
-2. **কার্টে যোগ করুন**: পণ্য পেজ থেকে
-3. **কার্ট দেখুন**: http://127.0.0.1:8000/orders/cart/
-4. **চেকআউট করুন**: http://127.0.0.1:8000/orders/checkout/
-5. **অর্ডার নিশ্চিত করুন**: পেমেন্ট পদ্ধতি নির্বাচন করে
-6. **অর্ডার ট্র্যাক করুন**: http://127.0.0.1:8000/orders/12345/track/
-
-### **2. অ্যাডমিন হিসেবে ব্যবস্থাপনা:**
-1. **Django Admin**: http://127.0.0.1:8000/admin/
-2. **অ্যাডমিন ড্যাশবোর্ড**: http://127.0.0.1:8000/admin-dashboard/
-3. **ডেটাবেস ভিউয়ার**: http://127.0.0.1:8000/database-viewer/
-
-### **3. ইউজার হিসেবে:**
-1. **ড্যাশবোর্ড**: http://127.0.0.1:8000/users/dashboard/
-2. **অর্ডার ইতিহাস**: ড্যাশবোর্ড থেকে
-3. **প্রোফাইল এডিট**: ড্যাশবোর্ড থেকে
-
----
-
-## 🛡️ **সমাধান করা সমস্যা**
-
-### **1. লগইন সমস্যা:**
-- ✅ POST method error সমাধান
-- ✅ Authentication system সম্পূর্ণ
-- ✅ Login/Logout functionality
-
-### **2. নোটিফিকেশন সমস্যা:**
-- ✅ Missing notification stream endpoint যোগ
-- ✅ JSON response তৈরি
-
-### **3. কার্ট সিস্টেম:**
-- ✅ সম্পূর্ণ কার্ট functionality
-- ✅ Add/Remove items
-- ✅ Quantity update
-- ✅ Total calculation
-
-### **4. পেমেন্ট সিস্টেম:**
-- ✅ COD, bKash, Nagad, Rocket
-- ✅ Payment form validation
-- ✅ Processing charges
-
-### **5. ড্যাশবোর্ড:**
-- ✅ ইউজার ড্যাশবোর্ড
-- ✅ অ্যাডমিন ড্যাশবোর্ড
-- ✅ Statistics display
-
----
-
-## 📱 **মোবাইল ফ্রেন্ডলি**
-
-- ✅ Bootstrap 5 রেসপন্সিভ ডিজাইন
-- ✅ সব ডিভাইসে কাজ করে
-- ✅ টাচ ফ্রেন্ডলি ইন্টারফেস
-- ✅ ফাস্ট লোডিং
-
----
-
-## 🎨 **ডিজাইন ফিচার**
-
-- ✅ **নাগরীবাসী** ব্র্যান্ডিং
-- ✅ লাল রঙের থিম (#dc3545)
-- ✅ বাংলা ফন্ট (Hind Siliguri)
-- ✅ Font Awesome আইকন
-- ✅ সুন্দর অ্যানিমেশন
-- ✅ প্রফেশনাল UI/UX
-
----
-
-## 🛡️ **নিরাপত্তা**
-
-- ✅ Django নিরাপত্তা
-- ✅ CSRF প্রোটেকশন
-- ✅ SQL Injection প্রোটেকশন
-- ✅ XSS প্রোটেকশন
-- ✅ নিরাপদ পেমেন্ট
-
----
-
-## 📞 **সাপোর্ট**
-
-যদি কোন সমস্যা হয়:
-1. **Error message** কপি করুন
-2. **কোন পেজে** সমস্যা হচ্ছে জানান
-3. **আপনি কি করতে** চাচ্ছেন জানান
-
----
-
-## 🎉 **সমাপ্তি**
-
-আপনার **নাগরীবাসী এক্সপ্রেস** ওয়েবসাইট এখন সম্পূর্ণভাবে কাজ করছে!
-
-### **✅ সম্পূর্ণ ফিচার:**
-- 🛒 কার্ট সিস্টেম
-- 💳 পেমেন্ট সিস্টেম (COD, bKash, Nagad, Rocket)
-- 📊 ইউজার ড্যাশবোর্ড
-- ⚙️ অ্যাডমিন ড্যাশবোর্ড
-- 🔍 অর্ডার ট্র্যাকিং
-- ⭐ রিভিউ সিস্টেম
-- 🗄️ ডেটাবেস ভিউয়ার
-- 🔧 Django Admin Panel
-- 📱 মোবাইল ফ্রেন্ডলি
-- 🎨 সুন্দর ডিজাইন
-- 🛡️ নিরাপত্তা
-
-**🚀 এখন আপনি একটি সম্পূর্ণ ই-কমার্স ওয়েবসাইট চালাতে পারবেন!**
-
----
-
-## 🔧 **ট্রাবলশুটিং**
-
-### **সার্ভার চালু না হলে:**
-```bash
-# 1. Ctrl+C দিয়ে সার্ভার বন্ধ করুন
-# 2. আবার চালু করুন
-python manage.py runserver
-```
-
-### **ডেটাবেস সমস্যা হলে:**
-```bash
-# 1. ডেটাবেস রিসেট করুন
-del db.sqlite3
-
-# 2. নতুন মাইগ্রেশন করুন
-python manage.py makemigrations
-python manage.py migrate
-
-# 3. স্যাম্পল ডেটা তৈরি করুন
-python manage.py setup_data
-```
-
-### **ব্রাউজার ক্যাশ ক্লিয়ার করুন:**
-- **Chrome**: Ctrl + Shift + R
-- **Firefox**: Ctrl + F5
-
----
-
-**🎊 আপনার নাগরীবাসী এক্সপ্রেস ওয়েবসাইট সম্পূর্ণ প্রস্তুত!**
+*© 2026 SwiftDrop. All rights reserved. Developed by [Rifat Bin Alam](https://rifat-bin-alam.vercel.app/).*

@@ -1,410 +1,360 @@
 {% extends 'base.html' %}
 {% load static %}
 
-{% block title %}চেকআউট - নাগরীবাসী এক্সপ্রেস{% endblock %}
+{% block title %}Checkout — SwiftDrop{% endblock %}
 
 {% block content %}
-<div class="container py-5">
-    <div class="row">
-        <div class="col-12">
-            <h2 class="mb-4">
-                <i class="fas fa-credit-card me-2"></i>চেকআউট
-            </h2>
-        </div>
-    </div>
+<div class="container py-4">
+    <!-- Breadcrumb -->
+    <nav aria-label="breadcrumb">
+        <ol class="breadcrumb small">
+            <li class="breadcrumb-item"><a href="{% url 'dashboard:home' %}">Home</a></li>
+            <li class="breadcrumb-item"><a href="{% url 'orders:cart' %}">Cart</a></li>
+            <li class="breadcrumb-item active" aria-current="page">Checkout</li>
+        </ol>
+    </nav>
 
-    <div class="row">
-        <div class="col-md-8">
-            <!-- Delivery Information -->
-            <div class="card mb-4">
-                <div class="card-header">
-                    <h5><i class="fas fa-truck me-2"></i>ডেলিভারি তথ্য</h5>
-                </div>
-                <div class="card-body">
-                    <form id="checkout-form">
-                        {% csrf_token %}
-                        <div class="row">
-                            <div class="col-md-6 mb-3">
-                                <label class="form-label">নাম *</label>
-                                <input type="text" class="form-control" id="customer-name" required>
+    <h2 class="fw-bold text-dark mb-4">
+        <i class="fas fa-lock text-primary me-2"></i>Secure Checkout
+    </h2>
+
+    <div class="row g-4">
+        <!-- Main Form Column -->
+        <div class="col-lg-8">
+            <form id="checkout-form">
+                {% csrf_token %}
+
+                <!-- Step 1: Delivery Address & Zone -->
+                <div class="card border shadow-sm rounded-3 mb-4">
+                    <div class="card-header bg-white py-3">
+                        <h5 class="fw-bold text-dark mb-0">
+                            <span class="badge bg-primary rounded-circle me-2" style="width: 24px; height: 24px; display: inline-flex; align-items: center; justify-content: center; font-size: 0.75rem;">1</span>
+                            Delivery Information
+                        </h5>
+                    </div>
+                    <div class="card-body p-4">
+                        <div class="row g-3">
+                            <div class="col-md-6">
+                                <label class="form-label small fw-bold">Customer Full Name <span class="text-danger">*</span></label>
+                                <input type="text" class="form-control" id="cust-name" value="{{ customer_name }}" required placeholder="e.g. Rifat Alam">
                             </div>
-                            <div class="col-md-6 mb-3">
-                                <label class="form-label">ফোন নম্বর *</label>
-                                <input type="tel" class="form-control" id="customer-phone" required>
+                            <div class="col-md-6">
+                                <label class="form-label small fw-bold">Contact Phone Number <span class="text-danger">*</span></label>
+                                <input type="tel" class="form-control" id="cust-phone" value="{{ customer_phone }}" required placeholder="+8801XXXXXXXXX">
                             </div>
-                        </div>
-                        <div class="mb-3">
-                            <label class="form-label">ঠিকানা *</label>
-                            <textarea class="form-control" id="delivery-address" rows="3" required></textarea>
-                        </div>
-                        <div class="mb-3">
-                            <label class="form-label">বিশেষ নির্দেশনা</label>
-                            <textarea class="form-control" id="special-instructions" rows="2" placeholder="ডেলিভারি সম্পর্কে বিশেষ নির্দেশনা (ঐচ্ছিক)"></textarea>
-                        </div>
-                        <div class="row">
-                            <div class="col-md-6 mb-3">
-                                <label class="form-label">এলাকা *</label>
-                                <select class="form-select" id="delivery-area" required>
-                                    <option value="">এলাকা নির্বাচন করুন</option>
-                                    <option value="dhaka">ঢাকা</option>
-                                    <option value="chittagong">চট্টগ্রাম</option>
-                                    <option value="sylhet">সিলেট</option>
-                                    <option value="rajshahi">রাজশাহী</option>
-                                    <option value="khulna">খুলনা</option>
+                            <div class="col-md-6">
+                                <label class="form-label small fw-bold">Delivery Zone / Area <span class="text-danger">*</span></label>
+                                <select class="form-select" id="cust-zone" required>
+                                    <option value="">Select your delivery area...</option>
+                                    {% for area in delivery_areas %}
+                                    <option value="{{ area.name }}" data-fee="{{ area.delivery_fee }}" {% if area.name in customer_city %}selected{% endif %}>
+                                        {{ area.name }} — ৳ {{ area.delivery_fee }} ({{ area.estimated_delivery_time }} mins)
+                                    </option>
+                                    {% empty %}
+                                    <option value="Dhaka Central" data-fee="50.00" selected>Dhaka Central — ৳ 50.00</option>
+                                    {% endfor %}
                                 </select>
                             </div>
-                            <div class="col-md-6 mb-3">
-                                <label class="form-label">ডেলিভারি সময় *</label>
-                                <select class="form-select" id="delivery-time" required>
-                                    <option value="">সময় নির্বাচন করুন</option>
-                                    <option value="asap">যত তাড়াতাড়ি সম্ভব</option>
-                                    <option value="morning">সকাল (৯-১২টা)</option>
-                                    <option value="afternoon">দুপুর (১২-৫টা)</option>
-                                    <option value="evening">সন্ধ্যা (৫-৮টা)</option>
+                            <div class="col-md-6">
+                                <label class="form-label small fw-bold">Delivery Option</label>
+                                <select class="form-select" id="cust-delivery-type">
+                                    <option value="instant" selected>Instant Express (Within 30-45 mins)</option>
+                                    <option value="scheduled">Scheduled Delivery</option>
                                 </select>
                             </div>
-                        </div>
-                    </form>
-                </div>
-            </div>
-
-            <!-- Payment Method Selection -->
-            <div class="card">
-                <div class="card-header">
-                    <h5><i class="fas fa-credit-card me-2"></i>পেমেন্ট পদ্ধতি</h5>
-                </div>
-                <div class="card-body">
-                    <div class="row">
-                        <div class="col-md-6 mb-3">
-                            <div class="card payment-method" onclick="selectPayment('cod')">
-                                <div class="card-body text-center">
-                                    <i class="fas fa-money-bill-wave fa-2x text-success mb-2"></i>
-                                    <h6>ক্যাশ অন ডেলিভারি</h6>
-                                    <small class="text-muted">ডেলিভারি সময়ে নগদ পেমেন্ট</small>
-                                </div>
+                            <div class="col-12">
+                                <label class="form-label small fw-bold">Full Street Address <span class="text-danger">*</span></label>
+                                <textarea class="form-control" id="cust-address" rows="3" required placeholder="House number, road number, apartment / floor details...">{{ customer_address }}</textarea>
                             </div>
-                        </div>
-                        <div class="col-md-6 mb-3">
-                            <div class="card payment-method" onclick="selectPayment('bkash')">
-                                <div class="card-body text-center">
-                                    <i class="fas fa-mobile-alt fa-2x text-primary mb-2"></i>
-                                    <h6>bKash</h6>
-                                    <small class="text-muted">মোবাইল পেমেন্ট</small>
-                                </div>
-                            </div>
-                        </div>
-                        <div class="col-md-6 mb-3">
-                            <div class="card payment-method" onclick="selectPayment('nagad')">
-                                <div class="card-body text-center">
-                                    <i class="fas fa-mobile-alt fa-2x text-warning mb-2"></i>
-                                    <h6>Nagad</h6>
-                                    <small class="text-muted">মোবাইল পেমেন্ট</small>
-                                </div>
-                            </div>
-                        </div>
-                        <div class="col-md-6 mb-3">
-                            <div class="card payment-method" onclick="selectPayment('rocket')">
-                                <div class="card-body text-center">
-                                    <i class="fas fa-mobile-alt fa-2x text-info mb-2"></i>
-                                    <h6>Rocket</h6>
-                                    <small class="text-muted">মোবাইল পেমেন্ট</small>
-                                </div>
-                            </div>
-                        </div>
-                    </div>
-
-                    <!-- Payment Details Form -->
-                    <div id="payment-details" style="display: none;">
-                        <hr>
-                        <h6>পেমেন্ট বিবরণ</h6>
-                        <div class="row">
-                            <div class="col-md-6 mb-3">
-                                <label class="form-label">মোবাইল নম্বর</label>
-                                <input type="tel" class="form-control" id="payment-phone">
-                            </div>
-                            <div class="col-md-6 mb-3">
-                                <label class="form-label">ট্রানজেকশন ID</label>
-                                <input type="text" class="form-control" id="transaction-id">
+                            <div class="col-12">
+                                <label class="form-label small fw-bold">Rider Delivery Instructions (Optional)</label>
+                                <input type="text" class="form-control" id="cust-instructions" value="{{ customer_instructions }}" placeholder="e.g. Ring bell, leave with security guard, call on arrival">
                             </div>
                         </div>
                     </div>
                 </div>
-            </div>
+
+                <!-- Step 2: Payment Method -->
+                <div class="card border shadow-sm rounded-3 mb-4">
+                    <div class="card-header bg-white py-3">
+                        <h5 class="fw-bold text-dark mb-0">
+                            <span class="badge bg-primary rounded-circle me-2" style="width: 24px; height: 24px; display: inline-flex; align-items: center; justify-content: center; font-size: 0.75rem;">2</span>
+                            Payment Method
+                        </h5>
+                    </div>
+                    <div class="card-body p-4">
+                        <div class="row g-3 mb-4">
+                            <!-- COD -->
+                            <div class="col-md-6">
+                                <label class="card h-100 p-3 border payment-method-card cursor-pointer rounded-3">
+                                    <div class="d-flex align-items-center gap-3">
+                                        <input type="radio" name="payment_method" value="cash_on_delivery" checked class="form-check-input mt-0">
+                                        <div>
+                                            <div class="fw-bold text-dark"><i class="fas fa-money-bill-wave text-success me-1"></i> Cash on Delivery</div>
+                                            <small class="text-muted">Pay exact cash to rider upon arrival</small>
+                                        </div>
+                                    </div>
+                                </label>
+                            </div>
+
+                            <!-- bKash -->
+                            <div class="col-md-6">
+                                <label class="card h-100 p-3 border payment-method-card cursor-pointer rounded-3">
+                                    <div class="d-flex align-items-center gap-3">
+                                        <input type="radio" name="payment_method" value="bkash" class="form-check-input mt-0">
+                                        <div>
+                                            <div class="fw-bold text-dark"><span class="badge bg-danger text-white me-1">bKash</span> Mobile Wallet</div>
+                                            <small class="text-muted">Direct or development sandbox verification</small>
+                                        </div>
+                                    </div>
+                                </label>
+                            </div>
+
+                            <!-- Nagad -->
+                            <div class="col-md-6">
+                                <label class="card h-100 p-3 border payment-method-card cursor-pointer rounded-3">
+                                    <div class="d-flex align-items-center gap-3">
+                                        <input type="radio" name="payment_method" value="nagad" class="form-check-input mt-0">
+                                        <div>
+                                            <div class="fw-bold text-dark"><span class="badge bg-warning text-dark me-1">Nagad</span> Digital Payment</div>
+                                            <small class="text-muted">Instant mobile transaction</small>
+                                        </div>
+                                    </div>
+                                </label>
+                            </div>
+
+                            <!-- Rocket -->
+                            <div class="col-md-6">
+                                <label class="card h-100 p-3 border payment-method-card cursor-pointer rounded-3">
+                                    <div class="d-flex align-items-center gap-3">
+                                        <input type="radio" name="payment_method" value="rocket" class="form-check-input mt-0">
+                                        <div>
+                                            <div class="fw-bold text-dark"><span class="badge bg-purple text-white me-1" style="background-color: #8B5CF6;">Rocket</span> DBBL Wallet</div>
+                                            <small class="text-muted">Dutch-Bangla Bank mobile wallet</small>
+                                        </div>
+                                    </div>
+                                </label>
+                            </div>
+                        </div>
+
+                        <!-- Digital Wallet Extra Fields -->
+                        <div id="digital-wallet-details" class="p-3 bg-light rounded-3 border" style="display: none;">
+                            <div class="alert alert-info py-2 small mb-3">
+                                <i class="fas fa-info-circle me-1"></i>
+                                <strong>Development Sandbox Flow:</strong> Enter your mobile wallet number and any test Transaction ID (e.g. <code>TXN87654321</code>).
+                            </div>
+                            <div class="row g-3">
+                                <div class="col-md-6">
+                                    <label class="form-label small fw-bold">Sender Mobile Number <span class="text-danger">*</span></label>
+                                    <input type="text" class="form-control form-control-sm" id="payment-phone" placeholder="017XXXXXXXX">
+                                </div>
+                                <div class="col-md-6">
+                                    <label class="form-label small fw-bold">Transaction Reference ID <span class="text-danger">*</span></label>
+                                    <input type="text" class="form-control form-control-sm" id="payment-txn-id" placeholder="e.g. 9J4K2L8M">
+                                </div>
+                            </div>
+                        </div>
+                    </div>
+                </div>
+
+                <!-- Submit Button -->
+                <button type="submit" class="btn btn-primary btn-lg w-100 py-3 rounded-pill fw-bold shadow-sm" id="btn-place-order">
+                    <i class="fas fa-check-circle me-2"></i> Confirm & Place Order
+                </button>
+            </form>
         </div>
-        
-        <div class="col-md-4">
-            <!-- Order Summary -->
-            <div class="card">
-                <div class="card-header">
-                    <h5>অর্ডার সারাংশ</h5>
+
+        <!-- Order Summary Column -->
+        <div class="col-lg-4">
+            <div class="card border shadow-sm rounded-3 sticky-top" style="top: 90px;">
+                <div class="card-header bg-white py-3">
+                    <h5 class="fw-bold text-dark mb-0">Order Summary</h5>
                 </div>
-                <div class="card-body">
-                    <div id="checkout-items">
-                        <!-- Checkout items will be loaded here -->
+                <div class="card-body p-4">
+                    <!-- Items Preview List -->
+                    <div id="checkout-items-preview" class="mb-3 small divide-y" style="max-height: 240px; overflow-y: auto;">
+                        <!-- Rendered by JS -->
                     </div>
-                    <hr>
-                    <div class="d-flex justify-content-between">
-                        <span>মোট পণ্য:</span>
-                        <span id="checkout-subtotal">৳ 0</span>
+
+                    <hr class="my-3">
+
+                    <div class="d-flex justify-content-between mb-2">
+                        <span class="text-muted small">Items Subtotal:</span>
+                        <span class="fw-semibold text-dark" id="checkout-subtotal">৳ 0.00</span>
                     </div>
-                    <div class="d-flex justify-content-between">
-                        <span>ডেলিভারি চার্জ:</span>
-                        <span id="checkout-delivery">৳ 50</span>
+
+                    <div class="d-flex justify-content-between mb-2">
+                        <span class="text-muted small">Delivery Charge:</span>
+                        <span class="fw-semibold text-dark" id="checkout-delivery-fee">৳ 50.00</span>
                     </div>
-                    <div class="d-flex justify-content-between">
-                        <span>ভ্যাট (৫%):</span>
-                        <span id="checkout-vat">৳ 0</span>
+
+                    <hr class="my-3">
+
+                    <div class="d-flex justify-content-between align-items-center mb-3">
+                        <span class="fw-bold text-dark">Total Payable:</span>
+                        <span class="fs-4 fw-extrabold text-primary" id="checkout-total">৳ 0.00</span>
                     </div>
-                    <div class="d-flex justify-content-between" id="processing-fee-row" style="display: none;">
-                        <span>প্রসেসিং ফি:</span>
-                        <span id="checkout-processing">৳ 0</span>
-                    </div>
-                    <hr>
-                    <div class="d-flex justify-content-between fw-bold">
-                        <span>মোট পরিমাণ:</span>
-                        <span id="checkout-total">৳ 0</span>
-                    </div>
-                    <div class="d-grid gap-2 mt-3">
-                        <button class="btn btn-success" id="place-order-btn" onclick="placeOrder()">
-                            <i class="fas fa-check me-2"></i>অর্ডার নিশ্চিত করুন
-                        </button>
-                        <a href="{% url 'orders:cart' %}" class="btn btn-outline-secondary">
-                            <i class="fas fa-arrow-left me-2"></i>কার্টে ফিরুন
-                        </a>
+
+                    <div class="bg-light p-3 rounded-3 small text-muted">
+                        <div class="d-flex align-items-center gap-2 mb-1">
+                            <i class="fas fa-motorcycle text-primary"></i>
+                            <span>Express Delivery by SwiftDrop Rider</span>
+                        </div>
+                        <div class="d-flex align-items-center gap-2">
+                            <i class="fas fa-shield-alt text-success"></i>
+                            <span>Safe & Hygienic Packaging Guaranteed</span>
+                        </div>
                     </div>
                 </div>
             </div>
         </div>
     </div>
 </div>
+{% endblock %}
 
+{% block extra_js %}
 <script>
-    let cart = JSON.parse(localStorage.getItem('cart')) || [];
-    let selectedPayment = 'cod';
+document.addEventListener('DOMContentLoaded', () => {
+    const itemsPreview = document.getElementById('checkout-items-preview');
+    const subtotalEl = document.getElementById('checkout-subtotal');
+    const deliveryFeeEl = document.getElementById('checkout-delivery-fee');
+    const totalEl = document.getElementById('checkout-total');
+    const zoneSelect = document.getElementById('cust-zone');
+    const walletDetails = document.getElementById('digital-wallet-details');
+    const form = document.getElementById('checkout-form');
+    const submitBtn = document.getElementById('btn-place-order');
 
-    document.addEventListener('DOMContentLoaded', function() {
-        if (cart.length === 0) {
-            alert('কার্টে কোন পণ্য নেই!');
-            window.location.href = "{% url 'orders:products' %}";
-            return;
-        }
-        loadCheckoutItems();
-        selectPayment('cod');
+    const cart = SwiftDropCart.getItems();
+    if (cart.length === 0) {
+        showToast('Your cart is empty. Please add items before checking out.', 'error');
+        setTimeout(() => {
+            window.location.href = '{% url "orders:products" %}';
+        }, 1500);
+        return;
+    }
+
+    function renderSummary() {
+        let subtotal = 0;
+        let html = '';
+
+        cart.forEach(item => {
+            const price = parseFloat(item.price) || 0;
+            const qty = parseInt(item.quantity) || 1;
+            const itemTotal = price * qty;
+            subtotal += itemTotal;
+
+            html += `
+                <div class="d-flex justify-content-between align-items-center py-2 border-bottom">
+                    <div>
+                        <div class="fw-bold text-dark">${item.name}</div>
+                        <div class="text-muted" style="font-size: 0.72rem;">Qty: ${qty} × ৳ ${price.toFixed(2)}</div>
+                    </div>
+                    <div class="fw-semibold text-dark">৳ ${itemTotal.toFixed(2)}</div>
+                </div>
+            `;
+        });
+
+        itemsPreview.innerHTML = html;
+
+        const selectedOption = zoneSelect ? zoneSelect.options[zoneSelect.selectedIndex] : null;
+        const deliveryFee = (selectedOption && selectedOption.dataset.fee) ? parseFloat(selectedOption.dataset.fee) : 50;
+
+        subtotalEl.textContent = formatBDT(subtotal);
+        deliveryFeeEl.textContent = formatBDT(deliveryFee);
+        totalEl.textContent = formatBDT(subtotal + deliveryFee);
+    }
+
+    renderSummary();
+
+    if (zoneSelect) {
+        zoneSelect.addEventListener('change', renderSummary);
+    }
+
+    // Toggle wallet fields based on radio selection
+    document.querySelectorAll('input[name="payment_method"]').forEach(radio => {
+        radio.addEventListener('change', (e) => {
+            if (e.target.value === 'cash_on_delivery') {
+                walletDetails.style.display = 'none';
+            } else {
+                walletDetails.style.display = 'block';
+            }
+        });
     });
 
-    function loadCheckoutItems() {
-        const checkoutItems = document.getElementById('checkout-items');
-        if (cart.length === 0) {
-            checkoutItems.innerHTML = '<p class="text-muted">কার্টে কোন পণ্য নেই</p>';
+    // Handle Order Submission
+    form.addEventListener('submit', (e) => {
+        e.preventDefault();
+
+        const name = document.getElementById('cust-name').value.trim();
+        const phone = document.getElementById('cust-phone').value.trim();
+        const zone = zoneSelect.value.trim();
+        const address = document.getElementById('cust-address').value.trim();
+        const instructions = document.getElementById('cust-instructions').value.trim();
+        const paymentMethod = document.querySelector('input[name="payment_method"]:checked')?.value || 'cash_on_delivery';
+
+        if (!name || !phone || !zone || !address) {
+            showToast('Please fill in all required delivery details.', 'error');
             return;
         }
-        
-        checkoutItems.innerHTML = cart.map(item => `
-            <div class="d-flex justify-content-between mb-2">
-                <span>${item.product_name || item.name} x${item.quantity}</span>
-                <span>৳ ${(item.product_price || item.price) * item.quantity}</span>
-            </div>
-        `).join('');
-        
-        updateCheckoutTotal();
-    }
 
-    function updateCheckoutTotal() {
-        const subtotal = cart.reduce((sum, item) => sum + ((item.product_price || item.price) * item.quantity), 0);
-        const delivery = 50;
-        const vat = Math.round(subtotal * 0.05);
-        let processingFee = 0;
-        
-        if (selectedPayment !== 'cod') {
-            processingFee = Math.round(subtotal * 0.02); // 2% processing fee for digital payments
-        }
-        
-        const total = subtotal + delivery + vat + processingFee;
-        
-        document.getElementById('checkout-subtotal').textContent = `৳ ${subtotal}`;
-        document.getElementById('checkout-delivery').textContent = `৳ ${delivery}`;
-        document.getElementById('checkout-vat').textContent = `৳ ${vat}`;
-        document.getElementById('checkout-processing').textContent = `৳ ${processingFee}`;
-        document.getElementById('checkout-total').textContent = `৳ ${total}`;
-        
-        if (processingFee > 0) {
-            document.getElementById('processing-fee-row').style.display = 'flex';
-        } else {
-            document.getElementById('processing-fee-row').style.display = 'none';
-        }
-    }
+        let paymentPhone = '';
+        let transactionId = '';
 
-    function selectPayment(method) {
-        selectedPayment = method;
-        
-        // Update visual selection
-        document.querySelectorAll('.payment-method').forEach(card => {
-            card.classList.remove('border-primary', 'bg-light');
-        });
-        event.currentTarget.classList.add('border-primary', 'bg-light');
-        
-        // Show/hide payment details
-        const paymentDetails = document.getElementById('payment-details');
-        if (method === 'cod') {
-            paymentDetails.style.display = 'none';
-        } else {
-            paymentDetails.style.display = 'block';
-        }
-        
-        updateCheckoutTotal();
-    }
+        if (paymentMethod !== 'cash_on_delivery') {
+            paymentPhone = document.getElementById('payment-phone').value.trim();
+            transactionId = document.getElementById('payment-txn-id').value.trim();
 
-    function placeOrder() {
-        if (cart.length === 0) {
-            showNotification('কার্টে কোন পণ্য নেই!', 'error');
-            return;
-        }
-        
-        const name = document.getElementById('customer-name').value;
-        const phone = document.getElementById('customer-phone').value;
-        const address = document.getElementById('delivery-address').value;
-        const area = document.getElementById('delivery-area').value;
-        const time = document.getElementById('delivery-time').value;
-        
-        if (!name || !phone || !address || !area || !time) {
-            showNotification('সব তথ্য পূরণ করুন!', 'error');
-            return;
-        }
-        
-        if (selectedPayment !== 'cod') {
-            const paymentPhone = document.getElementById('payment-phone').value;
-            const transactionId = document.getElementById('transaction-id').value;
-            
             if (!paymentPhone || !transactionId) {
-                showNotification('পেমেন্ট বিবরণ পূরণ করুন!', 'error');
+                showToast('Please provide your sender wallet number and Transaction ID.', 'error');
                 return;
             }
         }
-        
-        // Show loading
-        const submitBtn = document.getElementById('place-order-btn');
-        const originalText = submitBtn.innerHTML;
-        submitBtn.innerHTML = '<i class="fas fa-spinner fa-spin me-2"></i>অর্ডার দেওয়া হচ্ছে...';
+
+        // Disable button & show spinner
         submitBtn.disabled = true;
-        
-        // Prepare order data for server
-        const orderData = {
-            cart_items: cart.map(item => ({
-                id: item.product_id || item.id,
-                quantity: item.quantity,
-                name: item.product_name || item.name,
-                price: item.product_price || item.price
-            })),
+        const originalContent = submitBtn.innerHTML;
+        submitBtn.innerHTML = '<i class="fas fa-spinner fa-spin me-2"></i> Processing Order Securely...';
+
+        const payload = {
+            cart_items: cart,
             delivery_address: address,
-            delivery_city: area,
-            special_instructions: document.getElementById('special-instructions').value || '',
-            payment_method: selectedPayment
+            delivery_city: zone,
+            special_instructions: instructions,
+            payment_method: paymentMethod,
+            payment_phone: paymentPhone,
+            transaction_id: transactionId
         };
-        
-        // Get CSRF token from form
-        const csrfToken = document.querySelector('[name=csrfmiddlewaretoken]').value;
-        
-        // Send order to server
+
         fetch('{% url "orders:create_order_api" %}', {
             method: 'POST',
             headers: {
                 'Content-Type': 'application/json',
-                'X-CSRFToken': csrfToken
+                'X-CSRFToken': getCsrfToken()
             },
-            body: JSON.stringify(orderData)
+            body: JSON.stringify(payload)
         })
-        .then(response => response.json())
+        .then(res => res.json())
         .then(data => {
             if (data.success) {
-                // Clear cart
-                cart = [];
-                localStorage.removeItem('cart');
-                updateCartBadge();
-                
-                // Show success message
-                showNotification(`অর্ডার সফলভাবে দেওয়া হয়েছে! অর্ডার নম্বর: ${data.order_number}`, 'success');
-                
-                // Redirect to order list
+                // Clear client cart
+                SwiftDropCart.clear();
+                showToast(`Order #${data.order_number} confirmed!`, 'success');
                 setTimeout(() => {
-                    window.location.href = '{% url "orders:order_list" %}';
-                }, 2000);
+                    window.location.href = data.redirect_url || '{% url "orders:order_list" %}';
+                }, 1200);
             } else {
-                showNotification(data.message || 'অর্ডার দেওয়ার সময় সমস্যা হয়েছে।', 'error');
+                showToast(data.message || 'Unable to complete order. Please review your cart.', 'error');
+                submitBtn.disabled = false;
+                submitBtn.innerHTML = originalContent;
             }
         })
-        .catch(error => {
-            console.error('Error:', error);
-            showNotification('অর্ডার দেওয়ার সময় সমস্যা হয়েছে।', 'error');
-        })
-        .finally(() => {
-            // Reset button
-            submitBtn.innerHTML = originalText;
+        .catch(err => {
+            console.error('Order placement error:', err);
+            showToast('A network error occurred while submitting your order.', 'error');
             submitBtn.disabled = false;
+            submitBtn.innerHTML = originalContent;
         });
-    }
-    
-    // Get CSRF token
-    function getCookie(name) {
-        let cookieValue = null;
-        if (document.cookie && document.cookie !== '') {
-            const cookies = document.cookie.split(';');
-            for (let i = 0; i < cookies.length; i++) {
-                const cookie = cookies[i].trim();
-                if (cookie.substring(0, name.length + 1) === (name + '=')) {
-                    cookieValue = decodeURIComponent(cookie.substring(name.length + 1));
-                    break;
-                }
-            }
-        }
-        return cookieValue;
-    }
-
-    function updateCartBadge() {
-        const totalItems = cart.reduce((sum, item) => sum + item.quantity, 0);
-        const cartBadge = document.getElementById('cart-badge');
-        if (cartBadge) {
-            if (totalItems > 0) {
-                cartBadge.textContent = totalItems;
-                cartBadge.style.display = 'inline';
-            } else {
-                cartBadge.style.display = 'none';
-            }
-        }
-    }
-
-    function showNotification(message, type = 'info') {
-        const notification = document.createElement('div');
-        notification.className = `alert alert-${type === 'error' ? 'danger' : type} alert-dismissible fade show`;
-        notification.style.position = 'fixed';
-        notification.style.top = '20px';
-        notification.style.right = '20px';
-        notification.style.zIndex = '9999';
-        notification.innerHTML = `
-            ${message}
-            <button type="button" class="btn-close" data-bs-dismiss="alert"></button>
-        `;
-        
-        document.body.appendChild(notification);
-        
-        setTimeout(() => {
-            notification.remove();
-        }, 3000);
-    }
+    });
+});
 </script>
-
-<style>
-    .payment-method {
-        cursor: pointer;
-        transition: all 0.3s ease;
-        border: 2px solid transparent;
-    }
-    .payment-method:hover {
-        border-color: #007bff;
-        transform: translateY(-2px);
-    }
-    .payment-method.border-primary {
-        border-color: #007bff !important;
-        background-color: #f8f9fa !important;
-    }
-</style>
 {% endblock %}

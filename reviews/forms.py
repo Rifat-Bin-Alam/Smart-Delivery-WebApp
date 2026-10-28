@@ -9,21 +9,21 @@ class ReviewForm(forms.ModelForm):
         model = Review
         fields = ['rating', 'title', 'comment']
         widgets = {
-            'rating': forms.Select(attrs={'class': 'form-control'}),
+            'rating': forms.Select(attrs={'class': 'form-select'}),
             'title': forms.TextInput(attrs={
                 'class': 'form-control',
-                'placeholder': 'রিভিউের শিরোনাম (যদি থাকে)'
+                'placeholder': 'Review headline (e.g., Fast delivery & fresh items)'
             }),
             'comment': forms.Textarea(attrs={
                 'class': 'form-control',
                 'rows': 5,
-                'placeholder': 'আপনার মতামত লিখুন'
+                'placeholder': 'Share your experience with this essential and the delivery service...'
             }),
         }
         labels = {
-            'rating': 'রেটিং',
-            'title': 'শিরোনাম',
-            'comment': 'মন্তব্য',
+            'rating': 'Rating',
+            'title': 'Review Headline',
+            'comment': 'Detailed Feedback',
         }
 
 
@@ -38,12 +38,12 @@ class ReviewImageForm(forms.ModelForm):
             'image': forms.FileInput(attrs={'class': 'form-control'}),
             'caption': forms.TextInput(attrs={
                 'class': 'form-control',
-                'placeholder': 'ছবির ক্যাপশন (যদি থাকে)'
+                'placeholder': 'Photo caption (optional)'
             }),
         }
         labels = {
-            'image': 'ছবি',
-            'caption': 'ক্যাপশন',
+            'image': 'Photo',
+            'caption': 'Caption',
         }
 
 
@@ -55,14 +55,14 @@ class ReviewReportForm(forms.ModelForm):
         model = ReviewReport
         fields = ['reason', 'description']
         widgets = {
-            'reason': forms.Select(attrs={'class': 'form-control'}),
+            'reason': forms.Select(attrs={'class': 'form-select'}),
             'description': forms.Textarea(attrs={
                 'class': 'form-control',
                 'rows': 4,
-                'placeholder': 'রিপোর্টের কারণ বিস্তারিত লিখুন'
+                'placeholder': 'Please describe why this review violates platform policies...'
             }),
         }
         labels = {
-            'reason': 'কারণ',
-            'description': 'বিবরণ',
+            'reason': 'Reason for Report',
+            'description': 'Details',
         }

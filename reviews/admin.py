@@ -22,13 +22,13 @@ class ReviewAdmin(admin.ModelAdmin):
     inlines = [ReviewImageInline]
     
     fieldsets = (
-        (_('রিভিউ তথ্য'), {
+        (_('Review Information'), {
             'fields': ('customer', 'order', 'product', 'rating', 'title', 'comment')
         }),
-        (_('অবস্থা'), {
+        (_('Status'), {
             'fields': ('is_verified', 'is_public', 'helpful_count')
         }),
-        (_('সময়'), {
+        (_('Timestamps'), {
             'fields': ('created_at', 'updated_at'),
             'classes': ('collapse',)
         }),
@@ -91,13 +91,13 @@ class ReviewReportAdmin(admin.ModelAdmin):
     readonly_fields = ('created_at', 'reviewed_at')
     
     fieldsets = (
-        (_('রিপোর্ট তথ্য'), {
+        (_('Report Information'), {
             'fields': ('review', 'reporter', 'reason', 'description', 'status')
         }),
-        (_('পর্যালোচনা'), {
+        (_('Review & Moderation'), {
             'fields': ('reviewed_by', 'reviewed_at')
         }),
-        (_('সময়'), {
+        (_('Timestamps'), {
             'fields': ('created_at',),
             'classes': ('collapse',)
         }),

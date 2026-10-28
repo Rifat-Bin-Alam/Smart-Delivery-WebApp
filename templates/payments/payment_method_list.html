@@ -1,0 +1,62 @@
+{% extends 'base.html' %}
+{% load static %}
+
+{% block title %}Payment Methods - {{ BRAND_NAME }}{% endblock %}
+
+{% block content %}
+<div class="container py-5">
+    <div class="text-center mb-5">
+        <span class="badge bg-primary-subtle text-primary border border-primary-subtle rounded-pill px-3 py-1 fw-semibold mb-2">
+            Payment Gateways
+        </span>
+        <h2 class="display-6 fw-bold text-navy mb-2">Supported Payment Channels</h2>
+        <p class="text-muted">SwiftDrop provides secure Cash on Delivery and instant Mobile Financial Services</p>
+    </div>
+
+    <div class="row g-4 justify-content-center">
+        <div class="col-md-6 col-lg-3">
+            <div class="card border-0 shadow-sm rounded-4 text-center p-4 h-100">
+                <div class="rounded-circle bg-success-subtle text-success mx-auto d-flex align-items-center justify-content-center mb-3" style="width: 60px; height: 60px;">
+                    <i class="fas fa-hand-holding-usd fa-2x"></i>
+                </div>
+                <h5 class="fw-bold text-navy">Cash on Delivery</h5>
+                <p class="text-muted small">Pay with cash directly to your rider upon inspecting your package.</p>
+                <span class="badge bg-success-subtle text-success mt-auto">Available Everywhere</span>
+            </div>
+        </div>
+
+        <div class="col-md-6 col-lg-3">
+            <div class="card border-0 shadow-sm rounded-4 text-center p-4 h-100">
+                <div class="rounded-circle bg-danger-subtle text-danger mx-auto d-flex align-items-center justify-content-center mb-3" style="width: 60px; height: 60px;">
+                    <i class="fas fa-mobile-alt fa-2x"></i>
+                </div>
+                <h5 class="fw-bold text-navy">bKash</h5>
+                <p class="text-muted small">Instant payment via Bangladesh's leading mobile financial network.</p>
+                <span class="badge bg-primary-subtle text-primary mt-auto">Active Sandbox & Live</span>
+            </div>
+        </div>
+
+        <div class="col-md-6 col-lg-3">
+            <div class="card border-0 shadow-sm rounded-4 text-center p-4 h-100">
+                <div class="rounded-circle bg-warning-subtle text-warning mx-auto d-flex align-items-center justify-content-center mb-3" style="width: 60px; height: 60px;">
+                    <i class="fas fa-wallet fa-2x"></i>
+                </div>
+                <h5 class="fw-bold text-navy">Nagad</h5>
+                <p class="text-muted small">Fast digital wallet checkouts powered by Bangladesh Post Office.</p>
+                <span class="badge bg-primary-subtle text-primary mt-auto">Active Sandbox & Live</span>
+            </div>
+        </div>
+
+        <div class="col-md-6 col-lg-3">
+            <div class="card border-0 shadow-sm rounded-4 text-center p-4 h-100">
+                <div class="rounded-circle bg-info-subtle text-info mx-auto d-flex align-items-center justify-content-center mb-3" style="width: 60px; height: 60px;">
+                    <i class="fas fa-university fa-2x"></i>
+                </div>
+                <h5 class="fw-bold text-navy">Rocket</h5>
+                <p class="text-muted small">Dutch-Bangla Bank mobile banking for seamless order settlements.</p>
+                <span class="badge bg-primary-subtle text-primary mt-auto">Active Sandbox & Live</span>
+            </div>
+        </div>
+    </div>
+</div>
+{% endblock %}

@@ -1,0 +1,79 @@
+{% extends 'base.html' %}
+{% load static %}
+
+{% block title %}Agent: {{ delivery_agent.get_full_name|default:delivery_agent.username }} - SwiftDrop Admin{% endblock %}
+
+{% block content %}
+<div class="container py-4">
+    <div class="d-flex justify-content-between align-items-center mb-4">
+        <div>
+            <h3 class="fw-bold text-navy mb-0">Delivery Agent: {{ delivery_agent.get_full_name|default:delivery_agent.username }}</h3>
+            <span class="text-muted small">ID #{{ delivery_agent.pk }} &bull; Registered {{ delivery_agent.date_joined|date:"M d, Y" }}</span>
+        </div>
+        <a href="{% url 'users:delivery_agent_list' %}" class="btn btn-outline-secondary btn-sm rounded-pill">
+            <i class="fas fa-arrow-left me-1"></i> Fleet Directory
+        </a>
+    </div>
+
+    <div class="row g-4">
+        <div class="col-md-6">
+            <div class="card border-0 shadow-sm rounded-4 p-4">
+                <h5 class="fw-bold text-navy mb-3">Courier Profile & Duty Status</h5>
+                {% if delivery_agent.delivery_agent_profile %}
+                    <div class="d-flex align-items-center justify-content-between p-3 bg-light rounded-3 mb-3">
+                        <div>
+                            <span class="small text-muted d-block">Current Duty State</span>
+                            {% if delivery_agent.delivery_agent_profile.is_available %}
+                                <span class="badge bg-success-subtle text-success fs-6">Available / Accepting Orders</span>
+                            {% else %}
+                                <span class="badge bg-secondary-subtle text-secondary fs-6">Offline</span>
+                            {% endif %}
+                        </div>
+                        <form method="post" action="{% url 'users:toggle_availability' delivery_agent.pk %}">
+                            {% csrf_token %}
+                            <button type="submit" class="btn btn-sm btn-outline-primary rounded-pill">
+                                Toggle Status
+                            </button>
+                        </form>
+                    </div>
+
+                    <dl class="row mb-0 small">
+                        <dt class="col-sm-5 text-muted">Vehicle Type</dt>
+                        <dd class="col-sm-7 fw-semibold text-navy">{{ delivery_agent.delivery_agent_profile.get_vehicle_type_display }}</dd>
+
+                        <dt class="col-sm-5 text-muted">Vehicle Number</dt>
+                        <dd class="col-sm-7 fw-semibold text-navy">{{ delivery_agent.delivery_agent_profile.vehicle_number }}</dd>
+
+                        <dt class="col-sm-5 text-muted">License / NID</dt>
+                        <dd class="col-sm-7 fw-semibold text-navy">{{ delivery_agent.delivery_agent_profile.license_number }}</dd>
+
+                        <dt class="col-sm-5 text-muted">Lifetime Deliveries</dt>
+                        <dd class="col-sm-7 fw-bold text-navy">{{ delivery_agent.delivery_agent_profile.total_deliveries }}</dd>
+
+                        <dt class="col-sm-5 text-muted">Rider Score</dt>
+                        <dd class="col-sm-7 text-warning fw-bold">★ {{ delivery_agent.delivery_agent_profile.rating }} / 5.0</dd>
+                    </dl>
+                {% else %}
+                    <div class="alert alert-warning mb-0">No vehicle/agent profile attached.</div>
+                {% endif %}
+            </div>
+        </div>
+
+        <div class="col-md-6">
+            <div class="card border-0 shadow-sm rounded-4 p-4">
+                <h5 class="fw-bold text-navy mb-3">Contact Details</h5>
+                <dl class="row mb-0 small">
+                    <dt class="col-sm-4 text-muted">Email</dt>
+                    <dd class="col-sm-8 fw-semibold text-navy">{{ delivery_agent.email }}</dd>
+
+                    <dt class="col-sm-4 text-muted">Phone Number</dt>
+                    <dd class="col-sm-8 fw-semibold text-navy">{{ delivery_agent.phone_number|default:"-" }}</dd>
+
+                    <dt class="col-sm-4 text-muted">Assigned Base Area</dt>
+                    <dd class="col-sm-8 fw-semibold text-navy">{{ delivery_agent.city|default:"Not specified" }}</dd>
+                </dl>
+            </div>
+        </div>
+    </div>
+</div>
+{% endblock %}

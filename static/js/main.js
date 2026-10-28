@@ -1,320 +1,195 @@
-// Main JavaScript for Nagaribashi Express
-$(document).ready(function() {
-    // Initialize tooltips
-    var tooltipTriggerList = [].slice.call(document.querySelectorAll('[data-bs-toggle="tooltip"]'));
-    var tooltipList = tooltipTriggerList.map(function (tooltipTriggerEl) {
-        return new bootstrap.Tooltip(tooltipTriggerEl);
-    });
+/**
+ * SwiftDrop — Modern Delivery Client-Side Application Script
+ */
 
-    // Initialize popovers
-    var popoverTriggerList = [].slice.call(document.querySelectorAll('[data-bs-toggle="popover"]'));
-    var popoverList = popoverTriggerList.map(function (popoverTriggerEl) {
-        return new bootstrap.Popover(popoverTriggerEl);
-    });
+// Initialize Cart System
+const SwiftDropCart = {
+  STORAGE_KEY: 'swiftdrop_cart_v1',
 
-    // Auto-hide alerts after 5 seconds
-    $('.alert').each(function() {
-        var alert = $(this);
-        setTimeout(function() {
-            alert.fadeOut();
-        }, 5000);
-    });
+  getItems() {
+    try {
+      const data = localStorage.getItem(this.STORAGE_KEY);
+      return data ? JSON.parse(data) : [];
+    } catch (e) {
+      console.error('Failed to parse cart data:', e);
+      return [];
+    }
+  },
 
-    // Confirm delete actions
-    $('.btn-delete').on('click', function(e) {
-        if (!confirm('আপনি কি নিশ্চিত যে আপনি এটি মুছে ফেলতে চান?')) {
-            e.preventDefault();
-        }
-    });
+  saveItems(items) {
+    try {
+      localStorage.setItem(this.STORAGE_KEY, JSON.stringify(items));
+      this.updateBadges();
+      window.dispatchEvent(new CustomEvent('swiftdrop:cart-updated', { detail: { items } }));
+    } catch (e) {
+      console.error('Failed to save cart items:', e);
+    }
+  },
 
-    // Form validation
-    $('form').on('submit', function(e) {
-        var form = $(this);
-        if (form[0].checkValidity() === false) {
-            e.preventDefault();
-            e.stopPropagation();
-        }
-        form.addClass('was-validated');
-    });
+  addItem(product) {
+    let items = this.getItems();
+    const existingIndex = items.findIndex(i => String(i.id) === String(product.id));
 
-    // Currency formatting
-    $('.currency-input').on('input', function() {
-        var value = $(this).val().replace(/[^\d]/g, '');
-        if (value) {
-            $(this).val('৳' + parseInt(value).toLocaleString());
-        }
-    });
-
-    // Rating stars
-    $('.rating-stars').on('click', 'i', function() {
-        var rating = $(this).data('rating');
-        var stars = $(this).parent().find('i');
-        
-        stars.removeClass('fas').addClass('far');
-        stars.slice(0, rating).removeClass('far').addClass('fas');
-        
-        $(this).parent().find('input[type="hidden"]').val(rating);
-    });
-
-    // Order status updates
-    $('.status-update').on('change', function() {
-        var orderId = $(this).data('order-id');
-        var newStatus = $(this).val();
-        var statusElement = $(this).closest('tr').find('.order-status');
-        
-        $.ajax({
-            url: '/orders/' + orderId + '/status/update/',
-            method: 'POST',
-            data: {
-                'status': newStatus,
-                'csrfmiddlewaretoken': $('[name=csrfmiddlewaretoken]').val()
-            },
-            success: function(response) {
-                statusElement.removeClass().addClass('order-status status-' + newStatus);
-                statusElement.text(response.status_display);
-                showAlert('অর্ডার অবস্থা সফলভাবে আপডেট হয়েছে', 'success');
-            },
-            error: function() {
-                showAlert('অর্ডার অবস্থা আপডেট করতে ব্যর্থ', 'danger');
-            }
-        });
-    });
-
-    // Search functionality
-    $('#search-input').on('keyup', function() {
-        var searchTerm = $(this).val().toLowerCase();
-        $('.searchable-item').each(function() {
-            var itemText = $(this).text().toLowerCase();
-            if (itemText.indexOf(searchTerm) === -1) {
-                $(this).hide();
-            } else {
-                $(this).show();
-            }
-        });
-    });
-
-    // Filter functionality
-    $('.filter-btn').on('click', function() {
-        var filter = $(this).data('filter');
-        $('.filterable-item').each(function() {
-            if (filter === 'all' || $(this).data('category') === filter) {
-                $(this).show();
-            } else {
-                $(this).hide();
-            }
-        });
-        
-        $('.filter-btn').removeClass('active');
-        $(this).addClass('active');
-    });
-
-    // Loading states
-    $('.btn-loading').on('click', function() {
-        var btn = $(this);
-        var originalText = btn.html();
-        
-        btn.prop('disabled', true);
-        btn.html('<span class="loading-spinner"></span> প্রক্রিয়াধীন...');
-        
-        setTimeout(function() {
-            btn.prop('disabled', false);
-            btn.html(originalText);
-        }, 2000);
-    });
-
-    // Real-time notifications
-    if (typeof(EventSource) !== "undefined") {
-        var source = new EventSource("/notifications/stream/");
-        source.onmessage = function(event) {
-            var notification = JSON.parse(event.data);
-            showNotification(notification.title, notification.message, notification.type);
-        };
+    if (existingIndex > -1) {
+      const maxStock = product.max_stock || 999;
+      const newQty = items[existingIndex].quantity + (product.quantity || 1);
+      if (newQty > maxStock) {
+        showToast(`Only ${maxStock} items available in stock.`, 'error');
+        return false;
+      }
+      items[existingIndex].quantity = newQty;
+    } else {
+      items.push({
+        id: product.id,
+        name: product.name,
+        price: parseFloat(product.price) || 0,
+        quantity: parseInt(product.quantity) || 1,
+        image: product.image || '',
+        category: product.category || 'essentials',
+        max_stock: product.max_stock || 999
+      });
     }
 
-    // Location tracking for delivery agents
-    if (navigator.geolocation && $('.delivery-agent').length > 0) {
-        navigator.geolocation.getCurrentPosition(function(position) {
-            updateLocation(position.coords.latitude, position.coords.longitude);
-        });
+    this.saveItems(items);
+    showToast(`Added "${product.name}" to cart.`, 'success');
+    return true;
+  },
+
+  updateQuantity(productId, quantity) {
+    let items = this.getItems();
+    const itemIndex = items.findIndex(i => String(i.id) === String(productId));
+
+    if (itemIndex > -1) {
+      const targetQty = parseInt(quantity);
+      if (targetQty <= 0) {
+        this.removeItem(productId);
+        return;
+      }
+      const maxStock = items[itemIndex].max_stock || 999;
+      if (targetQty > maxStock) {
+        showToast(`Stock limit reached (${maxStock} max).`, 'error');
+        items[itemIndex].quantity = maxStock;
+      } else {
+        items[itemIndex].quantity = targetQty;
+      }
+      this.saveItems(items);
     }
+  },
 
-    // Auto-refresh for order tracking
-    if ($('.order-tracking').length > 0) {
-        setInterval(function() {
-            refreshOrderStatus();
-        }, 30000); // Refresh every 30 seconds
-    }
-});
+  removeItem(productId) {
+    let items = this.getItems().filter(i => String(i.id) !== String(productId));
+    this.saveItems(items);
+    showToast('Item removed from cart.', 'info');
+  },
 
-// Utility functions
-function showAlert(message, type) {
-    var alertHtml = '<div class="alert alert-' + type + ' alert-dismissible fade show" role="alert">' +
-                    message +
-                    '<button type="button" class="btn-close" data-bs-dismiss="alert"></button>' +
-                    '</div>';
-    
-    $('.main-content').prepend(alertHtml);
-    
-    setTimeout(function() {
-        $('.alert').fadeOut();
-    }, 5000);
-}
+  clear() {
+    localStorage.removeItem(this.STORAGE_KEY);
+    this.updateBadges();
+    window.dispatchEvent(new CustomEvent('swiftdrop:cart-updated', { detail: { items: [] } }));
+  },
 
-function showNotification(title, message, type) {
-    var notificationHtml = '<div class="toast" role="alert">' +
-                          '<div class="toast-header">' +
-                          '<strong class="me-auto">' + title + '</strong>' +
-                          '<button type="button" class="btn-close" data-bs-dismiss="toast"></button>' +
-                          '</div>' +
-                          '<div class="toast-body">' + message + '</div>' +
-                          '</div>';
-    
-    $('.toast-container').append(notificationHtml);
-    
-    var toast = new bootstrap.Toast($('.toast').last()[0]);
-    toast.show();
-}
+  getTotalCount() {
+    return this.getItems().reduce((sum, item) => sum + (parseInt(item.quantity) || 0), 0);
+  },
 
-function updateLocation(latitude, longitude) {
-    $.ajax({
-        url: '/delivery/location/update/',
-        method: 'POST',
-        data: {
-            'latitude': latitude,
-            'longitude': longitude,
-            'csrfmiddlewaretoken': $('[name=csrfmiddlewaretoken]').val()
-        },
-        success: function(response) {
-            console.log('Location updated successfully');
-        },
-        error: function() {
-            console.log('Failed to update location');
-        }
-    });
-}
-
-function refreshOrderStatus() {
-    $('.order-tracking').each(function() {
-        var orderId = $(this).data('order-id');
-        $.ajax({
-            url: '/orders/' + orderId + '/status/',
-            method: 'GET',
-            success: function(response) {
-                $(this).find('.order-status').text(response.status_display);
-                $(this).find('.order-status').removeClass().addClass('order-status status-' + response.status);
-            }.bind(this)
-        });
-    });
-}
-
-// Bengali number conversion
-function convertToBengaliNumbers(number) {
-    var bengaliNumbers = ['০', '১', '২', '৩', '৪', '৫', '৬', '৭', '৮', '৯'];
-    return number.toString().replace(/\d/g, function(digit) {
-        return bengaliNumbers[digit];
-    });
-}
-
-// Currency formatting
-function formatCurrency(amount) {
-    return '৳' + parseInt(amount).toLocaleString('bn-BD');
-}
-
-// Date formatting
-function formatDate(dateString) {
-    var date = new Date(dateString);
-    var options = { 
-        year: 'numeric', 
-        month: 'long', 
-        day: 'numeric',
-        hour: '2-digit',
-        minute: '2-digit'
-    };
-    return date.toLocaleDateString('bn-BD', options);
-}
-
-// Phone number validation
-function validatePhoneNumber(phone) {
-    var phoneRegex = /^(\+88)?01[3-9]\d{8}$/;
-    return phoneRegex.test(phone);
-}
-
-// Email validation
-function validateEmail(email) {
-    var emailRegex = /^[^\s@]+@[^\s@]+\.[^\s@]+$/;
-    return emailRegex.test(email);
-}
-
-// Form submission with loading state
-function submitFormWithLoading(formSelector, successCallback) {
-    var form = $(formSelector);
-    var submitBtn = form.find('button[type="submit"]');
-    var originalText = submitBtn.html();
-    
-    submitBtn.prop('disabled', true);
-    submitBtn.html('<span class="loading-spinner"></span> প্রক্রিয়াধীন...');
-    
-    form.submit();
-    
-    setTimeout(function() {
-        submitBtn.prop('disabled', false);
-        submitBtn.html(originalText);
-    }, 3000);
-}
-
-// Cart notification functionality
-function addToCartNotification(productName, quantity) {
-    // Show green notification when item is added to cart
-    showCartNotification(quantity + 'টি ' + productName + ' কার্টে যোগ করা হয়েছে!', 'success');
-    
-    // Update cart badge
-    updateCartBadge();
-}
-
-function showCartNotification(message, type) {
-    type = type || 'success';
-    var notification = document.createElement('div');
-    notification.className = 'alert alert-' + type + ' alert-dismissible fade show';
-    notification.style.position = 'fixed';
-    notification.style.top = '20px';
-    notification.style.right = '20px';
-    notification.style.zIndex = '9999';
-    notification.style.minWidth = '300px';
-    notification.innerHTML = '<i class="fas fa-shopping-cart me-2"></i>' + message + '<button type="button" class="btn-close" data-bs-dismiss="alert"></button>';
-    
-    document.body.appendChild(notification);
-    
-    // Auto remove after 3 seconds
-    setTimeout(function() {
-        if (notification.parentNode) {
-            notification.remove();
-        }
-    }, 3000);
-}
-
-function updateCartBadge() {
-    var cart = JSON.parse(localStorage.getItem('cart')) || [];
-    var totalItems = cart.reduce(function(sum, item) {
-        return sum + item.quantity;
+  getSubtotal() {
+    return this.getItems().reduce((sum, item) => {
+      const price = parseFloat(item.price) || 0;
+      const qty = parseInt(item.quantity) || 0;
+      return sum + (price * qty);
     }, 0);
-    var cartBadge = document.getElementById('cart-badge');
-    
-    if (cartBadge) {
-        if (totalItems > 0) {
-            cartBadge.textContent = totalItems;
-            cartBadge.style.display = 'inline';
-            // Add pulse animation for new items
-            cartBadge.style.animation = 'pulse 0.5s ease-in-out';
-            setTimeout(function() {
-                cartBadge.style.animation = '';
-            }, 500);
-        } else {
-            cartBadge.style.display = 'none';
-        }
-    }
+  },
+
+  updateBadges() {
+    const totalCount = this.getTotalCount();
+    const badges = document.querySelectorAll('.cart-badge-count');
+    badges.forEach(badge => {
+      badge.textContent = totalCount;
+      badge.style.display = totalCount > 0 ? 'inline-flex' : 'none';
+    });
+  }
+};
+
+// Global Toast System
+function showToast(message, type = 'info') {
+  let container = document.querySelector('.sd-toast-container');
+  if (!container) {
+    container = document.createElement('div');
+    container.className = 'sd-toast-container';
+    document.body.appendChild(container);
+  }
+
+  const toast = document.createElement('div');
+  toast.className = `sd-toast ${type}`;
+
+  let icon = '<i class="fas fa-info-circle text-info"></i>';
+  if (type === 'success') icon = '<i class="fas fa-check-circle text-success"></i>';
+  if (type === 'error') icon = '<i class="fas fa-exclamation-circle text-danger"></i>';
+
+  toast.innerHTML = `
+    ${icon}
+    <div class="flex-grow-1">${message}</div>
+    <button type="button" class="btn-close btn-close-white ms-2" style="font-size: 0.75rem;"></button>
+  `;
+
+  toast.querySelector('.btn-close').addEventListener('click', () => toast.remove());
+  container.appendChild(toast);
+
+  setTimeout(() => {
+    toast.style.opacity = '0';
+    toast.style.transform = 'translateX(100%)';
+    toast.style.transition = 'all 0.3s ease';
+    setTimeout(() => toast.remove(), 300);
+  }, 4000);
 }
 
-// Add CSS for pulse animation
-var style = document.createElement('style');
-style.textContent = '@keyframes pulse { 0% { transform: scale(1); } 50% { transform: scale(1.2); } 100% { transform: scale(1); } }';
-document.head.appendChild(style);
+// CSRF Token Helper
+function getCsrfToken() {
+  const cookieValue = document.cookie
+    .split('; ')
+    .find(row => row.startsWith('csrftoken='))
+    ?.split('=')[1];
+  if (cookieValue) return cookieValue;
+  const tokenInput = document.querySelector('[name=csrfmiddlewaretoken]');
+  return tokenInput ? tokenInput.value : '';
+}
+
+// Format Currency
+function formatBDT(amount) {
+  const num = parseFloat(amount) || 0;
+  return '৳ ' + num.toLocaleString('en-US', { minimumFractionDigits: 2, maximumFractionDigits: 2 });
+}
+
+// Initialize on DOM load
+document.addEventListener('DOMContentLoaded', () => {
+  SwiftDropCart.updateBadges();
+
+  // Listen for storage changes across tabs
+  window.addEventListener('storage', (e) => {
+    if (e.key === SwiftDropCart.STORAGE_KEY) {
+      SwiftDropCart.updateBadges();
+      window.dispatchEvent(new CustomEvent('swiftdrop:cart-updated', {
+        detail: { items: SwiftDropCart.getItems() }
+      }));
+    }
+  });
+
+  // Attach Add-To-Cart buttons
+  document.querySelectorAll('.btn-add-to-cart').forEach(btn => {
+    btn.addEventListener('click', (e) => {
+      e.preventDefault();
+      const card = btn.closest('[data-product-id]');
+      const product = {
+        id: btn.dataset.productId || (card && card.dataset.productId),
+        name: btn.dataset.productName || (card && card.dataset.productName),
+        price: btn.dataset.productPrice || (card && card.dataset.productPrice),
+        image: btn.dataset.productImage || (card && card.dataset.productImage),
+        max_stock: parseInt(btn.dataset.productStock || (card && card.dataset.productStock) || 999),
+        quantity: 1
+      };
+      if (product.id && product.name) {
+        SwiftDropCart.addItem(product);
+      }
+    });
+  });
+});

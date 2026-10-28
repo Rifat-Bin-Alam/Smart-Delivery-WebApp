@@ -9,282 +9,289 @@ User = get_user_model()
 
 class Review(models.Model):
     """
-    Model for customer reviews and ratings
+    Model for verified customer reviews and ratings.
     """
     RATING_CHOICES = [
-        (1, '১ ⭐'),
-        (2, '২ ⭐⭐'),
-        (3, '৩ ⭐⭐⭐'),
-        (4, '৪ ⭐⭐⭐⭐'),
-        (5, '৫ ⭐⭐⭐⭐⭐'),
+        (1, '1 Star ★☆☆☆☆'),
+        (2, '2 Stars ★★☆☆☆'),
+        (3, '3 Stars ★★★☆☆'),
+        (4, '4 Stars ★★★★☆'),
+        (5, '5 Stars ★★★★★'),
     ]
-    
+
     customer = models.ForeignKey(
         User,
         on_delete=models.CASCADE,
         related_name='reviews',
         limit_choices_to={'user_type': 'customer'},
-        verbose_name=_('গ্রাহক')
+        verbose_name=_('Customer')
     )
-    
+
     order = models.ForeignKey(
         Order,
         on_delete=models.CASCADE,
         related_name='reviews',
-        verbose_name=_('অর্ডার')
+        verbose_name=_('Order')
     )
-    
+
     product = models.ForeignKey(
         ProductService,
         on_delete=models.CASCADE,
         related_name='reviews',
-        verbose_name=_('পণ্য/সেবা')
+        verbose_name=_('Product / Service')
     )
-    
+
     rating = models.PositiveIntegerField(
         choices=RATING_CHOICES,
         validators=[MinValueValidator(1), MaxValueValidator(5)],
-        verbose_name=_('রেটিং')
+        default=5,
+        verbose_name=_('Rating')
     )
-    
+
     title = models.CharField(
         max_length=200,
         blank=True,
         null=True,
-        verbose_name=_('শিরোনাম')
+        verbose_name=_('Headline')
     )
-    
+
     comment = models.TextField(
         blank=True,
         null=True,
-        verbose_name=_('মন্তব্য')
+        verbose_name=_('Review Comment')
     )
-    
+
     is_verified = models.BooleanField(
-        default=False,
-        verbose_name=_('যাচাইকৃত')
+        default=True,
+        verbose_name=_('Verified Purchase')
     )
-    
+
     is_public = models.BooleanField(
         default=True,
-        verbose_name=_('পাবলিক')
+        verbose_name=_('Visible Publicly')
     )
-    
+
     helpful_count = models.PositiveIntegerField(
         default=0,
-        verbose_name=_('সহায়ক ভোট')
+        verbose_name=_('Helpful Votes')
     )
-    
+
     created_at = models.DateTimeField(
         auto_now_add=True,
-        verbose_name=_('তৈরি হয়েছে')
+        verbose_name=_('Created At')
     )
-    
+
     updated_at = models.DateTimeField(
         auto_now=True,
-        verbose_name=_('আপডেট হয়েছে')
+        verbose_name=_('Updated At')
     )
-    
+
     class Meta:
-        verbose_name = _('রিভিউ')
-        verbose_name_plural = _('রিভিউ')
+        verbose_name = _('Review')
+        verbose_name_plural = _('Reviews')
         ordering = ['-created_at']
         unique_together = ['customer', 'order', 'product']
-    
+
     def __str__(self):
-        return f"{self.customer.get_full_name()} - {self.product.name} - {self.rating}⭐"
-    
+        name = self.customer.get_full_name() or self.customer.username
+        return f"{name} on {self.product.name} ({self.rating}★)"
+
     @property
     def stars(self):
-        return '⭐' * self.rating
+        return '★' * self.rating + '☆' * (5 - self.rating)
 
 
 class ReviewImage(models.Model):
     """
-    Model for review images
+    Customer photo uploads attached to reviews.
     """
     review = models.ForeignKey(
         Review,
         on_delete=models.CASCADE,
         related_name='images',
-        verbose_name=_('রিভিউ')
+        verbose_name=_('Review')
     )
-    
+
     image = models.ImageField(
         upload_to='review_images/',
-        verbose_name=_('ছবি')
+        verbose_name=_('Image')
     )
-    
+
     caption = models.CharField(
         max_length=200,
         blank=True,
         null=True,
-        verbose_name=_('ক্যাপশন')
+        verbose_name=_('Caption')
     )
-    
+
     created_at = models.DateTimeField(
         auto_now_add=True,
-        verbose_name=_('তৈরি হয়েছে')
+        verbose_name=_('Uploaded At')
     )
-    
+
     class Meta:
-        verbose_name = _('রিভিউ ছবি')
-        verbose_name_plural = _('রিভিউ ছবি')
-    
+        verbose_name = _('Review Image')
+        verbose_name_plural = _('Review Images')
+
     def __str__(self):
-        return f"{self.review} - ছবি #{self.id}"
+        return f"{self.review} - Image #{self.id}"
 
 
 class ReviewHelpful(models.Model):
     """
-    Model for tracking helpful votes on reviews
+    Helpful vote counter for community reviews.
     """
     review = models.ForeignKey(
         Review,
         on_delete=models.CASCADE,
         related_name='helpful_votes',
-        verbose_name=_('রিভিউ')
+        verbose_name=_('Review')
     )
-    
+
     user = models.ForeignKey(
         User,
         on_delete=models.CASCADE,
         related_name='helpful_votes',
-        verbose_name=_('ব্যবহারকারী')
+        verbose_name=_('User')
     )
-    
+
     is_helpful = models.BooleanField(
-        verbose_name=_('সহায়ক')
+        default=True,
+        verbose_name=_('Is Helpful')
     )
-    
+
     created_at = models.DateTimeField(
         auto_now_add=True,
-        verbose_name=_('তৈরি হয়েছে')
+        verbose_name=_('Created At')
     )
-    
+
     class Meta:
-        verbose_name = _('রিভিউ সহায়ক ভোট')
-        verbose_name_plural = _('রিভিউ সহায়ক ভোট')
+        verbose_name = _('Review Helpful Vote')
+        verbose_name_plural = _('Review Helpful Votes')
         unique_together = ['review', 'user']
-    
+
     def __str__(self):
-        return f"{self.user.get_full_name()} - {self.review} - {'সহায়ক' if self.is_helpful else 'অসহায়ক'}"
+        name = self.user.get_full_name() or self.user.username
+        return f"{name} - {self.review} - {'Helpful' if self.is_helpful else 'Unhelpful'}"
 
 
 class ReviewResponse(models.Model):
     """
-    Model for admin/merchant responses to reviews
+    Merchant / admin responses to customer reviews.
     """
     review = models.OneToOneField(
         Review,
         on_delete=models.CASCADE,
         related_name='response',
-        verbose_name=_('রিভিউ')
+        verbose_name=_('Review')
     )
-    
+
     responder = models.ForeignKey(
         User,
         on_delete=models.CASCADE,
         related_name='review_responses',
-        verbose_name=_('উত্তরদাতা')
+        verbose_name=_('Responder')
     )
-    
+
     response = models.TextField(
-        verbose_name=_('উত্তর')
+        verbose_name=_('Official Response')
     )
-    
+
     created_at = models.DateTimeField(
         auto_now_add=True,
-        verbose_name=_('তৈরি হয়েছে')
+        verbose_name=_('Replied At')
     )
-    
+
     updated_at = models.DateTimeField(
         auto_now=True,
-        verbose_name=_('আপডেট হয়েছে')
+        verbose_name=_('Updated At')
     )
-    
+
     class Meta:
-        verbose_name = _('রিভিউ উত্তর')
-        verbose_name_plural = _('রিভিউ উত্তর')
-    
+        verbose_name = _('Review Response')
+        verbose_name_plural = _('Review Responses')
+
     def __str__(self):
-        return f"{self.review} - উত্তর"
+        return f"Response to review #{self.review.id}"
 
 
 class ReviewReport(models.Model):
     """
-    Model for reporting inappropriate reviews
+    Moderation reports for spam or inappropriate reviews.
     """
     REPORT_REASON_CHOICES = [
-        ('spam', 'স্প্যাম'),
-        ('inappropriate', 'অনুপযুক্ত'),
-        ('fake', 'জাল'),
-        ('offensive', 'আপত্তিকর'),
-        ('other', 'অন্যান্য'),
+        ('spam', 'Spam or Advertising'),
+        ('inappropriate', 'Inappropriate Language'),
+        ('fake', 'Fraudulent or Fake'),
+        ('offensive', 'Offensive Content'),
+        ('other', 'Other Reason'),
     ]
-    
+
+    STATUS_CHOICES = [
+        ('pending', 'Pending Moderation'),
+        ('reviewed', 'Reviewed'),
+        ('resolved', 'Action Taken'),
+        ('dismissed', 'Dismissed'),
+    ]
+
     review = models.ForeignKey(
         Review,
         on_delete=models.CASCADE,
         related_name='reports',
-        verbose_name=_('রিভিউ')
+        verbose_name=_('Review')
     )
-    
+
     reporter = models.ForeignKey(
         User,
         on_delete=models.CASCADE,
         related_name='review_reports',
-        verbose_name=_('রিপোর্টার')
+        verbose_name=_('Reported By')
     )
-    
+
     reason = models.CharField(
-        max_length=20,
+        max_length=30,
         choices=REPORT_REASON_CHOICES,
-        verbose_name=_('কারণ')
+        default='spam',
+        verbose_name=_('Reason')
     )
-    
+
     description = models.TextField(
         blank=True,
         null=True,
-        verbose_name=_('বিবরণ')
+        verbose_name=_('Details')
     )
-    
+
     status = models.CharField(
         max_length=20,
-        choices=[
-            ('pending', 'অপেক্ষমান'),
-            ('reviewed', 'পর্যালোচিত'),
-            ('resolved', 'সমাধান'),
-            ('dismissed', 'খারিজ'),
-        ],
+        choices=STATUS_CHOICES,
         default='pending',
-        verbose_name=_('অবস্থা')
+        verbose_name=_('Status')
     )
-    
+
     created_at = models.DateTimeField(
         auto_now_add=True,
-        verbose_name=_('তৈরি হয়েছে')
+        verbose_name=_('Reported At')
     )
-    
+
     reviewed_by = models.ForeignKey(
         User,
         on_delete=models.SET_NULL,
         null=True,
         blank=True,
         related_name='reviewed_reports',
-        verbose_name=_('পর্যালোচনা করেছেন')
+        verbose_name=_('Moderated By')
     )
-    
+
     reviewed_at = models.DateTimeField(
         blank=True,
         null=True,
-        verbose_name=_('পর্যালোচনা হয়েছে')
+        verbose_name=_('Moderated At')
     )
-    
+
     class Meta:
-        verbose_name = _('রিভিউ রিপোর্ট')
-        verbose_name_plural = _('রিভিউ রিপোর্ট')
+        verbose_name = _('Review Report')
+        verbose_name_plural = _('Review Reports')
         ordering = ['-created_at']
-    
+
     def __str__(self):
-        return f"{self.review} - {self.get_reason_display()}"
+        return f"Report #{self.id} on Review #{self.review.id} ({self.get_status_display()})"

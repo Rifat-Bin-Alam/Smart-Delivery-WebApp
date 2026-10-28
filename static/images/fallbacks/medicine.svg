@@ -1,0 +1,21 @@
+<svg xmlns="http://www.w3.org/2000/svg" viewBox="0 0 400 300" width="100%" height="100%">
+  <defs>
+    <linearGradient id="medGrad" x1="0%" y1="0%" x2="100%" y2="100%">
+      <stop offset="0%" stop-color="#EFF6FF" />
+      <stop offset="100%" stop-color="#E0E7FF" />
+    </linearGradient>
+    <linearGradient id="pillGrad" x1="0%" y1="0%" x2="100%" y2="100%">
+      <stop offset="0%" stop-color="#EF4444" />
+      <stop offset="100%" stop-color="#DC2626" />
+    </linearGradient>
+  </defs>
+  <rect width="400" height="300" rx="16" fill="url(#medGrad)"/>
+  <circle cx="200" cy="135" r="75" fill="#FFFFFF" stroke="#C7D2FE" stroke-width="3" filter="drop-shadow(0 4px 6px rgba(79,70,229,0.08))"/>
+  <!-- Pharmacy Cross -->
+  <path d="M 190 100 H 210 V 125 H 235 V 145 H 210 V 170 H 190 V 145 H 165 V 125 H 190 Z" fill="#2563EB"/>
+  <!-- Capsule overlay -->
+  <rect x="205" y="140" width="30" height="15" rx="7.5" fill="url(#pillGrad)" transform="rotate(-30 220 147)"/>
+  <!-- Text Label -->
+  <rect x="120" y="235" width="160" height="28" rx="14" fill="#0F172A"/>
+  <text x="200" y="253" text-anchor="middle" fill="#FFFFFF" font-family="-apple-system, BlinkMacSystemFont, 'Segoe UI', Roboto, sans-serif" font-size="12" font-weight="600" letter-spacing="0.5">PHARMACY &amp; HEALTH</text>
+</svg>

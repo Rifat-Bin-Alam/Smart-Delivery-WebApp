@@ -1,264 +1,214 @@
-# নাগরীবাসী এক্সপ্রেস (Nagaribashi Express)
+# SwiftDrop — Your Essentials. Delivered Smarter.
 
-একটি আধুনিক, বাংলা-প্রথম Django ওয়েবসাইট যা শহরের সবচেয়ে নির্ভরযোগ্য ডেলিভারি সেবা প্রদান করে। খাবার, ঔষধ, গ্যাস এবং আরও অনেক কিছু দ্রুত এবং নিরাপদে পৌঁছে দেওয়া।
+[![Django 5.2](https://img.shields.io/badge/Django-5.2-092E20?style=for-the-badge&logo=django)](https://www.djangoproject.com/)
+[![Python 3.13](https://img.shields.io/badge/Python-3.13-3776AB?style=for-the-badge&logo=python)](https://www.python.org/)
+[![Bootstrap 5.3](https://img.shields.io/badge/Bootstrap-5.3-7952B2?style=for-the-badge&logo=bootstrap)](https://getbootstrap.com/)
+[![License: MIT](https://img.shields.io/badge/License-MIT-blue.svg?style=for-the-badge)](LICENSE)
 
-## বৈশিষ্ট্য (Features)
+**SwiftDrop** is an on-demand hyperlocal essentials delivery platform engineered with **Django**, **Bootstrap 5**, and **JavaScript**. Developed to solve the logistical challenges of rapid urban fulfillment in Bangladesh, SwiftDrop enables customers to order daily groceries, cooked meals, pharmacy items, emergency LPG cooking gas cylinders, and personal parcels with instant cart recalculation, real-time status tracking, verified reviews, and transparent BDT (৳) pricing.
 
-### 🏠 গ্রাহক সেবা (Customer Services)
-- **হোম পেজ**: স্বাগতম পেজ এবং সেবা পরিচিতি
-- **লগইন/সাইনআপ**: নিরাপদ ব্যবহারকারী অ্যাকাউন্ট ব্যবস্থাপনা
-- **অর্ডার প্লেসমেন্ট**: সহজ অর্ডার দেওয়ার সিস্টেম
-- **পেমেন্ট**: নানান পেমেন্ট পদ্ধতি (ক্যাশ অন ডেলিভারি, bKash, Nagad, Rocket)
-- **রিভিউ সিস্টেম**: ৫-তারকা রেটিং এবং মন্তব্য
-- **অর্ডার ট্র্যাকিং**: রিয়েল-টাইম অর্ডার অবস্থা
+* **Repository:** [https://github.com/Rifat-Bin-Alam/Smart-Delivery-WebApp](https://github.com/Rifat-Bin-Alam/Smart-Delivery-WebApp)
+* **Author & Developer:** [Rifat Bin Alam](https://rifat-bin-alam.vercel.app/)
+* **Contact:** [rifat5566123@gmail.com](mailto:rifat5566123@gmail.com)
 
-### 👨‍💼 অ্যাডমিন প্যানেল (Admin Panel)
-- **ড্যাশবোর্ড**: বিক্রয়, রাজস্ব, এবং ডেলিভারি পরিসংখ্যান
-- **গ্রাহক ব্যবস্থাপনা**: গ্রাহক এবং ডেলিভারি এজেন্ট পরিচালনা
-- **অর্ডার ব্যবস্থাপনা**: অর্ডার প্রক্রিয়াকরণ এবং অবস্থা আপডেট
-- **পণ্য/সেবা ব্যবস্থাপনা**: পণ্য ক্যাটালগ পরিচালনা
-- **ডেলিভারি ব্যবস্থাপনা**: ডেলিভারি এজেন্ট নির্ধারণ এবং ট্র্যাকিং
-- **পেমেন্ট ব্যবস্থাপনা**: পেমেন্ট এবং রিফান্ড প্রক্রিয়াকরণ
-- **রিভিউ মডারেশন**: রিভিউ অনুমোদন এবং রিপোর্ট ব্যবস্থাপনা
+---
 
-### 🚚 ডেলিভারি সিস্টেম (Delivery System)
-- **ডেলিভারি এজেন্ট অ্যাপ**: এজেন্টদের জন্য বিশেষ ইন্টারফেস
-- **লোকেশন ট্র্যাকিং**: রিয়েল-টাইম অবস্থান আপডেট
-- **অর্ডার অ্যাসাইনমেন্ট**: স্বয়ংক্রিয় এজেন্ট নির্ধারণ
-- **ডেলিভারি এলাকা**: বিভিন্ন এলাকার জন্য ফি এবং সময় নির্ধারণ
+## ⚡ Key Features by User Role
 
-## প্রযুক্তি স্ট্যাক (Technology Stack)
+### 🛍️ Customer Experience
+* **Essentials Catalog:** High-priority categories for Fresh Food, Daily Groceries, Pharmaceuticals, LPG Cooking Gas, Electronics, and Documents.
+* **Smart Filter & Search:** Instant search filter across title and category with dynamic fallback cards.
+* **Persistent Cart System:** Client-side cache in `localStorage` backed by strict server-side price recalculation at checkout.
+* **Secure Checkout Flow:** Atomic order creation, zone-based delivery fee computation, and address validation.
+* **Visual Status Tracker:** 4-step progressive timeline (`Placed & Verified` → `Packed & Sealed` → `Out for Delivery` → `Delivered`).
+* **Verified Customer Reviews:** Star rating (1-5), review comments, and verified purchase badges.
+* **Self-Service Cancellation:** Cancellation flow for `pending`/`confirmed` orders with automatic stock restoral.
 
-- **Backend**: Django 5.2.6
-- **Database**: SQLite (Development), PostgreSQL/MySQL (Production)
-- **Frontend**: Bootstrap 5.3, HTML5, CSS3, JavaScript
-- **Fonts**: Noto Sans Bengali (বাংলা ফন্ট)
-- **Icons**: Font Awesome 6.4
-- **Payment**: bKash, Nagad, Rocket integration ready
-- **Maps**: Google Maps API ready
-- **SMS/Email**: Twilio, Django Email ready
+### 🚴 Delivery Agent Portal
+* **Dedicated Courier Hub:** Protected portal for couriers (`/delivery/`).
+* **Duty Status Toggle:** Switch active availability state for automated dispatcher assignments.
+* **Task Management:** Real-time assignment cards with pickup addresses, customer phone numbers, and delivery instructions.
+* **Delivery Status Logs:** Real-time checkpoint updates (`Picked Up` → `On The Way` → `Delivered`).
 
-## ইনস্টলেশন (Installation)
+### 🛡️ Operations Control Center (Admin & Staff)
+* **Live Operations Deck (`/dashboard/admin/`):** Real-time aggregation of completed orders, pending volumes, and active agents.
+* **Catalog Management (`/orders/admin/`):** Add, update, and manage inventory stock levels with automated low-stock warnings.
+* **Order Dispatch & Invoicing:** View and update order statuses, assign couriers, and generate printable PDF invoices.
+* **Review Moderation (`/reviews/admin/`):** Moderate customer reviews and provide official merchant responses.
 
-### ১. প্রজেক্ট ক্লোন করুন
+---
+
+## 🛠️ Technology Stack
+
+| Component | Technology | Description |
+|---|---|---|
+| **Backend Framework** | Django 5.2 | High-level Python Web Framework (MTV Architecture) |
+| **Runtime Engine** | Python 3.13 | Verified compatibility with modern typing and performance |
+| **Database** | SQLite 3 / PostgreSQL | ACID-compliant relational storage with ORM parameterization |
+| **Frontend Styling** | Bootstrap 5.3 + CSS3 | Deep Navy (`#0F172A`) & Electric Blue (`#0284C7`) Design System |
+| **Icons & Assets** | FontAwesome 6 + SVG | Custom vector branding and 9 category fallback SVG illustrations |
+| **Client Scripting** | Vanilla JavaScript (ES6) | Reactive cart engine, real-time DOM updates, toast notifications |
+
+---
+
+## 🏛️ Architecture Highlights
+
+1. **Custom User Authentication:** Extends `AbstractUser` to support email authentication (`EmailOrUsernameModelBackend`), unique phone numbers, and specialized profiles (`CustomerProfile`, `DeliveryAgentProfile`).
+2. **Decoupled Cart & Server Verification:** Cart items are cached in the client's browser for instantaneous interaction. Upon submitting checkout, Django queries the database directly to prevent client-side price tampering.
+3. **Graceful Fallback Image Pipeline:** Custom `image_url` property on `ProductService` returns uploaded photography if present, or dynamically routes to category-specific vector SVGs (`static/images/fallbacks/`). All image tags feature client-side `onerror` fallbacks to eliminate broken image icons.
+4. **100% English-Only Interface:** Complete elimination of foreign or corrupted text across public customer portals, admin consoles, forms, and database fixtures.
+
+---
+
+## 🔐 Local Development Credentials
+
+SwiftDrop comes pre-seeded with two dedicated demo accounts for local testing and evaluation:
+
+| Account Type | Email Address | Password | Permissions & Role |
+|:---|:---|:---|:---|
+| **Customer** | `rifat@gmail.com` | `123456` | Standard customer ordering, cart checkout, tracking & reviews |
+| **Admin** | `rifatadmin@gmail.com` | `123456` | Full Django superuser, staff portal, inventory & operations control |
+
+> **Quick-Fill Feature:** On the login page (`/users/login/`), click either the **"Customer"** or **"Admin"** helper badge to auto-populate credentials instantly.
+
+---
+
+## 🚀 Step-by-Step Local Setup
+
+### 1. Prerequisites
+* Python 3.10+ (Python 3.13 recommended)
+* Git installed
+* PowerShell / Terminal
+
+### 2. Clone Repository
 ```bash
-git clone <repository-url>
-cd Nagaribashi_express
+git clone https://github.com/Rifat-Bin-Alam/Smart-Delivery-WebApp.git
+cd Smart-Delivery-WebApp
 ```
 
-### ২. ভার্চুয়াল এনভায়রনমেন্ট তৈরি করুন
+### 3. Create & Activate Virtual Environment
+```powershell
+# Windows PowerShell
+python -m venv .venv
+.\.venv\Scripts\Activate.ps1
+```
 ```bash
-python -m venv venv
-# Windows
-venv\Scripts\activate
-# Linux/Mac
-source venv/bin/activate
+# macOS / Linux
+python3 -m venv .venv
+source .venv/bin/activate
 ```
 
-### ৩. প্রয়োজনীয় প্যাকেজ ইনস্টল করুন
+### 4. Install Dependencies
 ```bash
 pip install -r requirements.txt
 ```
 
-### ৪. ডেটাবেস মাইগ্রেশন চালান
+### 5. Apply Database Migrations
 ```bash
-python manage.py makemigrations
 python manage.py migrate
 ```
 
-### ৫. সুপারইউজার তৈরি করুন
+### 6. Seed Demo Accounts & Catalog
 ```bash
-python manage.py createsuperuser
+python manage.py setup_data
 ```
 
-### ৬. স্ট্যাটিক ফাইল সংগ্রহ করুন
-```bash
-python manage.py collectstatic
-```
-
-### ৭. সার্ভার চালু করুন
+### 7. Run Local Development Server
 ```bash
 python manage.py runserver
 ```
-
-## কনফিগারেশন (Configuration)
-
-### পরিবেশ পরিবর্তনশীল (Environment Variables)
-`.env` ফাইল তৈরি করুন:
-```env
-SECRET_KEY=your-secret-key-here
-DEBUG=True
-ALLOWED_HOSTS=localhost,127.0.0.1
-DATABASE_URL=sqlite:///db.sqlite3
-EMAIL_HOST=smtp.gmail.com
-EMAIL_PORT=587
-EMAIL_USE_TLS=True
-EMAIL_HOST_USER=your-email@gmail.com
-EMAIL_HOST_PASSWORD=your-app-password
-```
-
-### ডেটাবেস কনফিগারেশন
-`settings.py` এ ডেটাবেস সেটিংস:
-```python
-# SQLite (Development)
-DATABASES = {
-    'default': {
-        'ENGINE': 'django.db.backends.sqlite3',
-        'NAME': BASE_DIR / 'db.sqlite3',
-    }
-}
-
-# PostgreSQL (Production)
-DATABASES = {
-    'default': {
-        'ENGINE': 'django.db.backends.postgresql',
-        'NAME': 'nagaribashi_express',
-        'USER': 'your-username',
-        'PASSWORD': 'your-password',
-        'HOST': 'localhost',
-        'PORT': '5432',
-    }
-}
-```
-
-## ব্যবহারকারী ধরন (User Types)
-
-### ১. গ্রাহক (Customer)
-- অর্ডার দেওয়া
-- পেমেন্ট করা
-- রিভিউ দেওয়া
-- অর্ডার ট্র্যাক করা
-
-### ২. ডেলিভারি এজেন্ট (Delivery Agent)
-- অর্ডার গ্রহণ
-- অবস্থান আপডেট
-- ডেলিভারি সম্পন্ন
-- রেটিং পাওয়া
-
-### ৩. অ্যাডমিন (Admin)
-- সব ব্যবস্থাপনা
-- রিপোর্ট দেখা
-- সিস্টেম কনফিগার
-
-## API এন্ডপয়েন্ট (API Endpoints)
-
-### গ্রাহক API
-- `GET /` - হোম পেজ
-- `GET /orders/` - অর্ডার তালিকা
-- `POST /orders/create/` - নতুন অর্ডার
-- `GET /orders/{id}/track/` - অর্ডার ট্র্যাক
-- `POST /payments/create/` - পেমেন্ট
-- `GET /reviews/` - রিভিউ তালিকা
-- `POST /reviews/create/` - রিভিউ তৈরি
-
-### অ্যাডমিন API
-- `GET /admin-dashboard/` - অ্যাডমিন ড্যাশবোর্ড
-- `GET /orders/admin/` - অ্যাডমিন অর্ডার তালিকা
-- `POST /delivery/assign/` - ডেলিভারি এজেন্ট নির্ধারণ
-- `GET /analytics/` - বিশ্লেষণ রিপোর্ট
-
-## ডেটাবেস মডেল (Database Models)
-
-### Users App
-- `User` - কাস্টম ইউজার মডেল
-- `CustomerProfile` - গ্রাহক প্রোফাইল
-- `DeliveryAgentProfile` - ডেলিভারি এজেন্ট প্রোফাইল
-
-### Orders App
-- `ProductService` - পণ্য/সেবা
-- `Order` - অর্ডার
-- `OrderItem` - অর্ডার আইটেম
-- `OrderStatusHistory` - অর্ডার অবস্থা ইতিহাস
-
-### Delivery App
-- `DeliveryAssignment` - ডেলিভারি নির্ধারণ
-- `DeliveryStatus` - ডেলিভারি অবস্থা
-- `DeliveryArea` - ডেলিভারি এলাকা
-- `DeliveryAgentLocation` - এজেন্ট অবস্থান
-- `DeliveryRating` - ডেলিভারি রেটিং
-
-### Payments App
-- `Payment` - পেমেন্ট
-- `PaymentMethod` - পেমেন্ট পদ্ধতি
-- `PaymentTransaction` - পেমেন্ট লেনদেন
-- `Refund` - রিফান্ড
-
-### Reviews App
-- `Review` - রিভিউ
-- `ReviewImage` - রিভিউ ছবি
-- `ReviewHelpful` - সহায়ক ভোট
-- `ReviewResponse` - রিভিউ উত্তর
-- `ReviewReport` - রিভিউ রিপোর্ট
-
-### Dashboard App
-- `DashboardWidget` - ড্যাশবোর্ড উইজেট
-- `AnalyticsData` - বিশ্লেষণ ডেটা
-- `Notification` - নোটিফিকেশন
-- `SystemLog` - সিস্টেম লগ
-- `FAQ` - প্রায়শই জিজ্ঞাসিত প্রশ্ন
-
-## সিকিউরিটি (Security)
-
-- CSRF Protection
-- XSS Protection
-- SQL Injection Protection
-- Password Validation
-- User Authentication
-- Permission-based Access Control
-
-## ডেপ্লয়মেন্ট (Deployment)
-
-### Heroku
-```bash
-# Procfile
-web: gunicorn Nagaribashi_express.wsgi --log-file -
-
-# Runtime
-python-3.11.0
-```
-
-### DigitalOcean
-```bash
-# Nginx configuration
-# Gunicorn service
-# SSL certificate
-```
-
-### AWS
-```bash
-# EC2 instance
-# RDS database
-# S3 storage
-# CloudFront CDN
-```
-
-## টেস্টিং (Testing)
-
-```bash
-# Unit tests
-python manage.py test
-
-# Coverage report
-coverage run --source='.' manage.py test
-coverage report
-coverage html
-```
-
-## কন্ট্রিবিউশন (Contribution)
-
-1. Fork the repository
-2. Create a feature branch
-3. Commit your changes
-4. Push to the branch
-5. Create a Pull Request
-
-
+Visit `http://127.0.0.1:8000/` in your browser.
 
 ---
 
-**Made with ❤️ in Bangladesh**
-#   S m a r t - D e l i v e r y - W e b A p p 
- 
- #   S m a r t - D e l i v e r y - W e b A p p 
- 
- 
+## 🧪 Automated Testing Suite
+
+SwiftDrop includes 25 unit and integration tests verifying every critical flow:
+```bash
+# Run all application test suites
+python manage.py test users orders delivery payments reviews dashboard
+```
+
+Test coverage includes:
+* Email-based customer authentication & profile signals
+* Dynamic catalog listing and category filtering
+* Tamper-proof price recalculation and stock deduction
+* Delivery zone fee lookup and assignment linking
+* Payment transaction logging and refund records
+* Order cancellation state rules and stock restoral
+
+---
+
+## 📂 Project Structure
+
+```
+Smart-Delivery-WebApp/
+├── dashboard/               # Operational control, landing page, metrics & FAQs
+├── users/                   # Custom User model, auth backend, customer/agent profiles
+├── orders/                  # Catalog, cart, checkout, order state machine & tracking
+├── delivery/                # Driver dispatch, zones, and fulfillment status logs
+├── payments/                # Ledger, simulated transaction logging, and refunds
+├── reviews/                 # Verified purchase reviews, star ratings & moderation
+├── templates/               # Modular HTML5 templates with clean component hierarchy
+├── static/                  # Design system: styles.css, main.js, fallback SVG icons
+├── media/                   # Uploaded media assets (product images, avatars)
+├── Nagaribashi_express/     # Django settings, WSGI/ASGI, root URL routing
+├── requirements.txt         # Pinned Python dependencies (Django 5.2, Pillow, etc.)
+├── .env.example             # Safe environment variable configuration template
+├── manage.py                # Django management executable
+└── README.md                # Project documentation
+```
+
+---
+
+## 🌐 Production Deployment Summary
+
+For production deployment (Render, Railway, VPS, PythonAnywhere):
+1. Configure environment variables in `.env` based on `.env.example`.
+2. Set `DJANGO_DEBUG=False` and configure `DJANGO_ALLOWED_HOSTS`.
+3. Collect static files:
+   ```bash
+   python manage.py collectstatic --noinput --settings=Nagaribashi_express.settings_production
+   ```
+4. Run WSGI server via Gunicorn:
+   ```bash
+   gunicorn Nagaribashi_express.wsgi:application --bind 0.0.0.0:8000
+   ```
+Detailed deployment instructions are documented in [DEPLOYMENT_GUIDE.md](DEPLOYMENT_GUIDE.md).
+
+---
+
+## 🖼️ User Interface Preview
+
+```
++--------------------------------------------------------------------------+
+|  SwiftDrop  [Essentials]  [Categories]  [Track Order]     [Cart (2)] [Rifat]  |
++--------------------------------------------------------------------------+
+|                                                                          |
+|   Your Essentials. Delivered Smarter.                                    |
+|   30-minute hyperlocal delivery across your city.                        |
+|                                                                          |
+|   [ Fresh Food ]   [ Groceries ]   [ Pharmacy ]   [ LPG Gas Refill ]     |
+|                                                                          |
++--------------------------------------------------------------------------+
+|  Featured Essentials:                                                    |
+|  +-------------------+  +-------------------+  +-------------------+     |
+|  | [Food SVG / Photo]|  | [Gas SVG / Photo] |  | [Med SVG / Photo] |     |
+|  | Chicken Biryani   |  | LPG Gas (12kg)    |  | Paracetamol 500mg |     |
+|  | ৳ 280.00          |  | ৳ 1,350.00        |  | ৳ 25.00           |     |
+|  | [ Add to Cart ]   |  | [ Add to Cart ]   |  | [ Add to Cart ]   |     |
+|  +-------------------+  +-------------------+  +-------------------+     |
++--------------------------------------------------------------------------+
+```
+
+---
+
+## 📄 Authorship, Copyright & Attribution
+
+* **Developed by:** [Rifat Bin Alam](https://rifat-bin-alam.vercel.app/)
+* **Portfolio:** [https://rifat-bin-alam.vercel.app/](https://rifat-bin-alam.vercel.app/)
+* **GitHub Repository:** [https://github.com/Rifat-Bin-Alam/Smart-Delivery-WebApp](https://github.com/Rifat-Bin-Alam/Smart-Delivery-WebApp)
+* **Contact Email:** [rifat5566123@gmail.com](mailto:rifat5566123@gmail.com)
+* **License:** [MIT License](LICENSE)
+
+*© 2026 SwiftDrop. All rights reserved. Developed by Rifat Bin Alam.*

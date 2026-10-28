@@ -1,0 +1,24 @@
+<svg xmlns="http://www.w3.org/2000/svg" viewBox="0 0 400 300" width="100%" height="100%">
+  <defs>
+    <linearGradient id="elecGrad" x1="0%" y1="0%" x2="100%" y2="100%">
+      <stop offset="0%" stop-color="#F8FAFC" />
+      <stop offset="100%" stop-color="#E2E8F0" />
+    </linearGradient>
+    <linearGradient id="screenGrad" x1="0%" y1="0%" x2="100%" y2="100%">
+      <stop offset="0%" stop-color="#38BDF8" />
+      <stop offset="100%" stop-color="#0284C7" />
+    </linearGradient>
+  </defs>
+  <rect width="400" height="300" rx="16" fill="url(#elecGrad)"/>
+  <circle cx="200" cy="135" r="75" fill="#FFFFFF" stroke="#CBD5E1" stroke-width="3" filter="drop-shadow(0 4px 6px rgba(15,23,42,0.08))"/>
+  <!-- Smartphone Outline -->
+  <rect x="175" y="95" width="50" height="85" rx="8" fill="#1E293B"/>
+  <rect x="179" y="103" width="42" height="68" rx="4" fill="url(#screenGrad)"/>
+  <circle cx="200" cy="99" r="2" fill="#64748B"/>
+  <circle cx="200" cy="175" r="3" fill="#64748B"/>
+  <!-- Power Spark -->
+  <path d="M 203 125 L 196 137 H 201 L 198 148 L 205 135 H 200 Z" fill="#FDE047"/>
+  <!-- Text Label -->
+  <rect x="110" y="235" width="180" height="28" rx="14" fill="#0F172A"/>
+  <text x="200" y="253" text-anchor="middle" fill="#FFFFFF" font-family="-apple-system, BlinkMacSystemFont, 'Segoe UI', Roboto, sans-serif" font-size="12" font-weight="600" letter-spacing="0.5">ELECTRONICS &amp; GADGETS</text>
+</svg>

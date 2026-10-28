@@ -1,244 +1,282 @@
 {% extends 'base.html' %}
 {% load static %}
 
-{% block title %}হোম - নগরবাসী এক্সপ্রেস{% endblock %}
+{% block title %}SwiftDrop — Your Essentials. Delivered Smarter.{% endblock %}
 
 {% block content %}
 <!-- Hero Section -->
-<section class="hero-section bg-primary text-white py-5">
-    <div class="container">
-        <div class="row align-items-center">
-            <div class="col-lg-6">
-                <h1 class="display-4 fw-bold mb-4">স্বাগতম নগরবাসী এক্সপ্রেসে</h1>
-                <p class="lead mb-4">আপনার শহরের সবচেয়ে নির্ভরযোগ্য ডেলিভারি সেবা। খাবার, ঔষধ, গ্যাস এবং আরও অনেক কিছু দ্রুত এবং নিরাপদে পৌঁছে দেওয়া।</p>
-                <div class="d-flex gap-3">
-                    <a href="{% url 'orders:order_create' %}" class="btn btn-light btn-lg">
-                        <i class="fas fa-shopping-cart me-2"></i>অর্ডার করুন
+<section class="sd-hero">
+    <div class="container position-relative">
+        <div class="row align-items-center g-5">
+            <div class="col-lg-7">
+                <div class="sd-hero-badge">
+                    <i class="fas fa-bolt"></i> FAST 30-MINUTE DELIVERY ACROSS DHAKA
+                </div>
+                <h1 class="sd-hero-title">
+                    Your Essentials.<br>
+                    <span style="background: linear-gradient(90deg, #38BDF8, #60A5FA); -webkit-background-clip: text; -webkit-text-fill-color: transparent;">Delivered Smarter.</span>
+                </h1>
+                <p class="sd-hero-subtitle">
+                    Order piping-hot meals, fresh groceries, emergency pharmacy prescriptions, and LPG gas cylinders right to your doorstep. Transparent rates, real-time rider tracking, and reliable service.
+                </p>
+                <div class="d-flex flex-wrap gap-3">
+                    <a href="{% url 'orders:products' %}" class="btn btn-primary btn-lg px-4 shadow">
+                        <i class="fas fa-shopping-bag me-2"></i> Browse Essentials
                     </a>
-                    <a href="{% url 'orders:product_list' %}" class="btn btn-outline-light btn-lg">
-                        <i class="fas fa-eye me-2"></i>পণ্য দেখুন
-                    </a>
+                    {% if user.is_authenticated %}
+                        <a href="{% url 'orders:order_list' %}" class="btn btn-outline-light btn-lg px-4">
+                            <i class="fas fa-receipt me-2"></i> My Orders
+                        </a>
+                    {% else %}
+                        <a href="{% url 'users:login' %}" class="btn btn-outline-light btn-lg px-4">
+                            <i class="fas fa-sign-in-alt me-2"></i> Sign In to Order
+                        </a>
+                    {% endif %}
+                </div>
+
+                <!-- Trust Badges -->
+                <div class="d-flex align-items-center gap-4 mt-5 pt-3 border-top border-white border-opacity-10 text-white-50 small">
+                    <div class="d-flex align-items-center gap-2">
+                        <i class="fas fa-check-circle text-success fs-6"></i> Verified Quality
+                    </div>
+                    <div class="d-flex align-items-center gap-2">
+                        <i class="fas fa-shield-alt text-info fs-6"></i> Safe & Contactless
+                    </div>
+                    <div class="d-flex align-items-center gap-2">
+                        <i class="fas fa-wallet text-warning fs-6"></i> Cash & Mobile Wallets
+                    </div>
                 </div>
             </div>
-            <div class="col-lg-6">
-                <img src="{% static 'images/delivery-hero.png' %}" alt="ডেলিভারি সেবা" class="img-fluid">
+
+            <div class="col-lg-5 d-none d-lg-block text-center">
+                <div class="p-4 rounded-4" style="background: rgba(255, 255, 255, 0.05); backdrop-filter: blur(10px); border: 1px solid rgba(255, 255, 255, 0.1);">
+                    <div class="text-uppercase fw-bold text-info mb-3 small letter-spacing-1">Quick Fleet Highlights</div>
+                    <div class="row g-3">
+                        <div class="col-6">
+                            <div class="bg-dark bg-opacity-50 p-3 rounded-3 border border-secondary border-opacity-25 text-center">
+                                <div class="fs-3 fw-bold text-white">{{ total_orders|default:"100+" }}</div>
+                                <div class="small text-white-50">Deliveries Completed</div>
+                            </div>
+                        </div>
+                        <div class="col-6">
+                            <div class="bg-dark bg-opacity-50 p-3 rounded-3 border border-secondary border-opacity-25 text-center">
+                                <div class="fs-3 fw-bold text-info">{{ total_zones|default:"5" }}</div>
+                                <div class="small text-white-50">Coverage Zones</div>
+                            </div>
+                        </div>
+                        <div class="col-6">
+                            <div class="bg-dark bg-opacity-50 p-3 rounded-3 border border-secondary border-opacity-25 text-center">
+                                <div class="fs-3 fw-bold text-warning">25-35m</div>
+                                <div class="small text-white-50">Avg Turnaround</div>
+                            </div>
+                        </div>
+                        <div class="col-6">
+                            <div class="bg-dark bg-opacity-50 p-3 rounded-3 border border-secondary border-opacity-25 text-center">
+                                <div class="fs-3 fw-bold text-success">৳ 40-70</div>
+                                <div class="small text-white-50">Delivery Flat Rates</div>
+                            </div>
+                        </div>
+                    </div>
+                    <div class="mt-3 text-start small text-white-50">
+                        <i class="fas fa-map-pin text-danger me-1"></i> Serving Dhanmondi, Gulshan, Banani, Uttara, Mirpur, and Mohakhali.
+                    </div>
+                </div>
             </div>
         </div>
     </div>
 </section>
 
-<!-- Statistics Section -->
+<!-- Category Quick Navigation -->
+<section class="py-5 bg-white border-bottom">
+    <div class="container">
+        <div class="d-flex flex-column flex-md-row justify-content-between align-items-md-center gap-3 mb-4">
+            <div>
+                <h3 class="fw-bold mb-1 text-dark">Essential Categories</h3>
+                <p class="text-muted small mb-0">Select a category to browse in-stock essentials</p>
+            </div>
+            <a href="{% url 'orders:products' %}" class="btn btn-outline-primary btn-sm rounded-pill">
+                View Full Catalog <i class="fas fa-arrow-right ms-1"></i>
+            </a>
+        </div>
+
+        <div class="row g-3">
+            <div class="col-6 col-md-3">
+                <a href="{% url 'orders:product_category' 'food' %}" class="text-decoration-none">
+                    <div class="card h-100 border text-center p-3 hover-shadow transition rounded-3">
+                        <div class="mx-auto mb-2 rounded-circle bg-danger bg-opacity-10 text-danger d-flex align-items-center justify-content-center" style="width: 54px; height: 54px;">
+                            <i class="fas fa-utensils fs-4"></i>
+                        </div>
+                        <h6 class="fw-bold text-dark mb-1">Food & Meals</h6>
+                        <small class="text-muted">Hot meals & snacks</small>
+                    </div>
+                </a>
+            </div>
+
+            <div class="col-6 col-md-3">
+                <a href="{% url 'orders:product_category' 'groceries' %}" class="text-decoration-none">
+                    <div class="card h-100 border text-center p-3 hover-shadow transition rounded-3">
+                        <div class="mx-auto mb-2 rounded-circle bg-success bg-opacity-10 text-success d-flex align-items-center justify-content-center" style="width: 54px; height: 54px;">
+                            <i class="fas fa-shopping-basket fs-4"></i>
+                        </div>
+                        <h6 class="fw-bold text-dark mb-1">Groceries & Fresh</h6>
+                        <small class="text-muted">Pantry, dairy & eggs</small>
+                    </div>
+                </a>
+            </div>
+
+            <div class="col-6 col-md-3">
+                <a href="{% url 'orders:product_category' 'medicine' %}" class="text-decoration-none">
+                    <div class="card h-100 border text-center p-3 hover-shadow transition rounded-3">
+                        <div class="mx-auto mb-2 rounded-circle bg-info bg-opacity-10 text-info d-flex align-items-center justify-content-center" style="width: 54px; height: 54px;">
+                            <i class="fas fa-prescription-bottle-alt fs-4"></i>
+                        </div>
+                        <h6 class="fw-bold text-dark mb-1">Pharmacy & Care</h6>
+                        <small class="text-muted">OTC meds & first aid</small>
+                    </div>
+                </a>
+            </div>
+
+            <div class="col-6 col-md-3">
+                <a href="{% url 'orders:product_category' 'gas' %}" class="text-decoration-none">
+                    <div class="card h-100 border text-center p-3 hover-shadow transition rounded-3">
+                        <div class="mx-auto mb-2 rounded-circle bg-warning bg-opacity-10 text-warning d-flex align-items-center justify-content-center" style="width: 54px; height: 54px;">
+                            <i class="fas fa-burn fs-4"></i>
+                        </div>
+                        <h6 class="fw-bold text-dark mb-1">LPG Gas Cylinders</h6>
+                        <small class="text-muted">Safe kitchen refills</small>
+                    </div>
+                </a>
+            </div>
+        </div>
+    </div>
+</section>
+
+<!-- Featured Essentials Showcase -->
 <section class="py-5">
     <div class="container">
-        <div class="row text-center">
-            <div class="col-md-3 mb-4">
-                <div class="card stat-card h-100">
-                    <div class="card-body">
-                        <div class="stat-number text-primary">{{ total_products }}</div>
-                        <div class="stat-label">পণ্য/সেবা</div>
-                    </div>
-                </div>
+        <div class="d-flex justify-content-between align-items-center mb-4">
+            <div>
+                <h3 class="fw-bold mb-1">Featured Essentials</h3>
+                <p class="text-muted small mb-0">High-demand items ready for instant dispatch</p>
             </div>
-            <div class="col-md-3 mb-4">
-                <div class="card stat-card h-100">
-                    <div class="card-body">
-                        <div class="stat-number text-success">{{ total_orders }}</div>
-                        <div class="stat-label">সফল অর্ডার</div>
-                    </div>
-                </div>
-            </div>
-            <div class="col-md-3 mb-4">
-                <div class="card stat-card h-100">
-                    <div class="card-body">
-                        <div class="stat-number text-info">{{ total_customers }}</div>
-                        <div class="stat-label">সন্তুষ্ট গ্রাহক</div>
-                    </div>
-                </div>
-            </div>
-            <div class="col-md-3 mb-4">
-                <div class="card stat-card h-100">
-                    <div class="card-body">
-                        <div class="stat-number text-warning">{{ total_delivery_agents }}</div>
-                        <div class="stat-label">ডেলিভারি এজেন্ট</div>
-                    </div>
-                </div>
-            </div>
+            <a href="{% url 'orders:products' %}" class="btn btn-sm btn-link text-primary text-decoration-none fw-semibold">
+                See All Items ({{ total_products }}) <i class="fas fa-chevron-right ms-1"></i>
+            </a>
         </div>
-    </div>
-</section>
 
-<!-- Featured Products Section -->
-<section class="py-5 bg-light">
-    <div class="container">
-        <div class="row">
-            <div class="col-12">
-                <h2 class="text-center mb-5">জনপ্রিয় পণ্য/সেবা</h2>
-            </div>
-        </div>
-        <div class="row">
+        <div class="row g-4">
             {% for product in featured_products %}
-            <div class="col-lg-4 col-md-6 mb-4">
-                <div class="card product-card h-100">
-                    {% if product.image %}
-                    <img src="{{ product.image.url }}" class="card-img-top product-image" alt="{{ product.name }}">
-                    {% else %}
-                    <div class="card-img-top product-image bg-light d-flex align-items-center justify-content-center">
-                        <i class="fas fa-box fa-3x text-muted"></i>
+            <div class="col-lg-3 col-md-4 col-sm-6" data-product-id="{{ product.id }}" data-product-name="{{ product.name }}" data-product-price="{{ product.price }}" data-product-stock="{{ product.stock_quantity }}">
+                <div class="sd-product-card">
+                    <div class="sd-product-img-wrapper">
+                        <img src="{{ product.image_url }}" alt="{{ product.name }}" loading="lazy" onerror="this.onerror=null; this.src='{% static 'images/fallbacks/default.svg' %}';">
+                        <span class="position-absolute top-0 start-0 m-2 badge bg-primary bg-opacity-90 small">
+                            {{ product.get_category_display }}
+                        </span>
                     </div>
-                    {% endif %}
-                    <div class="card-body d-flex flex-column">
-                        <h5 class="card-title">{{ product.name }}</h5>
-                        <p class="card-text text-muted">{{ product.description|truncatechars:100 }}</p>
-                        <div class="mt-auto">
-                            <div class="d-flex justify-content-between align-items-center">
-                                <span class="h5 text-primary currency">{{ product.price }}</span>
-                                <span class="badge bg-secondary">{{ product.get_category_display }}</span>
+                    <div class="sd-product-body">
+                        <a href="{% url 'orders:product_detail' product.id %}" class="text-decoration-none">
+                            <h5 class="sd-product-title">{{ product.name }}</h5>
+                        </a>
+                        <p class="sd-product-desc">{{ product.description }}</p>
+                        
+                        <div class="sd-product-footer">
+                            <div>
+                                <span class="sd-product-price">৳{{ product.price }}</span>
+                                <div class="text-muted" style="font-size: 0.72rem;">{{ product.get_stock_status }}</div>
                             </div>
-                            <div class="mt-3">
-                                <a href="{% url 'orders:product_detail' product.pk %}" class="btn btn-primary w-100">
-                                    <i class="fas fa-eye me-2"></i>বিস্তারিত দেখুন
-                                </a>
-                            </div>
+                            <button class="btn btn-primary btn-sm rounded-pill btn-add-to-cart" data-product-id="{{ product.id }}" data-product-name="{{ product.name }}" data-product-price="{{ product.price }}" data-product-stock="{{ product.stock_quantity }}" data-product-image="{{ product.image_url }}">
+                                <i class="fas fa-cart-plus me-1"></i> Add
+                            </button>
                         </div>
                     </div>
                 </div>
             </div>
             {% empty %}
-            <div class="col-12">
-                <div class="text-center py-5">
-                    <i class="fas fa-box fa-3x text-muted mb-3"></i>
-                    <h4 class="text-muted">কোন পণ্য পাওয়া যায়নি</h4>
-                    <p class="text-muted">শীঘ্রই নতুন পণ্য যোগ করা হবে</p>
-                </div>
+            <div class="col-12 text-center py-5">
+                <i class="fas fa-box-open fa-3x text-muted mb-3"></i>
+                <h5 class="text-muted">No products available at the moment.</h5>
             </div>
             {% endfor %}
         </div>
-        <div class="row">
-            <div class="col-12 text-center">
-                <a href="{% url 'orders:product_list' %}" class="btn btn-outline-primary btn-lg">
-                    <i class="fas fa-th-large me-2"></i>সব পণ্য দেখুন
-                </a>
+    </div>
+</section>
+
+<!-- How SwiftDrop Works -->
+<section class="py-5 bg-white border-top border-bottom">
+    <div class="container text-center">
+        <h3 class="fw-bold mb-2">How SwiftDrop Works</h3>
+        <p class="text-muted max-w-600 mx-auto mb-5">Getting your daily necessities delivered takes three straightforward steps.</p>
+
+        <div class="row g-4">
+            <div class="col-md-4">
+                <div class="p-4 rounded-3 h-100 border border-light-subtle bg-light bg-opacity-50">
+                    <div class="rounded-circle bg-primary bg-opacity-10 text-primary d-flex align-items-center justify-content-center mx-auto mb-3" style="width: 64px; height: 64px;">
+                        <i class="fas fa-search fs-3"></i>
+                    </div>
+                    <h5 class="fw-bold mb-2">1. Choose Essentials</h5>
+                    <p class="text-muted small mb-0">Browse through food, groceries, pharmacy, or gas. Add whatever you need to your shopping cart with instant stock verification.</p>
+                </div>
+            </div>
+
+            <div class="col-md-4">
+                <div class="p-4 rounded-3 h-100 border border-light-subtle bg-light bg-opacity-50">
+                    <div class="rounded-circle bg-info bg-opacity-10 text-info d-flex align-items-center justify-content-center mx-auto mb-3" style="width: 64px; height: 64px;">
+                        <i class="fas fa-map-marked-alt fs-3"></i>
+                    </div>
+                    <h5 class="fw-bold mb-2">2. Confirm Zone & Payment</h5>
+                    <p class="text-muted small mb-0">Select your Dhaka delivery zone to calculate transparent delivery fees. Choose Cash on Delivery, bKash, Nagad, or Rocket.</p>
+                </div>
+            </div>
+
+            <div class="col-md-4">
+                <div class="p-4 rounded-3 h-100 border border-light-subtle bg-light bg-opacity-50">
+                    <div class="rounded-circle bg-success bg-opacity-10 text-success d-flex align-items-center justify-content-center mx-auto mb-3" style="width: 64px; height: 64px;">
+                        <i class="fas fa-shipping-fast fs-3"></i>
+                    </div>
+                    <h5 class="fw-bold mb-2">3. Rapid Delivery</h5>
+                    <p class="text-muted small mb-0">A professional rider is dispatched immediately. Follow your delivery status step-by-step until it safely reaches your hands.</p>
+                </div>
             </div>
         </div>
     </div>
 </section>
 
-<!-- Services Section -->
+<!-- Verified Customer Reviews Section -->
 <section class="py-5">
     <div class="container">
-        <div class="row">
-            <div class="col-12">
-                <h2 class="text-center mb-5">আমাদের সেবা</h2>
+        <div class="d-flex justify-content-between align-items-center mb-4">
+            <div>
+                <h3 class="fw-bold mb-1">Customer Experiences</h3>
+                <p class="text-muted small mb-0">Real reviews from verified SwiftDrop shoppers</p>
             </div>
+            <a href="{% url 'reviews:review_list' %}" class="btn btn-outline-primary btn-sm rounded-pill">
+                Read All Reviews <i class="fas fa-arrow-right ms-1"></i>
+            </a>
         </div>
-        <div class="row">
-            <div class="col-lg-3 col-md-6 mb-4">
-                <div class="card text-center h-100">
-                    <div class="card-body">
-                        <i class="fas fa-utensils fa-3x text-primary mb-3"></i>
-                        <h5 class="card-title">খাবার ডেলিভারি</h5>
-                        <p class="card-text">তাজা এবং সুস্বাদু খাবার আপনার দরজায়</p>
-                    </div>
-                </div>
-            </div>
-            <div class="col-lg-3 col-md-6 mb-4">
-                <div class="card text-center h-100">
-                    <div class="card-body">
-                        <i class="fas fa-pills fa-3x text-success mb-3"></i>
-                        <h5 class="card-title">ঔষধ ডেলিভারি</h5>
-                        <p class="card-text">জরুরি ঔষধ দ্রুত এবং নিরাপদে পৌঁছে দেওয়া</p>
-                    </div>
-                </div>
-            </div>
-            <div class="col-lg-3 col-md-6 mb-4">
-                <div class="card text-center h-100">
-                    <div class="card-body">
-                        <i class="fas fa-fire fa-3x text-warning mb-3"></i>
-                        <h5 class="card-title">গ্যাস ডেলিভারি</h5>
-                        <p class="card-text">রান্নার গ্যাস নিরাপদে এবং সময়মতো</p>
-                    </div>
-                </div>
-            </div>
-            <div class="col-lg-3 col-md-6 mb-4">
-                <div class="card text-center h-100">
-                    <div class="card-body">
-                        <i class="fas fa-shopping-bag fa-3x text-info mb-3"></i>
-                        <h5 class="card-title">মুদি সামগ্রী</h5>
-                        <p class="card-text">দৈনন্দিন প্রয়োজনীয় জিনিসপত্র</p>
-                    </div>
-                </div>
-            </div>
-        </div>
-    </div>
-</section>
 
-<!-- Recent Reviews Section -->
-{% if recent_reviews %}
-<section class="py-5 bg-light">
-    <div class="container">
-        <div class="row">
-            <div class="col-12">
-                <h2 class="text-center mb-5">গ্রাহকদের মতামত</h2>
-            </div>
-        </div>
-        <div class="row">
+        <div class="row g-4">
             {% for review in recent_reviews %}
-            <div class="col-lg-4 col-md-6 mb-4">
-                <div class="card h-100">
-                    <div class="card-body">
-                        <div class="d-flex align-items-center mb-3">
-                            <div class="rating me-3">
-                                {% for i in "12345" %}
-                                    {% if forloop.counter <= review.rating %}
-                                        <i class="fas fa-star"></i>
-                                    {% else %}
-                                        <i class="far fa-star"></i>
-                                    {% endif %}
-                                {% endfor %}
-                            </div>
-                            <small class="text-muted">{{ review.created_at|date:"d M Y" }}</small>
-                        </div>
-                        <h6 class="card-title">{{ review.product.name }}</h6>
-                        <p class="card-text">{{ review.comment|truncatechars:100 }}</p>
-                        <small class="text-muted">- {{ review.customer.get_full_name|default:review.customer.username }}</small>
+            <div class="col-md-6 col-lg-3">
+                <div class="card h-100 p-3 border shadow-sm rounded-3">
+                    <div class="d-flex justify-content-between align-items-center mb-2">
+                        <span class="text-warning small">{{ review.stars }}</span>
+                        <span class="badge bg-success bg-opacity-10 text-success" style="font-size: 0.65rem;">Verified</span>
+                    </div>
+                    <h6 class="fw-bold text-dark mb-1">{{ review.title|default:"Great service!" }}</h6>
+                    <p class="text-muted small mb-3 flex-grow-1">"{{ review.comment|truncatechars:110 }}"</p>
+                    <div class="pt-2 border-top d-flex justify-content-between align-items-center" style="font-size: 0.75rem;">
+                        <span class="fw-bold text-dark">{{ review.customer.first_name|default:review.customer.username }}</span>
+                        <span class="text-muted">{{ review.product.name|truncatechars:18 }}</span>
                     </div>
                 </div>
+            </div>
+            {% empty %}
+            <div class="col-12 text-center text-muted py-4">
+                No reviews posted yet. Be the first to share your experience!
             </div>
             {% endfor %}
-        </div>
-        <div class="row">
-            <div class="col-12 text-center">
-                <a href="{% url 'reviews:review_list' %}" class="btn btn-outline-primary btn-lg">
-                    <i class="fas fa-star me-2"></i>সব রিভিউ দেখুন
-                </a>
-            </div>
-        </div>
-    </div>
-</section>
-{% endif %}
-
-<!-- CTA Section -->
-<section class="py-5 bg-primary text-white">
-    <div class="container">
-        <div class="row">
-            <div class="col-12 text-center">
-                <h2 class="mb-4">আজই শুরু করুন</h2>
-                <p class="lead mb-4">নগরবাসী এক্সপ্রেসের সাথে আপনার শহরে দ্রুত এবং নির্ভরযোগ্য ডেলিভারি সেবা পান</p>
-                {% if not user.is_authenticated %}
-                <a href="{% url 'users:signup' %}" class="btn btn-light btn-lg me-3">
-                    <i class="fas fa-user-plus me-2"></i>এখনই সাইনআপ করুন
-                </a>
-                <a href="{% url 'users:login' %}" class="btn btn-outline-light btn-lg">
-                    <i class="fas fa-sign-in-alt me-2"></i>লগইন করুন
-                </a>
-                {% else %}
-                <a href="{% url 'orders:order_create' %}" class="btn btn-light btn-lg">
-                    <i class="fas fa-shopping-cart me-2"></i>অর্ডার করুন
-                </a>
-                {% endif %}
-            </div>
         </div>
     </div>
 </section>
 {% endblock %}
-

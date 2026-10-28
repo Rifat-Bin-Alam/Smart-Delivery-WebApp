@@ -1,0 +1,26 @@
+<svg xmlns="http://www.w3.org/2000/svg" viewBox="0 0 400 300" width="100%" height="100%">
+  <defs>
+    <linearGradient id="gasGrad" x1="0%" y1="0%" x2="100%" y2="100%">
+      <stop offset="0%" stop-color="#FFF7ED" />
+      <stop offset="100%" stop-color="#FFEDD5" />
+    </linearGradient>
+    <linearGradient id="cylGrad" x1="0%" y1="0%" x2="100%" y2="100%">
+      <stop offset="0%" stop-color="#EA580C" />
+      <stop offset="100%" stop-color="#C2410C" />
+    </linearGradient>
+  </defs>
+  <rect width="400" height="300" rx="16" fill="url(#gasGrad)"/>
+  <circle cx="200" cy="135" r="75" fill="#FFFFFF" stroke="#FED7AA" stroke-width="3" filter="drop-shadow(0 4px 6px rgba(234,88,12,0.08))"/>
+  <!-- Top collar -->
+  <rect x="188" y="90" width="24" height="12" rx="4" fill="#78350F"/>
+  <ellipse cx="200" cy="90" rx="14" ry="4" fill="#9A3412"/>
+  <!-- Cylinder Body -->
+  <rect x="175" y="100" width="50" height="75" rx="16" fill="url(#cylGrad)"/>
+  <!-- Valve / Handle -->
+  <path d="M 185 100 C 185 88, 215 88, 215 100" stroke="#78350F" stroke-width="4" stroke-linecap="round" fill="none"/>
+  <!-- Flame symbol -->
+  <path d="M 200 125 C 194 135, 192 142, 195 150 C 198 156, 204 156, 206 150 C 208 145, 204 138, 200 125 Z" fill="#FDE047"/>
+  <!-- Text Label -->
+  <rect x="135" y="235" width="130" height="28" rx="14" fill="#0F172A"/>
+  <text x="200" y="253" text-anchor="middle" fill="#FFFFFF" font-family="-apple-system, BlinkMacSystemFont, 'Segoe UI', Roboto, sans-serif" font-size="12" font-weight="600" letter-spacing="0.5">LPG COOKING GAS</text>
+</svg>

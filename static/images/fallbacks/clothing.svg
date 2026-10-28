@@ -1,0 +1,15 @@
+<svg xmlns="http://www.w3.org/2000/svg" viewBox="0 0 400 300" width="100%" height="100%">
+  <defs>
+    <linearGradient id="clothGrad" x1="0%" y1="0%" x2="100%" y2="100%">
+      <stop offset="0%" stop-color="#FDF4FF" />
+      <stop offset="100%" stop-color="#F5D0FE" />
+    </linearGradient>
+  </defs>
+  <rect width="400" height="300" rx="16" fill="url(#clothGrad)"/>
+  <circle cx="200" cy="135" r="75" fill="#FFFFFF" stroke="#F0ABFC" stroke-width="3" filter="drop-shadow(0 4px 6px rgba(192,38,211,0.08))"/>
+  <!-- T-Shirt Icon -->
+  <path d="M 185 105 C 190 110, 210 110, 215 105 L 235 115 L 225 130 L 218 126 V 165 H 182 V 126 L 175 130 L 165 115 Z" fill="#A855F7"/>
+  <!-- Text Label -->
+  <rect x="120" y="235" width="160" height="28" rx="14" fill="#0F172A"/>
+  <text x="200" y="253" text-anchor="middle" fill="#FFFFFF" font-family="-apple-system, BlinkMacSystemFont, 'Segoe UI', Roboto, sans-serif" font-size="12" font-weight="600" letter-spacing="0.5">APPAREL &amp; LIFESTYLE</text>
+</svg>

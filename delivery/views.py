@@ -1,230 +1,289 @@
-from django.shortcuts import render, get_object_or_404
+from django.shortcuts import render, get_object_or_404, redirect
 from django.contrib.auth.decorators import login_required
 from django.contrib.auth.mixins import LoginRequiredMixin, UserPassesTestMixin
-from django.views.generic import ListView, DetailView, CreateView, UpdateView, DeleteView, TemplateView
+from django.views.generic import ListView, DetailView, CreateView, UpdateView, TemplateView
 from django.contrib import messages
-from django.urls import reverse_lazy
-from django.contrib.auth import get_user_model
+from django.urls import reverse_lazy, reverse
+from django.utils import timezone
+from django.http import JsonResponse
+from django.views.decorators.http import require_http_methods
+from decimal import Decimal
+import json
+
 from .models import DeliveryAssignment, DeliveryStatus, DeliveryArea, DeliveryAgentLocation, DeliveryRating
+from orders.models import Order, OrderStatusHistory
+from payments.models import Payment
+from django.contrib.auth import get_user_model
 
 User = get_user_model()
 
-class DeliveryListView(LoginRequiredMixin, ListView):
+
+class DeliveryAgentRequiredMixin(LoginRequiredMixin, UserPassesTestMixin):
     """
-    Delivery list view
+    Enforce delivery partner or staff access.
     """
-    model = DeliveryAssignment
-    template_name = 'delivery/delivery_list.html'
-    context_object_name = 'deliveries'
-    paginate_by = 20
-    
-    def get_queryset(self):
-        if self.request.user.is_admin:
-            return DeliveryAssignment.objects.all().order_by('-assigned_at')
-        elif self.request.user.is_delivery_agent:
-            return DeliveryAssignment.objects.filter(delivery_agent=self.request.user).order_by('-assigned_at')
-        else:
-            return DeliveryAssignment.objects.none()
+    def test_func(self):
+        user = self.request.user
+        return bool(user.is_authenticated and (
+            user.is_staff or
+            user.is_superuser or
+            getattr(user, 'user_type', None) in ('delivery_agent', 'admin')
+        ))
+
+    def handle_no_permission(self):
+        if self.request.user.is_authenticated:
+            messages.error(self.request, 'Access restricted to authorized delivery partners.')
+            return redirect('dashboard:home')
+        return super().handle_no_permission()
 
 
-class DeliveryDetailView(LoginRequiredMixin, DetailView):
-    """
-    Delivery detail view
-    """
-    model = DeliveryAssignment
-    template_name = 'delivery/delivery_detail.html'
-    context_object_name = 'delivery'
+class AdminRequiredMixin(LoginRequiredMixin, UserPassesTestMixin):
+    def test_func(self):
+        user = self.request.user
+        return bool(user.is_authenticated and (
+            user.is_staff or
+            user.is_superuser or
+            getattr(user, 'user_type', None) == 'admin'
+        ))
+
+    def handle_no_permission(self):
+        if self.request.user.is_authenticated:
+            messages.error(self.request, 'Administrative access required.')
+            return redirect('dashboard:home')
+        return super().handle_no_permission()
 
 
-class MyDeliveriesView(LoginRequiredMixin, ListView):
+class MyDeliveriesView(DeliveryAgentRequiredMixin, ListView):
     """
-    My deliveries view for delivery agents
+    Delivery Partner workspace showing active assignments and delivery history.
     """
     model = DeliveryAssignment
     template_name = 'delivery/my_deliveries.html'
     context_object_name = 'deliveries'
-    paginate_by = 20
-    
+    paginate_by = 15
+
     def get_queryset(self):
-        return DeliveryAssignment.objects.filter(delivery_agent=self.request.user).order_by('-assigned_at')
+        user = self.request.user
+        queryset = DeliveryAssignment.objects.filter(
+            delivery_agent=user
+        ).select_related('order', 'order__customer').order_by('-assigned_at')
+
+        tab = self.request.GET.get('tab', 'active')
+        if tab == 'active':
+            queryset = queryset.exclude(order__status__in=['delivered', 'cancelled', 'returned'])
+        elif tab == 'completed':
+            queryset = queryset.filter(order__status='delivered')
+
+        return queryset
+
+    def get_context_data(self, **kwargs):
+        context = super().get_context_data(**kwargs)
+        user = self.request.user
+
+        context['active_tab'] = self.request.GET.get('tab', 'active')
+
+        # Agent profile and stats
+        profile = getattr(user, 'delivery_agent_profile', None)
+        context['agent_profile'] = profile
+        context['total_completed'] = DeliveryAssignment.objects.filter(
+            delivery_agent=user,
+            order__status='delivered'
+        ).count()
+        context['active_count'] = DeliveryAssignment.objects.filter(
+            delivery_agent=user
+        ).exclude(order__status__in=['delivered', 'cancelled', 'returned']).count()
+
+        return context
 
 
-class MyDeliveryDetailView(LoginRequiredMixin, DetailView):
+class MyDeliveryDetailView(DeliveryAgentRequiredMixin, DetailView):
     """
-    My delivery detail view for delivery agents
+    Detailed delivery task page for the assigned rider.
     """
     model = DeliveryAssignment
     template_name = 'delivery/my_delivery_detail.html'
-    context_object_name = 'delivery'
-    
+    context_object_name = 'assignment'
+
     def get_queryset(self):
-        return DeliveryAssignment.objects.filter(delivery_agent=self.request.user)
+        user = self.request.user
+        if user.is_staff or getattr(user, 'user_type', None) == 'admin':
+            return DeliveryAssignment.objects.all()
+        return DeliveryAssignment.objects.filter(delivery_agent=user)
+
+    def get_context_data(self, **kwargs):
+        context = super().get_context_data(**kwargs)
+        assignment = self.object
+        order = assignment.order
+        context['order'] = order
+        context['items'] = order.items.select_related('product').all()
+        context['payments'] = order.payments.all()
+        context['updates'] = assignment.status_updates.order_by('-timestamp')
+        return context
+
+
+class DeliveryStatusUpdateView(DeliveryAgentRequiredMixin, TemplateView):
+    """
+    Status advancement for riders: Picked Up, In Transit, Delivered.
+    """
+    def post(self, request, *args, **kwargs):
+        user = request.user
+        assignment = get_object_or_404(DeliveryAssignment, pk=kwargs['pk'])
+
+        # Enforce assignment ownership
+        if assignment.delivery_agent != user and not (user.is_staff or getattr(user, 'user_type', None) == 'admin'):
+            messages.error(request, 'You are not authorized to update this delivery task.')
+            return redirect('delivery:my_deliveries')
+
+        action = request.POST.get('action')
+        notes = request.POST.get('notes', '').strip()
+        location_text = request.POST.get('location', '').strip()
+        order = assignment.order
+
+        if action == 'pickup':
+            assignment.status_updates.create(
+                status='picked_up',
+                location=location_text or 'Merchant Dispatch',
+                notes=notes or 'Package picked up by rider.'
+            )
+            order.status = 'dispatched'
+            order.save()
+            OrderStatusHistory.objects.create(
+                order=order,
+                status='dispatched',
+                notes=f"Picked up by rider {user.get_full_name() or user.username}.",
+                created_by=user
+            )
+            messages.success(request, f"Order #{order.order_number} marked as Picked Up & Out for Delivery.")
+
+        elif action == 'in_transit':
+            assignment.status_updates.create(
+                status='in_transit',
+                location=location_text or 'En Route to Delivery Address',
+                notes=notes or 'Rider is in transit towards customer location.'
+            )
+            messages.success(request, f"Transit update recorded for order #{order.order_number}.")
+
+        elif action == 'deliver':
+            assignment.status_updates.create(
+                status='delivered',
+                location=location_text or order.delivery_address,
+                notes=notes or 'Package handed over to customer.'
+            )
+            assignment.actual_delivery_time = timezone.now()
+            assignment.save()
+
+            order.status = 'delivered'
+            order.save()
+
+            # Complete any pending COD payments
+            for payment in order.payments.filter(status='pending'):
+                payment.status = 'completed'
+                payment.paid_at = timezone.now()
+                payment.save()
+
+            # Update agent delivery stats
+            if hasattr(user, 'delivery_agent_profile') and user.delivery_agent_profile:
+                user.delivery_agent_profile.total_deliveries += 1
+                user.delivery_agent_profile.save()
+
+            OrderStatusHistory.objects.create(
+                order=order,
+                status='delivered',
+                notes=f"Delivery completed and confirmed by rider {user.get_full_name() or user.username}.",
+                created_by=user
+            )
+            messages.success(request, f"Congratulations! Order #{order.order_number} has been marked as Delivered.")
+
+        return redirect('delivery:my_delivery_detail', pk=assignment.pk)
+
+
+class LocationUpdateView(DeliveryAgentRequiredMixin, TemplateView):
+    """
+    Simulated or browser-reported location ping for riders.
+    """
+    def post(self, request, *args, **kwargs):
+        try:
+            data = json.loads(request.body)
+            lat = Decimal(str(data.get('latitude', '23.8103')))
+            lng = Decimal(str(data.get('longitude', '90.4125')))
+            address_note = str(data.get('address', 'Simulated Rider Location Ping')).strip()
+
+            DeliveryAgentLocation.objects.create(
+                delivery_agent=request.user,
+                latitude=lat,
+                longitude=lng,
+                address=address_note
+            )
+            return JsonResponse({'success': True, 'message': 'Location ping logged successfully.'})
+        except Exception as e:
+            return JsonResponse({'success': False, 'message': str(e)}, status=400)
 
 
 class DeliveryAreaListView(ListView):
     """
-    Delivery area list view
+    Public listing of serviceable zones and standard delivery rates.
     """
     model = DeliveryArea
     template_name = 'delivery/delivery_area_list.html'
     context_object_name = 'areas'
-    
+
     def get_queryset(self):
-        return DeliveryArea.objects.filter(is_active=True).order_by('name')
-
-
-class DeliveryAreaDetailView(DetailView):
-    """
-    Delivery area detail view
-    """
-    model = DeliveryArea
-    template_name = 'delivery/delivery_area_detail.html'
-    context_object_name = 'area'
+        return DeliveryArea.objects.filter(is_active=True).order_by('delivery_fee')
 
 
 class DeliveryRateView(LoginRequiredMixin, CreateView):
     """
-    Delivery rating view
+    Customer rating for their delivery partner after successful delivery.
     """
     model = DeliveryRating
-    template_name = 'delivery/delivery_rate.html'
     fields = ['rating', 'comment']
-    success_url = reverse_lazy('delivery:my_deliveries')
-    
+    template_name = 'delivery/delivery_rate.html'
+
     def form_valid(self, form):
-        delivery_assignment = get_object_or_404(DeliveryAssignment, pk=self.kwargs['pk'])
-        form.instance.delivery_assignment = delivery_assignment
+        assignment = get_object_or_404(DeliveryAssignment, pk=self.kwargs['pk'])
+        if assignment.order.customer != self.request.user:
+            messages.error(self.request, 'You may only rate deliveries for your own orders.')
+            return redirect('orders:order_list')
+
+        form.instance.delivery_assignment = assignment
         response = super().form_valid(form)
-        messages.success(self.request, 'রেটিং সফলভাবে দেওয়া হয়েছে।')
+
+        # Recalculate agent average rating
+        agent_profile = getattr(assignment.delivery_agent, 'delivery_agent_profile', None)
+        if agent_profile:
+            ratings = DeliveryRating.objects.filter(delivery_assignment__delivery_agent=assignment.delivery_agent)
+            if ratings.exists():
+                avg = sum(r.rating for r in ratings) / ratings.count()
+                agent_profile.rating = round(avg, 1)
+                agent_profile.save()
+
+        messages.success(self.request, 'Thank you! Your delivery rating has been submitted.')
         return response
 
-
-class DeliveryRatingListView(ListView):
-    """
-    Delivery rating list view
-    """
-    model = DeliveryRating
-    template_name = 'delivery/delivery_rating_list.html'
-    context_object_name = 'ratings'
-    paginate_by = 20
-    
-    def get_queryset(self):
-        return DeliveryRating.objects.all().order_by('-rated_at')
+    def get_success_url(self):
+        return reverse('orders:order_detail', kwargs={'pk': self.object.delivery_assignment.order.pk})
 
 
-# Admin views
-class AdminDeliveryListView(LoginRequiredMixin, UserPassesTestMixin, ListView):
-    """
-    Admin delivery list view
-    """
+# Administrative views
+class AdminDeliveryListView(AdminRequiredMixin, ListView):
     model = DeliveryAssignment
     template_name = 'delivery/admin_delivery_list.html'
     context_object_name = 'deliveries'
     paginate_by = 20
-    
-    def test_func(self):
-        return self.request.user.is_admin
-    
+
     def get_queryset(self):
-        return DeliveryAssignment.objects.all().order_by('-assigned_at')
+        return DeliveryAssignment.objects.all().select_related(
+            'order', 'delivery_agent', 'delivery_agent__delivery_agent_profile'
+        ).order_by('-assigned_at')
 
 
-class AdminDeliveryAssignView(LoginRequiredMixin, UserPassesTestMixin, TemplateView):
-    """
-    Admin delivery assign view
-    """
-    template_name = 'delivery/admin_delivery_assign.html'
-    
-    def test_func(self):
-        return self.request.user.is_admin
-
-
-class AdminDeliveryAgentListView(LoginRequiredMixin, UserPassesTestMixin, ListView):
-    """
-    Admin delivery agent list view
-    """
+class AdminDeliveryAgentListView(AdminRequiredMixin, ListView):
     model = User
     template_name = 'delivery/admin_delivery_agent_list.html'
     context_object_name = 'delivery_agents'
     paginate_by = 20
-    
-    def test_func(self):
-        return self.request.user.is_admin
-    
+
     def get_queryset(self):
-        return User.objects.filter(user_type='delivery_agent').order_by('-date_joined')
-
-
-class AdminDeliveryAgentDetailView(LoginRequiredMixin, UserPassesTestMixin, DetailView):
-    """
-    Admin delivery agent detail view
-    """
-    model = User
-    template_name = 'delivery/admin_delivery_agent_detail.html'
-    context_object_name = 'delivery_agent'
-    
-    def test_func(self):
-        return self.request.user.is_admin
-    
-    def get_queryset(self):
-        return User.objects.filter(user_type='delivery_agent')
-
-
-class AdminAssignDeliveryView(LoginRequiredMixin, UserPassesTestMixin, TemplateView):
-    """
-    Admin assign delivery view
-    """
-    template_name = 'delivery/admin_assign_delivery.html'
-    
-    def test_func(self):
-        return self.request.user.is_admin
-
-
-# Status update views
-class DeliveryStatusUpdateView(LoginRequiredMixin, TemplateView):
-    """
-    Delivery status update view
-    """
-    template_name = 'delivery/delivery_status_update.html'
-
-
-class DeliveryPickupView(LoginRequiredMixin, TemplateView):
-    """
-    Delivery pickup view
-    """
-    template_name = 'delivery/delivery_pickup.html'
-
-
-class DeliveryDeliverView(LoginRequiredMixin, TemplateView):
-    """
-    Delivery deliver view
-    """
-    template_name = 'delivery/delivery_deliver.html'
-
-
-class DeliveryCompleteView(LoginRequiredMixin, TemplateView):
-    """
-    Delivery complete view
-    """
-    template_name = 'delivery/delivery_complete.html'
-
-
-# Location tracking views
-class LocationUpdateView(LoginRequiredMixin, TemplateView):
-    """
-    Location update view
-    """
-    template_name = 'delivery/location_update.html'
-
-
-class LocationHistoryView(LoginRequiredMixin, ListView):
-    """
-    Location history view
-    """
-    model = DeliveryAgentLocation
-    template_name = 'delivery/location_history.html'
-    context_object_name = 'locations'
-    paginate_by = 20
-    
-    def get_queryset(self):
-        return DeliveryAgentLocation.objects.filter(delivery_agent=self.request.user).order_by('-timestamp')
+        return User.objects.filter(
+            user_type='delivery_agent'
+        ).select_related('delivery_agent_profile').order_by('-date_joined')

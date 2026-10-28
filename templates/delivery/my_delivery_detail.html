@@ -1,0 +1,212 @@
+{% extends 'base.html' %}
+{% load static %}
+
+{% block title %}Task #{{ order.order_number }} — Delivery Portal{% endblock %}
+
+{% block content %}
+<div class="container py-4">
+    <!-- Breadcrumb -->
+    <nav aria-label="breadcrumb">
+        <ol class="breadcrumb small">
+            <li class="breadcrumb-item"><a href="{% url 'dashboard:home' %}">Home</a></li>
+            <li class="breadcrumb-item"><a href="{% url 'delivery:my_deliveries' %}">Delivery Portal</a></li>
+            <li class="breadcrumb-item active" aria-current="page">Task #{{ order.order_number }}</li>
+        </ol>
+    </nav>
+
+    <!-- Header -->
+    <div class="d-flex flex-column flex-md-row justify-content-between align-items-md-center gap-3 mb-4">
+        <div>
+            <div class="d-flex align-items-center gap-2 mb-1">
+                <h2 class="fw-bold mb-0 text-dark">Task for Order #{{ order.order_number }}</h2>
+                <span class="badge-status status-{{ order.status }} fs-6">
+                    {{ order.get_status_display }}
+                </span>
+            </div>
+            <p class="text-muted small mb-0">Assigned at {{ assignment.assigned_at|date:"M d, Y • h:i A" }}</p>
+        </div>
+
+        <div class="d-flex gap-2">
+            <a href="tel:{{ order.customer.phone_number }}" class="btn btn-outline-primary rounded-pill px-3">
+                <i class="fas fa-phone me-1"></i> Call Customer ({{ order.customer.phone_number }})
+            </a>
+            <a href="{% url 'delivery:my_deliveries' %}" class="btn btn-outline-secondary rounded-pill px-3">
+                Back to Tasks
+            </a>
+        </div>
+    </div>
+
+    <div class="row g-4">
+        <!-- Delivery Actions & Address -->
+        <div class="col-lg-7">
+            <!-- Rider Action Panel -->
+            <div class="card border shadow-sm rounded-4 mb-4 overflow-hidden">
+                <div class="card-header bg-primary text-white py-3">
+                    <h5 class="fw-bold mb-0"><i class="fas fa-tasks me-2"></i>Advance Delivery Status</h5>
+                </div>
+                <div class="card-body p-4">
+                    {% if order.status != 'delivered' and order.status != 'cancelled' %}
+                    <form method="post" action="{% url 'delivery:delivery_status_update' assignment.pk %}">
+                        {% csrf_token %}
+
+                        <div class="mb-3">
+                            <label class="form-label small fw-bold">Current Location Checkpoint (Optional)</label>
+                            <input type="text" name="location" class="form-control" placeholder="e.g. Near Dhanmondi 27 / En route">
+                        </div>
+
+                        <div class="mb-3">
+                            <label class="form-label small fw-bold">Delivery Notes (Optional)</label>
+                            <input type="text" name="notes" class="form-control" placeholder="e.g. Received at merchant desk / Customer verified">
+                        </div>
+
+                        <div class="d-flex flex-wrap gap-2 pt-2">
+                            {% if order.status != 'dispatched' %}
+                            <button type="submit" name="action" value="pickup" class="btn btn-primary rounded-pill px-4">
+                                <i class="fas fa-box-check me-1"></i> Mark Picked Up
+                            </button>
+                            {% endif %}
+
+                            <button type="submit" name="action" value="in_transit" class="btn btn-outline-primary rounded-pill px-4">
+                                <i class="fas fa-route me-1"></i> Update In-Transit
+                            </button>
+
+                            <button type="submit" name="action" value="deliver" class="btn btn-success rounded-pill px-4 fw-bold">
+                                <i class="fas fa-check-double me-1"></i> Confirm Delivered
+                            </button>
+                        </div>
+                    </form>
+                    {% else %}
+                    <div class="alert alert-success d-flex align-items-center mb-0" role="alert">
+                        <i class="fas fa-check-circle fs-4 me-3"></i>
+                        <div>
+                            <strong>Delivery Completed</strong>
+                            <div class="small">This order has been successfully delivered and confirmed. Great work!</div>
+                        </div>
+                    </div>
+                    {% endif %}
+                </div>
+            </div>
+
+            <!-- Customer & Destination Card -->
+            <div class="card border shadow-sm rounded-3 mb-4">
+                <div class="card-header bg-white py-3">
+                    <h5 class="fw-bold text-dark mb-0"><i class="fas fa-map-marker-alt text-danger me-2"></i>Destination Details</h5>
+                </div>
+                <div class="card-body p-4">
+                    <div class="row g-3">
+                        <div class="col-md-6">
+                            <small class="text-muted d-block">Customer Name</small>
+                            <strong class="text-dark">{{ order.customer.get_full_name|default:order.customer.username }}</strong>
+                        </div>
+                        <div class="col-md-6">
+                            <small class="text-muted d-block">Phone Number</small>
+                            <strong class="text-dark">{{ order.customer.phone_number }}</strong>
+                        </div>
+                        <div class="col-12">
+                            <small class="text-muted d-block">Delivery Zone & Address</small>
+                            <div class="p-3 bg-light rounded text-dark mt-1">
+                                <strong class="text-primary">{{ order.delivery_city }}:</strong> {{ order.delivery_address }}
+                            </div>
+                        </div>
+                        {% if order.special_instructions %}
+                        <div class="col-12">
+                            <small class="text-muted d-block">Customer Delivery Note</small>
+                            <div class="p-2 bg-info bg-opacity-10 text-dark small rounded mt-1">
+                                {{ order.special_instructions }}
+                            </div>
+                        </div>
+                        {% endif %}
+                    </div>
+                </div>
+            </div>
+
+            <!-- Delivery Checkpoint Updates -->
+            <div class="card border shadow-sm rounded-3">
+                <div class="card-header bg-white py-3">
+                    <h5 class="fw-bold text-dark mb-0"><i class="fas fa-history text-muted me-2"></i>Checkpoint Log</h5>
+                </div>
+                <div class="card-body p-4">
+                    {% for update in updates %}
+                    <div class="d-flex align-items-start gap-3 pb-3 {% if not forloop.last %}border-bottom mb-3{% endif %}">
+                        <div class="rounded-circle bg-light border text-primary d-flex align-items-center justify-content-center" style="width: 32px; height: 32px;">
+                            <i class="fas fa-check small"></i>
+                        </div>
+                        <div class="flex-grow-1">
+                            <div class="d-flex justify-content-between">
+                                <strong class="text-dark text-capitalize">{{ update.get_status_display }}</strong>
+                                <small class="text-muted">{{ update.timestamp|date:"h:i A" }}</small>
+                            </div>
+                            <div class="small text-muted">{{ update.location|default:"En route" }}</div>
+                            {% if update.notes %}<div class="small text-dark mt-1">{{ update.notes }}</div>{% endif %}
+                        </div>
+                    </div>
+                    {% empty %}
+                    <div class="text-muted small">No updates logged yet. Use the action panel above.</div>
+                    {% endfor %}
+                </div>
+            </div>
+        </div>
+
+        <!-- Sidebar (Items & Payment Collection) -->
+        <div class="col-lg-5">
+            <!-- Payment Collection Banner -->
+            <div class="card border shadow-sm rounded-3 mb-4">
+                <div class="card-header bg-white py-3">
+                    <h5 class="fw-bold text-dark mb-0">Payment Instruction</h5>
+                </div>
+                <div class="card-body p-4">
+                    {% for p in payments %}
+                        {% if p.payment_method == 'cash_on_delivery' %}
+                            <div class="p-3 bg-warning bg-opacity-10 border border-warning rounded-3 mb-2">
+                                <div class="fw-bold text-dark mb-1"><i class="fas fa-money-bill-wave text-warning me-1"></i> Cash on Delivery Order</div>
+                                <div class="fs-3 fw-extrabold text-dark">Collect ৳ {{ order.total_amount }}</div>
+                                <div class="small text-muted mt-1">Please collect full cash before handing over the sealed package.</div>
+                            </div>
+                        {% else %}
+                            <div class="p-3 bg-success bg-opacity-10 border border-success rounded-3 mb-2">
+                                <div class="fw-bold text-success mb-1"><i class="fas fa-check-circle me-1"></i> Order is Prepaid</div>
+                                <div class="fs-4 fw-bold text-dark">{{ p.get_payment_method_display }}</div>
+                                <div class="small text-muted">Do NOT collect cash from customer for this delivery.</div>
+                            </div>
+                        {% endif %}
+                    {% empty %}
+                        <div class="fw-bold text-dark">Order Total: ৳ {{ order.total_amount }}</div>
+                    {% endfor %}
+                </div>
+            </div>
+
+            <!-- Items to Deliver -->
+            <div class="card border shadow-sm rounded-3">
+                <div class="card-header bg-white py-3">
+                    <h5 class="fw-bold text-dark mb-0">Package Items ({{ items.count }})</h5>
+                </div>
+                <div class="card-body p-0">
+                    <div class="sd-table-container border-0 rounded-0">
+                        <table class="table sd-table mb-0">
+                            <thead>
+                                <tr>
+                                    <th>Item</th>
+                                    <th class="text-center">Qty</th>
+                                    <th class="text-end">Price</th>
+                                </tr>
+                            </thead>
+                            <tbody>
+                                {% for item in items %}
+                                <tr>
+                                    <td>
+                                        <div class="fw-semibold text-dark">{{ item.product.name }}</div>
+                                        <small class="text-muted">{{ item.product.get_category_display }}</small>
+                                    </td>
+                                    <td class="text-center font-monospace fw-bold">{{ item.quantity }}</td>
+                                    <td class="text-end fw-semibold">৳ {{ item.total_price }}</td>
+                                </tr>
+                                {% endfor %}
+                            </tbody>
+                        </table>
+                    </div>
+                </div>
+            </div>
+        </div>
+    </div>
+</div>
+{% endblock %}

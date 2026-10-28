@@ -23,14 +23,14 @@ class PaymentAdmin(admin.ModelAdmin):
     inlines = [PaymentTransactionInline]
     
     fieldsets = (
-        (_('পেমেন্ট তথ্য'), {
+        (_('Payment Information'), {
             'fields': ('order', 'payment_method', 'amount', 'status', 'transaction_id', 'payment_reference')
         }),
-        (_('পেমেন্ট বিবরণ'), {
+        (_('Payment Details'), {
             'fields': ('payment_details',),
             'classes': ('collapse',)
         }),
-        (_('সময়'), {
+        (_('Timestamps'), {
             'fields': ('created_at', 'updated_at', 'paid_at'),
             'classes': ('collapse',)
         }),
@@ -52,16 +52,16 @@ class PaymentMethodAdmin(admin.ModelAdmin):
     readonly_fields = ('created_at',)
     
     fieldsets = (
-        (_('মূল তথ্য'), {
+        (_('Basic Information'), {
             'fields': ('name', 'code', 'description', 'is_active')
         }),
-        (_('ছবি'), {
+        (_('Icon'), {
             'fields': ('icon',)
         }),
-        (_('ফি ও সীমা'), {
+        (_('Fees & Limits'), {
             'fields': ('processing_fee', 'min_amount', 'max_amount')
         }),
-        (_('সময়'), {
+        (_('Timestamps'), {
             'fields': ('created_at',),
             'classes': ('collapse',)
         }),
@@ -93,13 +93,13 @@ class RefundAdmin(admin.ModelAdmin):
     readonly_fields = ('created_at', 'processed_at')
     
     fieldsets = (
-        (_('রিফান্ড তথ্য'), {
+        (_('Refund Information'), {
             'fields': ('payment', 'amount', 'reason', 'status', 'refund_reference')
         }),
-        (_('প্রক্রিয়াকরণ'), {
+        (_('Processing'), {
             'fields': ('processed_by', 'processed_at')
         }),
-        (_('সময়'), {
+        (_('Timestamps'), {
             'fields': ('created_at',),
             'classes': ('collapse',)
         }),

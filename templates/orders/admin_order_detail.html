@@ -1,0 +1,243 @@
+{% extends 'base.html' %}
+{% load static %}
+
+{% block title %}Manage Order #{{ order.order_number }} - SwiftDrop Admin{% endblock %}
+
+{% block content %}
+<div class="container py-4">
+    <!-- Breadcrumb & Top Bar -->
+    <div class="d-flex flex-wrap justify-content-between align-items-center mb-4 gap-3">
+        <div>
+            <nav aria-label="breadcrumb">
+                <ol class="breadcrumb mb-1 small">
+                    <li class="breadcrumb-item"><a href="{% url 'dashboard:admin_dashboard' %}">Admin Operations</a></li>
+                    <li class="breadcrumb-item"><a href="{% url 'orders:admin_order_list' %}">Orders Console</a></li>
+                    <li class="breadcrumb-item active">#{{ order.order_number }}</li>
+                </ol>
+            </nav>
+            <h2 class="fw-bold text-navy mb-0">Order #{{ order.order_number }}</h2>
+            <span class="text-muted small">Placed on {{ order.created_at|date:"F d, Y at H:i" }}</span>
+        </div>
+        <div class="d-flex gap-2">
+            <a href="{% url 'orders:invoice' order.id %}" target="_blank" class="btn btn-outline-secondary btn-sm rounded-pill px-3">
+                <i class="fas fa-print me-1"></i> Print Invoice
+            </a>
+            <a href="{% url 'orders:admin_order_list' %}" class="btn btn-outline-secondary btn-sm rounded-pill px-3">
+                <i class="fas fa-arrow-left me-1"></i> Back to Console
+            </a>
+        </div>
+    </div>
+
+    <div class="row g-4">
+        <!-- Left Side: Order items, customer info, delivery notes -->
+        <div class="col-lg-8">
+            <!-- Items Card -->
+            <div class="card border-0 shadow-sm rounded-4 mb-4 overflow-hidden">
+                <div class="card-header bg-white border-0 pt-4 px-4 pb-2">
+                    <h5 class="fw-bold text-navy mb-0">Ordered Items</h5>
+                </div>
+                <div class="table-responsive">
+                    <table class="table align-middle mb-0">
+                        <thead class="table-light small text-muted">
+                            <tr>
+                                <th class="ps-4">Item</th>
+                                <th>Category</th>
+                                <th>Unit Price</th>
+                                <th>Qty</th>
+                                <th class="text-end pe-4">Line Total</th>
+                            </tr>
+                        </thead>
+                        <tbody>
+                            {% for item in items %}
+                                <tr>
+                                    <td class="ps-4 fw-semibold text-navy">{{ item.product.name }}</td>
+                                    <td><span class="badge bg-light text-navy border">{{ item.product.get_category_display }}</span></td>
+                                    <td>৳{{ item.price|floatformat:2 }}</td>
+                                    <td>{{ item.quantity }}</td>
+                                    <td class="text-end pe-4 fw-bold text-navy">৳{{ item.get_total_price|floatformat:2 }}</td>
+                                </tr>
+                            {% empty %}
+                                <tr><td colspan="5" class="text-center py-3 text-muted">No line items recorded.</td></tr>
+                            {% endfor %}
+                        </tbody>
+                        <tfoot class="border-top">
+                            <tr>
+                                <td colspan="4" class="text-end text-muted small pe-3">Items Subtotal:</td>
+                                <td class="text-end pe-4 fw-semibold text-navy">৳{{ order.subtotal|floatformat:2 }}</td>
+                            </tr>
+                            <tr>
+                                <td colspan="4" class="text-end text-muted small pe-3">Delivery Surcharge:</td>
+                                <td class="text-end pe-4 fw-semibold text-navy">৳{{ order.delivery_fee|floatformat:2 }}</td>
+                            </tr>
+                            <tr class="table-light">
+                                <td colspan="4" class="text-end fw-bold text-navy pe-3">Grand Total:</td>
+                                <td class="text-end pe-4 fw-bold text-navy fs-5">৳{{ order.total_amount|floatformat:2 }}</td>
+                            </tr>
+                        </tfoot>
+                    </table>
+                </div>
+            </div>
+
+            <!-- Customer & Shipping Info -->
+            <div class="card border-0 shadow-sm rounded-4 mb-4 p-4">
+                <h5 class="fw-bold text-navy mb-3">Delivery Destination & Recipient</h5>
+                <div class="row g-3 small">
+                    <div class="col-md-6">
+                        <span class="text-muted d-block">Recipient Name</span>
+                        <span class="fw-bold text-navy">{{ order.customer.get_full_name|default:order.customer.username }}</span>
+                    </div>
+                    <div class="col-md-6">
+                        <span class="text-muted d-block">Contact Phone</span>
+                        <span class="fw-bold text-navy">{{ order.phone_number|default:order.customer.phone_number|default:"-" }}</span>
+                    </div>
+                    <div class="col-md-6">
+                        <span class="text-muted d-block">Coverage Zone</span>
+                        <span class="fw-bold text-navy">{{ order.delivery_city }}</span>
+                    </div>
+                    <div class="col-md-6">
+                        <span class="text-muted d-block">Postal Code</span>
+                        <span class="fw-bold text-navy">{{ order.postal_code|default:"-" }}</span>
+                    </div>
+                    <div class="col-12">
+                        <span class="text-muted d-block">Full Street Address</span>
+                        <p class="mb-0 fw-semibold text-navy p-2 bg-light rounded-3">{{ order.delivery_address }}</p>
+                    </div>
+                    {% if order.special_instructions %}
+                        <div class="col-12">
+                            <span class="text-muted d-block">Special Instructions</span>
+                            <div class="alert alert-info py-2 px-3 small mb-0">{{ order.special_instructions }}</div>
+                        </div>
+                    {% endif %}
+                </div>
+            </div>
+
+            <!-- Audit Trail / Timeline -->
+            <div class="card border-0 shadow-sm rounded-4 p-4">
+                <h5 class="fw-bold text-navy mb-3">Status Audit Log</h5>
+                {% if status_history %}
+                    <ul class="list-group list-group-flush small">
+                        {% for log in status_history %}
+                            <li class="list-group-item px-0 py-2 d-flex justify-content-between align-items-center">
+                                <div>
+                                    <span class="badge bg-primary-subtle text-primary border border-primary-subtle me-2">
+                                        {{ log.get_status_display }}
+                                    </span>
+                                    <span class="text-navy">{{ log.notes }}</span>
+                                    {% if log.created_by %}
+                                        <small class="text-muted ms-1">(by {{ log.created_by.username }})</small>
+                                    {% endif %}
+                                </div>
+                                <span class="text-muted">{{ log.created_at|date:"M d, H:i" }}</span>
+                            </li>
+                        {% endfor %}
+                    </ul>
+                {% else %}
+                    <p class="text-muted small mb-0">No timeline entries logged yet.</p>
+                {% endif %}
+            </div>
+        </div>
+
+        <!-- Right Side: Status Updates & Rider Assignment -->
+        <div class="col-lg-4">
+            <!-- Order Status Management -->
+            <div class="card border-0 shadow-sm rounded-4 mb-4 p-4">
+                <h5 class="fw-bold text-navy mb-3">Fulfillment Status</h5>
+                <div class="mb-3">
+                    <span class="small text-muted d-block">Current Status</span>
+                    <span class="badge rounded-pill fs-6 
+                        {% if order.status == 'delivered' %}bg-success-subtle text-success border border-success-subtle
+                        {% elif order.status == 'cancelled' %}bg-danger-subtle text-danger border border-danger-subtle
+                        {% elif order.status == 'dispatched' or order.status == 'processing' %}bg-primary-subtle text-primary border border-primary-subtle
+                        {% else %}bg-warning-subtle text-warning border border-warning-subtle{% endif %}">
+                        {{ order.get_status_display }}
+                    </span>
+                </div>
+
+                <form method="post" action="{% url 'orders:admin_order_status_update' order.pk %}">
+                    {% csrf_token %}
+                    <div class="mb-3">
+                        <label class="form-label small fw-semibold text-muted">Update Status</label>
+                        <select name="status" class="form-select form-select-sm">
+                            {% for code, label in status_choices %}
+                                <option value="{{ code }}" {% if order.status == code %}selected{% endif %}>{{ label }}</option>
+                            {% endfor %}
+                        </select>
+                    </div>
+                    <div class="mb-3">
+                        <label class="form-label small fw-semibold text-muted">Update Notes / Reason</label>
+                        <textarea name="notes" class="form-control form-control-sm" rows="2" placeholder="e.g. Order validated and packaged for delivery..."></textarea>
+                    </div>
+                    <button type="submit" class="btn btn-primary btn-sm w-100 rounded-pill fw-semibold">
+                        Save Status Change
+                    </button>
+                </form>
+            </div>
+
+            <!-- Courier Assignment -->
+            <div class="card border-0 shadow-sm rounded-4 mb-4 p-4">
+                <h5 class="fw-bold text-navy mb-3">Delivery Partner Assignment</h5>
+                {% if order.delivery_assignment %}
+                    <div class="p-3 bg-light rounded-3 mb-3 small">
+                        <span class="text-muted d-block">Assigned Courier</span>
+                        <div class="fw-bold text-navy fs-6">{{ order.delivery_assignment.delivery_agent.get_full_name|default:order.delivery_assignment.delivery_agent.username }}</div>
+                        <div>Phone: {{ order.delivery_assignment.delivery_agent.phone_number|default:"-" }}</div>
+                        <div class="text-muted">Assigned: {{ order.delivery_assignment.assigned_at|date:"M d, H:i" }}</div>
+                    </div>
+                {% else %}
+                    <div class="alert alert-warning small mb-3">No courier currently assigned.</div>
+                {% endif %}
+
+                <form method="post" action="{% url 'orders:assign_delivery_agent' order.pk %}">
+                    {% csrf_token %}
+                    <div class="mb-3">
+                        <label class="form-label small fw-semibold text-muted">Select Available Rider</label>
+                        <select name="delivery_agent_id" class="form-select form-select-sm" required>
+                            <option value="">-- Choose Rider --</option>
+                            {% for agent in delivery_agents %}
+                                <option value="{{ agent.pk }}" {% if order.delivery_assignment and order.delivery_assignment.delivery_agent.pk == agent.pk %}selected{% endif %}>
+                                    {{ agent.get_full_name|default:agent.username }}
+                                    {% if agent.delivery_agent_profile.is_available %} (Available){% else %} (Offline){% endif %}
+                                </option>
+                            {% endfor %}
+                        </select>
+                    </div>
+                    <div class="mb-3">
+                        <label class="form-label small fw-semibold text-muted">Delivery Instructions for Rider</label>
+                        <textarea name="instructions" class="form-control form-control-sm" rows="2" placeholder="Fragile package, contact customer upon arrival..."></textarea>
+                    </div>
+                    <button type="submit" class="btn btn-navy text-white btn-sm w-100 rounded-pill fw-semibold">
+                        Assign Rider & Dispatch
+                    </button>
+                </form>
+            </div>
+
+            <!-- Payment Information -->
+            <div class="card border-0 shadow-sm rounded-4 p-4">
+                <h5 class="fw-bold text-navy mb-3">Payment Record</h5>
+                <div class="small">
+                    <div class="d-flex justify-content-between mb-1">
+                        <span class="text-muted">Method:</span>
+                        <span class="fw-semibold text-navy">{{ order.get_payment_method_display }}</span>
+                    </div>
+                    {% for p in payments %}
+                        <div class="d-flex justify-content-between mb-1">
+                            <span class="text-muted">Status:</span>
+                            <span class="badge {% if p.status == 'completed' %}bg-success-subtle text-success{% else %}bg-warning-subtle text-warning{% endif %}">
+                                {{ p.get_status_display }}
+                            </span>
+                        </div>
+                        {% if p.transaction_id %}
+                            <div class="d-flex justify-content-between mb-1">
+                                <span class="text-muted">Transaction ID:</span>
+                                <code>{{ p.transaction_id }}</code>
+                            </div>
+                        {% endif %}
+                    {% empty %}
+                        <p class="text-muted small mb-0">No payment transaction records.</p>
+                    {% endfor %}
+                </div>
+            </div>
+        </div>
+    </div>
+</div>
+{% endblock %}

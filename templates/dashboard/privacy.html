@@ -1,0 +1,29 @@
+{% extends 'base.html' %}
+
+{% block title %}Privacy Policy - {{ BRAND_NAME }}{% endblock %}
+
+{% block content %}
+<div class="container py-5">
+    <div class="row justify-content-center">
+        <div class="col-lg-9">
+            <div class="card border-0 shadow-sm rounded-4 p-4 p-md-5">
+                <span class="badge bg-primary-subtle text-primary border border-primary-subtle rounded-pill px-3 py-1 mb-2 d-inline-block" style="width: fit-content;">Privacy & Data</span>
+                <h2 class="fw-bold text-navy mb-4">Privacy Policy</h2>
+                <p class="text-muted small">Last updated: October 2026</p>
+
+                <h5 class="fw-bold text-navy mt-4">1. Information We Collect</h5>
+                <p class="text-muted">SwiftDrop collects necessary contact information (name, email address, mobile phone number) and delivery address details required to process, fulfill, and deliver your orders accurately.</p>
+
+                <h5 class="fw-bold text-navy mt-4">2. Usage of Your Data</h5>
+                <p class="text-muted">We use your information exclusively to dispatch assigned couriers, provide SMS/email order tracking updates, calculate appropriate delivery fees, and improve platform service offerings. We never sell customer records to third-party advertisers.</p>
+
+                <h5 class="fw-bold text-navy mt-4">3. Courier Access</h5>
+                <p class="text-muted">Assigned delivery partners are provided your delivery location and contact number solely during an active delivery task to ensure successful handoff.</p>
+
+                <h5 class="fw-bold text-navy mt-4">4. Data Security</h5>
+                <p class="text-muted">We employ industry-standard encryption, secure session tokens, and strict access controls to safeguard your personal credentials and order history.</p>
+            </div>
+        </div>
+    </div>
+</div>
+{% endblock %}

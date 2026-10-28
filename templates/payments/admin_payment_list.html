@@ -1,0 +1,86 @@
+{% extends 'base.html' %}
+{% load static %}
+
+{% block title %}Financial Operations & Revenue - SwiftDrop Admin{% endblock %}
+
+{% block content %}
+<div class="container-fluid px-lg-5 py-4">
+    <div class="d-flex justify-content-between align-items-center mb-4">
+        <div>
+            <h2 class="fw-bold text-navy mb-0">
+                <i class="fas fa-coins text-primary me-2"></i>Financial & Payment Auditing
+            </h2>
+            <p class="text-muted small mb-0">Verified transactions, collection records, and gateway statuses</p>
+        </div>
+        <a href="{% url 'dashboard:admin_dashboard' %}" class="btn btn-outline-secondary btn-sm rounded-pill px-3">
+            <i class="fas fa-arrow-left me-1"></i> Admin Dashboard
+        </a>
+    </div>
+
+    <!-- Metrics -->
+    <div class="row g-3 mb-4">
+        <div class="col-md-6">
+            <div class="card border-0 shadow-sm rounded-4 p-3 bg-success-subtle border border-success-subtle">
+                <span class="text-success small fw-bold text-uppercase">Total Settled Collections</span>
+                <h3 class="fw-bold text-navy mb-0 mt-1">৳{{ total_collected|floatformat:2 }}</h3>
+            </div>
+        </div>
+        <div class="col-md-6">
+            <div class="card border-0 shadow-sm rounded-4 p-3 bg-warning-subtle border border-warning-subtle">
+                <span class="text-warning small fw-bold text-uppercase">Pending Receivables (COD / Unverified)</span>
+                <h3 class="fw-bold text-navy mb-0 mt-1">৳{{ pending_amount|floatformat:2 }}</h3>
+            </div>
+        </div>
+    </div>
+
+    <!-- Payments Table -->
+    <div class="card border-0 shadow-sm rounded-4 overflow-hidden mb-4">
+        <div class="table-responsive">
+            <table class="table table-hover align-middle mb-0">
+                <thead class="table-light small text-muted">
+                    <tr>
+                        <th class="ps-4">ID</th>
+                        <th>Order</th>
+                        <th>Customer</th>
+                        <th>Channel</th>
+                        <th>Transaction Ref</th>
+                        <th>Amount</th>
+                        <th>Status</th>
+                        <th>Date</th>
+                    </tr>
+                </thead>
+                <tbody>
+                    {% for p in payments %}
+                        <tr>
+                            <td class="ps-4 fw-bold text-navy">#{{ p.id }}</td>
+                            <td>
+                                <a href="{% url 'orders:admin_order_detail' p.order.pk %}" class="text-primary fw-semibold text-decoration-none">
+                                    #{{ p.order.order_number }}
+                                </a>
+                            </td>
+                            <td>
+                                <div class="fw-semibold text-navy">{{ p.order.customer.get_full_name|default:p.order.customer.username }}</div>
+                                <small class="text-muted">{{ p.order.customer.email }}</small>
+                            </td>
+                            <td><span class="badge bg-light text-navy border">{{ p.get_payment_method_display }}</span></td>
+                            <td><code>{{ p.transaction_id|default:"COD Record" }}</code></td>
+                            <td class="fw-bold text-navy">৳{{ p.amount|floatformat:2 }}</td>
+                            <td>
+                                <span class="badge rounded-pill 
+                                    {% if p.status == 'completed' %}bg-success-subtle text-success border border-success-subtle
+                                    {% elif p.status == 'failed' %}bg-danger-subtle text-danger border border-danger-subtle
+                                    {% else %}bg-warning-subtle text-warning border border-warning-subtle{% endif %}">
+                                    {{ p.get_status_display }}
+                                </span>
+                            </td>
+                            <td class="small text-muted">{{ p.created_at|date:"M d, H:i" }}</td>
+                        </tr>
+                    {% empty %}
+                        <tr><td colspan="8" class="text-center py-5 text-muted">No financial records found.</td></tr>
+                    {% endfor %}
+                </tbody>
+            </table>
+        </div>
+    </div>
+</div>
+{% endblock %}

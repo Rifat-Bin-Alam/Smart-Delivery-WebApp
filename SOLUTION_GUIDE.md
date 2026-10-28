@@ -1,166 +1,56 @@
-# নাগরীবাসী এক্সপ্রেস - সমস্যা সমাধান গাইড
+# SwiftDrop — Architectural Solutions & Design Rationale Guide
 
-## 🎯 আপনার সমস্যাগুলির সমাধান
-
-### ১. ডেটাবেস ডেটা কোথায় পাবেন?
-
-**ডেটাবেস ফাইল অবস্থান:**
-```
-E:\Nagaribashi_express\db.sqlite3
-```
-
-**ডেটাবেস দেখার উপায়:**
-
-#### A. ডেটাবেস ভিউয়ার (সবচেয়ে সহজ)
-- **URL**: http://127.0.0.1:8000/database-viewer/
-- সব ডেটা টেবিল আকারে দেখতে পাবেন
-- ব্যবহারকারী, পণ্য, অর্ডার সব দেখতে পাবেন
-
-#### B. Django Admin Panel
-- **URL**: http://127.0.0.1:8000/admin/
-- **ইউজারনেম**: admin
-- **পাসওয়ার্ড**: admin123
-- সব মডেল এডিট করতে পারবেন
-
-#### C. অ্যাডমিন ড্যাশবোর্ড
-- **URL**: http://127.0.0.1:8000/admin-dashboard/
-- সুন্দর ইন্টারফেসে সব তথ্য দেখতে পাবেন
-
-### ২. লগইন সমস্যা সমাধান
-
-**লগইন পেজ:**
-- **URL**: http://127.0.0.1:8000/users/login/
-
-**লগইন তথ্য:**
-- **ইউজারনেম**: admin
-- **পাসওয়ার্ড**: admin123
-
-**অন্যান্য ব্যবহারকারী:**
-- **ইউজারনেম**: customer1
-- **পাসওয়ার্ড**: customer123
-
-### ৩. পণ্য পেজ দেখার সমস্যা সমাধান
-
-**পণ্য পেজ:**
-- **URL**: http://127.0.0.1:8000/orders/
-- এখন লগইন ছাড়াই দেখতে পারবেন
-
-**অর্ডার তৈরি:**
-- **URL**: http://127.0.0.1:8000/orders/create/
-
-### ৪. অ্যাডমিন হিসেবে সম্পাদনা করার উপায়
-
-#### A. Django Admin Panel (সবচেয়ে শক্তিশালী)
-- **URL**: http://127.0.0.1:8000/admin/
-- সব মডেল এডিট করতে পারবেন
-- নতুন রেকর্ড যোগ করতে পারবেন
-- ডিলিট করতে পারবেন
-
-#### B. অ্যাডমিন ড্যাশবোর্ড
-- **URL**: http://127.0.0.1:8000/admin-dashboard/
-- সুন্দর ইন্টারফেস
-- দ্রুত কাজের জন্য বাটন
-
-### ৫. সব পেজের তালিকা
-
-| পেজ | URL | বর্ণনা |
-|-----|-----|--------|
-| হোম | http://127.0.0.1:8000/ | মূল পেজ |
-| পণ্য | http://127.0.0.1:8000/orders/ | পণ্য তালিকা |
-| অর্ডার | http://127.0.0.1:8000/orders/create/ | অর্ডার তৈরি |
-| লগইন | http://127.0.0.1:8000/users/login/ | লগইন পেজ |
-| সাইনআপ | http://127.0.0.1:8000/users/signup/ | নতুন অ্যাকাউন্ট |
-| অ্যাডমিন ড্যাশবোর্ড | http://127.0.0.1:8000/admin-dashboard/ | অ্যাডমিন প্যানেল |
-| ডেটাবেস ভিউয়ার | http://127.0.0.1:8000/database-viewer/ | ডেটা দেখুন |
-| Django Admin | http://127.0.0.1:8000/admin/ | সম্পূর্ণ অ্যাডমিন |
-| টেস্ট পেজ | http://127.0.0.1:8000/test/ | সার্ভার টেস্ট |
-
-### ৬. অ্যাডমিন হিসেবে কি কি করতে পারবেন?
-
-#### Django Admin Panel এ:
-1. **ব্যবহারকারী ব্যবস্থাপনা**
-   - নতুন ব্যবহারকারী যোগ করুন
-   - ব্যবহারকারী এডিট করুন
-   - পারমিশন পরিবর্তন করুন
-
-2. **পণ্য ব্যবস্থাপনা**
-   - নতুন পণ্য যোগ করুন
-   - দাম পরিবর্তন করুন
-   - স্টক আপডেট করুন
-
-3. **অর্ডার ব্যবস্থাপনা**
-   - অর্ডার স্ট্যাটাস আপডেট করুন
-   - অর্ডার বাতিল করুন
-   - অর্ডার ইতিহাস দেখুন
-
-4. **ডেলিভারি ব্যবস্থাপনা**
-   - ডেলিভারি এজেন্ট অ্যাসাইন করুন
-   - ডেলিভারি স্ট্যাটাস আপডেট করুন
-
-5. **পেমেন্ট ব্যবস্থাপনা**
-   - পেমেন্ট স্ট্যাটাস দেখুন
-   - রিফান্ড প্রসেস করুন
-
-### ৭. নতুন ডেটা যোগ করার উপায়
-
-#### A. Django Admin Panel দিয়ে:
-1. http://127.0.0.1:8000/admin/ এ যান
-2. লগইন করুন (admin/admin123)
-3. যে মডেল এডিট করতে চান সেটিতে ক্লিক করুন
-4. "Add" বাটনে ক্লিক করুন
-5. তথ্য পূরণ করুন এবং Save করুন
-
-#### B. Setup Script দিয়ে:
-```bash
-python manage.py setup_data
-```
-
-### ৮. সার্ভার চালু করার উপায়
-
-```bash
-# 1. প্রজেক্ট ফোল্ডারে যান
-cd E:\Nagaribashi_express
-
-# 2. সার্ভার চালু করুন
-python manage.py runserver
-
-# 3. ব্রাউজারে যান
-# http://127.0.0.1:8000/
-```
-
-### ৯. সমস্যা হলে কি করবেন?
-
-#### A. সার্ভার রিস্টার্ট করুন:
-```bash
-# Ctrl+C দিয়ে সার্ভার বন্ধ করুন
-# তারপর আবার চালু করুন
-python manage.py runserver
-```
-
-#### B. ডেটাবেস রিসেট করুন:
-```bash
-# ডেটাবেস ফাইল মুছে দিন
-del db.sqlite3
-
-# নতুন মাইগ্রেশন করুন
-python manage.py makemigrations
-python manage.py migrate
-
-# স্যাম্পল ডেটা তৈরি করুন
-python manage.py setup_data
-```
-
-#### C. ব্রাউজার ক্যাশ ক্লিয়ার করুন:
-- **Chrome**: Ctrl + Shift + R
-- **Firefox**: Ctrl + F5
-
-### ১০. যোগাযোগ
-
-যদি আরও সাহায্যের প্রয়োজন হয়:
-1. Error message টি কপি করুন
-2. কোন পেজে সমস্যা হচ্ছে জানান
-3. আপনি কি করতে চাচ্ছেন জানান
+> **Tagline:** Your Essentials. Delivered Smarter.  
+> **Repository:** [https://github.com/Rifat-Bin-Alam/Smart-Delivery-WebApp](https://github.com/Rifat-Bin-Alam/Smart-Delivery-WebApp)  
+> **Author & Developer:** [Rifat Bin Alam](https://rifat-bin-alam.vercel.app/)  
+> **Contact Email:** [rifat5566123@gmail.com](mailto:rifat5566123@gmail.com)
 
 ---
 
-**🎉 এখন আপনার নাগরীবাসী এক্সপ্রেস ওয়েবসাইট সম্পূর্ণভাবে কাজ করছে!**
+## 1. Architectural Challenge & Design Solutions
+
+When developing a hyperlocal on-demand delivery platform, real-world constraints such as network latency, inventory race conditions, broken client-side pricing, and missing product photography present substantial operational hurdles. This document outlines how SwiftDrop strategically solves each challenge.
+
+---
+
+## 2. Key Engineering Solutions
+
+### 2.1. Challenge: Client-Side Price Tampering
+* **The Problem:** In many web applications, shopping carts calculate line item totals and send the total amount directly to the server, allowing malicious users to alter prices using browser developer tools.
+* **The SwiftDrop Solution:** The client application strictly maintains an ephemeral representation of item IDs and desired quantities in `localStorage`. When checkout is submitted to `/orders/checkout/`, Django discards any client-sent price and performs an authoritative database lookup against `ProductService.objects.filter(id__in=ids)`. The true total is calculated server-side within an atomic transaction.
+
+### 2.2. Challenge: Inventory Race Conditions & Overselling
+* **The Problem:** Multiple customers checking out simultaneously could purchase the last remaining unit of high-demand items (e.g., LPG gas or emergency medicine).
+* **The SwiftDrop Solution:** SwiftDrop leverages `transaction.atomic()` during order placement. Stock quantities are verified immediately before order commitment. If `product.stock_quantity < requested_quantity`, an exception aborts the checkout and notifies the customer, preventing negative inventory.
+
+### 2.3. Challenge: Broken Images & Inconsistent Card Layouts
+* **The Problem:** When products are uploaded without images or when images fail to load from storage, product grids render unsightly broken image icons or collapsed card layouts.
+* **The SwiftDrop Solution:** Dual-tier image fallback:
+  1. **Model Property:** `ProductService.image_url` dynamically checks if `self.image` is valid on disk. If absent, it automatically serves a curated category-specific SVG vector illustration (`/static/images/fallbacks/<category>.svg`).
+  2. **Client-Side Guard:** All `<img>` tags implement `onerror="this.onerror=null; this.src='{% static 'images/fallbacks/default.svg' %}';"` to gracefully handle 404s or network drops.
+
+### 2.4. Challenge: Email-Based Authentication with Legacy Compatibility
+* **The Problem:** Standard Django defaults to username-based authentication, whereas modern users expect to log in with their email address.
+* **The SwiftDrop Solution:** A custom authentication backend `EmailOrUsernameModelBackend` is registered in `Nagaribashi_express.settings`. It attempts to authenticate credentials against `email` first, then falls back to `username`, providing full flexibility.
+
+### 2.5. Challenge: Order Cancellation with Automated Stock Restoral
+* **The Problem:** When an order is cancelled, stock must be returned to inventory reliably without manual staff intervention.
+* **The SwiftDrop Solution:** The `OrderCancellationView` checks if `order.status` is in `['pending', 'confirmed']`. Upon customer confirmation:
+  - The order status transitions to `cancelled`.
+  - For each `OrderItem` in `order.items.all()`, the line item quantity is added back to `item.product.stock_quantity`.
+  - An entry is recorded in `OrderStatusHistory` for auditing.
+
+---
+
+## 3. Technology Stack Justification
+
+| Technology | Rationale for Selection |
+|---|---|
+| **Django 5.2** | Mature ORM, built-in CSRF/XSS security, powerful admin interface, modular app design. |
+| **Python 3.13** | Enhanced performance, improved error tracebacks, long-term support. |
+| **SQLite (Dev) / PostgreSQL (Prod)** | Zero-configuration local setup; seamless migration to managed cloud databases. |
+| **Bootstrap 5.3 + Vanilla JS** | Lightweight, responsive, eliminates heavy frontend framework overhead while delivering snappy UI performance. |
+
+---
+
+*© 2026 SwiftDrop. All rights reserved. Developed by [Rifat Bin Alam](https://rifat-bin-alam.vercel.app/).*

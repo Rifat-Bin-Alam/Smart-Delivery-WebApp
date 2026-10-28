@@ -1,164 +1,242 @@
 {% extends 'base.html' %}
 {% load static %}
 
-{% block title %}অ্যাডমিন প্যানেল - নাগরীবাসী এক্সপ্রেস{% endblock %}
+{% block title %}Catalog & Inventory Hub - SwiftDrop Admin{% endblock %}
 
 {% block content %}
-<div class="container py-5">
-    <div class="row">
-        <div class="col-12">
-            <h2 class="mb-4">
-                <i class="fas fa-cog me-2"></i>অ্যাডমিন প্যানেল
+<div class="container-fluid px-lg-5 py-4">
+    <!-- Header -->
+    <div class="d-flex flex-wrap justify-content-between align-items-center mb-4 gap-3">
+        <div>
+            <h2 class="fw-bold text-navy mb-0">
+                <i class="fas fa-boxes text-primary me-2"></i>Catalog & Inventory Hub
             </h2>
+            <p class="text-muted small mb-0">Manage services, real-time product stock, pricing, and coverage zones</p>
+        </div>
+        <div class="d-flex gap-2">
+            <button class="btn btn-primary btn-sm rounded-pill px-3 fw-semibold shadow-sm" data-bs-toggle="modal" data-bs-target="#addProductModal">
+                <i class="fas fa-plus me-1"></i> Add New Product
+            </button>
+            <a href="{% url 'dashboard:admin_dashboard' %}" class="btn btn-outline-secondary btn-sm rounded-pill px-3">
+                <i class="fas fa-tachometer-alt me-1"></i> Operations Center
+            </a>
         </div>
     </div>
 
-    <!-- Admin Navigation -->
-    <div class="row mb-4">
-        <div class="col-12">
-            <div class="card">
-                <div class="card-body">
-                    <div class="row">
-                        <div class="col-md-3 mb-2">
-                            <button class="btn btn-primary w-100" onclick="showSection('products')">
-                                <i class="fas fa-shopping-bag me-2"></i>পণ্য ব্যবস্থাপনা
-                            </button>
+    <!-- Quick Stats -->
+    <div class="row g-3 mb-4">
+        <div class="col-6 col-md-3">
+            <div class="card border-0 shadow-sm rounded-3 p-3">
+                <span class="text-muted small fw-semibold">Total Catalog Items</span>
+                <h4 class="fw-bold text-navy mb-0 mt-1">{{ total_products }}</h4>
+            </div>
+        </div>
+        <div class="col-6 col-md-3">
+            <div class="card border-0 shadow-sm rounded-3 p-3">
+                <span class="text-muted small fw-semibold">Active & Live</span>
+                <h4 class="fw-bold text-success mb-0 mt-1">{{ active_products }}</h4>
+            </div>
+        </div>
+        <div class="col-6 col-md-3">
+            <div class="card border-0 shadow-sm rounded-3 p-3">
+                <span class="text-muted small fw-semibold">Low Stock (&le; 5 units)</span>
+                <h4 class="fw-bold text-warning mb-0 mt-1">{{ low_stock_products.count }}</h4>
+            </div>
+        </div>
+        <div class="col-6 col-md-3">
+            <div class="card border-0 shadow-sm rounded-3 p-3">
+                <span class="text-muted small fw-semibold">Delivery Zones</span>
+                <h4 class="fw-bold text-navy mb-0 mt-1">{{ delivery_areas.count }}</h4>
+            </div>
+        </div>
+    </div>
+
+    <!-- Main Content Tabs -->
+    <ul class="nav nav-pills mb-4" id="adminTabs" role="tablist">
+        <li class="nav-item" role="presentation">
+            <button class="nav-link active rounded-pill fw-semibold me-2" id="products-tab" data-bs-toggle="tab" data-bs-target="#productsPane" type="button" role="tab">
+                <i class="fas fa-shopping-bag me-1"></i> Product Catalog
+            </button>
+        </li>
+        <li class="nav-item" role="presentation">
+            <button class="nav-link rounded-pill fw-semibold me-2" id="stock-tab" data-bs-toggle="tab" data-bs-target="#stockPane" type="button" role="tab">
+                <i class="fas fa-exclamation-triangle me-1"></i> Low Stock Alerts ({{ low_stock_products.count }})
+            </button>
+        </li>
+        <li class="nav-item" role="presentation">
+            <button class="nav-link rounded-pill fw-semibold" id="zones-tab" data-bs-toggle="tab" data-bs-target="#zonesPane" type="button" role="tab">
+                <i class="fas fa-map-marked-alt me-1"></i> Delivery Zones & Fees
+            </button>
+        </li>
+    </ul>
+
+    <div class="tab-content" id="adminTabContent">
+        <!-- Products Tab Pane -->
+        <div class="tab-pane fade show active" id="productsPane" role="tabpanel">
+            <div class="card border-0 shadow-sm rounded-4 overflow-hidden">
+                <div class="card-header bg-white border-0 pt-3 px-4 pb-2">
+                    <div class="row g-2 align-items-center">
+                        <div class="col-md-5">
+                            <input type="text" id="productFilterInput" class="form-control form-control-sm" placeholder="Filter products by name or category...">
                         </div>
-                        <div class="col-md-3 mb-2">
-                            <button class="btn btn-success w-100" onclick="showSection('orders')">
-                                <i class="fas fa-eye me-2"></i>অর্ডার বিশ্লেষণ
-                            </button>
-                        </div>
-                        <div class="col-md-3 mb-2">
-                            <button class="btn btn-info w-100" onclick="showSection('analytics')">
-                                <i class="fas fa-chart-bar me-2"></i>এনালিটিক্স
-                            </button>
-                        </div>
-                        <div class="col-md-3 mb-2">
-                            <button class="btn btn-warning w-100" onclick="showSection('settings')">
-                                <i class="fas fa-cog me-2"></i>সেটিংস
-                            </button>
+                        <div class="col-md-7 text-md-end text-muted small">
+                            Showing {{ products.count }} registered items
                         </div>
                     </div>
                 </div>
-            </div>
-        </div>
-    </div>
-
-    <!-- Products Management Section -->
-    <div id="products-section" class="admin-section">
-        <div class="card">
-            <div class="card-header d-flex justify-content-between align-items-center">
-                <h5><i class="fas fa-shopping-bag me-2"></i>পণ্য ব্যবস্থাপনা</h5>
-                <button class="btn btn-primary" onclick="showAddProductModal()">
-                    <i class="fas fa-plus me-2"></i>নতুন পণ্য যোগ করুন
-                </button>
-            </div>
-            <div class="card-body">
                 <div class="table-responsive">
-                    <table class="table table-striped">
-                        <thead>
+                    <table class="table table-hover align-middle mb-0" id="productsTable">
+                        <thead class="table-light small text-muted">
                             <tr>
-                                <th>ID</th>
-                                <th>নাম</th>
-                                <th>ক্যাটাগরি</th>
-                                <th>দর</th>
-                                <th>স্টক</th>
-                                <th>অ্যাকশন</th>
+                                <th class="ps-4">Product Name</th>
+                                <th>Category</th>
+                                <th>Price (BDT)</th>
+                                <th>Stock</th>
+                                <th>Status</th>
+                                <th class="text-end pe-4">Actions</th>
                             </tr>
                         </thead>
-                        <tbody id="products-table">
-                            {% for product in products %}
+                        <tbody>
+                            {% for p in products %}
                                 <tr>
-                                    <td>{{ product.id }}</td>
-                                    <td>{{ product.name }}</td>
-                                    <td>{{ product.category }}</td>
-                                    <td>৳ {{ product.price }}</td>
-                                    <td>{{ product.stock_quantity|default:"0" }}</td>
-                                    <td>
-                                        <button class="btn btn-sm btn-primary me-1 edit-product-btn" 
-                                                data-id="{{ product.id }}"
-                                                data-name="{{ product.name }}"
-                                                data-category="{{ product.category }}"
-                                                data-price="{{ product.price }}"
-                                                data-description="{{ product.description }}"
-                                                data-stock="{{ product.stock_quantity|default:0 }}">
-                                            <i class="fas fa-edit"></i>
-                                        </button>
-                                        <button class="btn btn-sm btn-danger delete-product-btn" data-product-id="{{ product.id }}">
-                                            <i class="fas fa-trash"></i>
-                                        </button>
+                                    <td class="ps-4">
+                                        <div class="fw-bold text-navy">{{ p.name }}</div>
+                                        <small class="text-muted text-truncate d-inline-block" style="max-width: 250px;">
+                                            {{ p.description|default:"No description" }}
+                                        </small>
                                     </td>
-                                </tr>
-                            {% empty %}
-                                <tr>
-                                    <td colspan="6" class="text-center text-muted">কোন পণ্য নেই</td>
-                                </tr>
-                            {% endfor %}
-                        </tbody>
-                    </table>
-                </div>
-            </div>
-        </div>
-    </div>
-
-    <!-- Orders Analysis Section (Read-Only) -->
-    <div id="orders-section" class="admin-section" style="display: none;">
-        <div class="card">
-            <div class="card-header">
-                <h5><i class="fas fa-eye me-2"></i>অর্ডার বিশ্লেষণ (পড়ার জন্য)</h5>
-                <small class="text-muted">অ্যাডমিন শুধুমাত্র অর্ডার বিশ্লেষণ করতে পারবেন, নতুন অর্ডার দিতে পারবেন না</small>
-            </div>
-            <div class="card-body">
-                <div class="table-responsive">
-                    <table class="table table-striped">
-                        <thead>
-                            <tr>
-                                <th>অর্ডার ID</th>
-                                <th>গ্রাহক</th>
-                                <th>তারিখ</th>
-                                <th>মোট</th>
-                                <th>স্ট্যাটাস</th>
-                                <th>অ্যাকশন</th>
-                            </tr>
-                        </thead>
-                        <tbody id="orders-table">
-                            {% for order in orders %}
-                                <tr>
-                                    <td>#{{ order.id }}</td>
-                                    <td>{{ order.customer.get_full_name|default:order.customer.username }}</td>
-                                    <td>{{ order.created_at|date:"d M Y, h:i A" }}</td>
-                                    <td>৳ {{ order.total_amount }}</td>
                                     <td>
-                                        <span class="badge 
-                                            {% if order.status == 'pending' %}bg-warning
-                                            {% elif order.status == 'confirmed' %}bg-info
-                                            {% elif order.status == 'processing' %}bg-primary
-                                            {% elif order.status == 'dispatched' %}bg-success
-                                            {% elif order.status == 'delivered' %}bg-success
-                                            {% elif order.status == 'cancelled' %}bg-danger
-                                            {% elif order.status == 'returned' %}bg-secondary
-                                            {% else %}bg-secondary{% endif %}">
-                                            {{ order.get_status_display }}
+                                        <span class="badge bg-light text-navy border">
+                                            {{ p.get_category_display }}
                                         </span>
                                     </td>
+                                    <td class="fw-bold text-navy">৳{{ p.price|floatformat:2 }}</td>
                                     <td>
-                                        <a href="{% url 'orders:order_detail' order.pk %}" class="btn btn-sm btn-primary me-1">
-                                            <i class="fas fa-eye"></i> দেখুন
-                                        </a>
-                                        <button class="btn btn-sm btn-success update-order-status-btn" 
-                                                data-order-id="{{ order.id }}"
-                                                data-current-status="{{ order.status }}">
-                                            <i class="fas fa-check"></i> স্ট্যাটাস
-                                        </button>
-                                        <a href="{% url 'orders:order_track' order.pk %}" class="btn btn-sm btn-info">
-                                            <i class="fas fa-map-marker-alt"></i> ট্র্যাক
-                                        </a>
+                                        {% if p.stock_quantity <= 5 %}
+                                            <span class="badge bg-warning-subtle text-warning border border-warning-subtle fw-semibold">
+                                                {{ p.stock_quantity }} left
+                                            </span>
+                                        {% else %}
+                                            <span class="fw-semibold text-navy">{{ p.stock_quantity }} in stock</span>
+                                        {% endif %}
+                                    </td>
+                                    <td>
+                                        {% if p.is_available %}
+                                            <span class="badge bg-success-subtle text-success">Live</span>
+                                        {% else %}
+                                            <span class="badge bg-secondary-subtle text-secondary">Hidden</span>
+                                        {% endif %}
+                                    </td>
+                                    <td class="text-end pe-4">
+                                        <div class="btn-group btn-group-sm">
+                                            <button type="button" class="btn btn-outline-primary" onclick="openEditModal('{{ p.id }}', '{{ p.name|escapejs }}', '{{ p.category }}', '{{ p.price }}', '{{ p.stock_quantity }}', '{{ p.description|escapejs }}', {{ p.is_available|yesno:'true,false' }})" title="Edit Item">
+                                                <i class="fas fa-edit"></i>
+                                            </button>
+                                            <button type="button" class="btn btn-outline-danger" onclick="deleteProduct('{{ p.id }}', '{{ p.name|escapejs }}')" title="Delete Item">
+                                                <i class="fas fa-trash-alt"></i>
+                                            </button>
+                                        </div>
                                     </td>
                                 </tr>
                             {% empty %}
                                 <tr>
-                                    <td colspan="6" class="text-center text-muted">কোন অর্ডার নেই</td>
+                                    <td colspan="6" class="text-center py-5 text-muted">No products found in the catalog.</td>
+                                </tr>
+                            {% endfor %}
+                        </tbody>
+                    </table>
+                </div>
+            </div>
+        </div>
+
+        <!-- Low Stock Alerts Pane -->
+        <div class="tab-pane fade" id="stockPane" role="tabpanel">
+            <div class="card border-0 shadow-sm rounded-4 overflow-hidden">
+                <div class="card-header bg-white border-0 pt-4 px-4 pb-2">
+                    <h5 class="fw-bold text-navy mb-0">Low Inventory Items</h5>
+                    <p class="text-muted small mb-0">Items with 5 or fewer remaining units requiring replenishment</p>
+                </div>
+                <div class="table-responsive">
+                    <table class="table table-hover align-middle mb-0">
+                        <thead class="table-light small text-muted">
+                            <tr>
+                                <th class="ps-4">Product</th>
+                                <th>Category</th>
+                                <th>Price</th>
+                                <th>Units Remaining</th>
+                                <th class="text-end pe-4">Quick Restock</th>
+                            </tr>
+                        </thead>
+                        <tbody>
+                            {% for p in low_stock_products %}
+                                <tr>
+                                    <td class="ps-4 fw-bold text-navy">{{ p.name }}</td>
+                                    <td><span class="badge bg-light text-navy border">{{ p.get_category_display }}</span></td>
+                                    <td class="fw-semibold">৳{{ p.price|floatformat:2 }}</td>
+                                    <td>
+                                        <span class="badge bg-danger-subtle text-danger fs-6 fw-bold">
+                                            {{ p.stock_quantity }}
+                                        </span>
+                                    </td>
+                                    <td class="text-end pe-4">
+                                        <button class="btn btn-sm btn-outline-primary rounded-pill px-3" onclick="openEditModal('{{ p.id }}', '{{ p.name|escapejs }}', '{{ p.category }}', '{{ p.price }}', '{{ p.stock_quantity }}', '{{ p.description|escapejs }}', {{ p.is_available|yesno:'true,false' }})">
+                                            Restock
+                                        </button>
+                                    </td>
+                                </tr>
+                            {% empty %}
+                                <tr>
+                                    <td colspan="5" class="text-center py-5 text-success">
+                                        <i class="fas fa-check-circle fa-2x mb-2 d-block"></i>
+                                        All catalog items have healthy stock levels!
+                                    </td>
+                                </tr>
+                            {% endfor %}
+                        </tbody>
+                    </table>
+                </div>
+            </div>
+        </div>
+
+        <!-- Zones Pane -->
+        <div class="tab-pane fade" id="zonesPane" role="tabpanel">
+            <div class="card border-0 shadow-sm rounded-4 overflow-hidden">
+                <div class="card-header bg-white border-0 pt-4 px-4 pb-2 d-flex justify-content-between align-items-center">
+                    <div>
+                        <h5 class="fw-bold text-navy mb-0">Delivery Zones & Rate Structure</h5>
+                        <p class="text-muted small mb-0">Configured operational sectors and calculated delivery surcharges</p>
+                    </div>
+                    <a href="{% url 'delivery:delivery_area_list' %}" class="btn btn-outline-primary btn-sm rounded-pill px-3">
+                        <i class="fas fa-external-link-alt me-1"></i> Advanced Zone Editor
+                    </a>
+                </div>
+                <div class="table-responsive">
+                    <table class="table table-hover align-middle mb-0">
+                        <thead class="table-light small text-muted">
+                            <tr>
+                                <th class="ps-4">Zone / Hub Name</th>
+                                <th>Delivery Fee</th>
+                                <th>Est. Delivery Time</th>
+                                <th>Status</th>
+                            </tr>
+                        </thead>
+                        <tbody>
+                            {% for zone in delivery_areas %}
+                                <tr>
+                                    <td class="ps-4 fw-bold text-navy">{{ zone.name }}</td>
+                                    <td class="fw-bold text-primary">৳{{ zone.delivery_fee|floatformat:2 }}</td>
+                                    <td class="text-muted small">{{ zone.estimated_delivery_time|default:"30-45 minutes" }}</td>
+                                    <td>
+                                        {% if zone.is_active %}
+                                            <span class="badge bg-success-subtle text-success">Active Hub</span>
+                                        {% else %}
+                                            <span class="badge bg-secondary-subtle text-secondary">Inactive</span>
+                                        {% endif %}
+                                    </td>
+                                </tr>
+                            {% empty %}
+                                <tr>
+                                    <td colspan="4" class="text-center py-4 text-muted">No delivery areas configured.</td>
                                 </tr>
                             {% endfor %}
                         </tbody>
@@ -167,521 +245,254 @@
             </div>
         </div>
     </div>
+</div>
 
-    <!-- Analytics Section -->
-    <div id="analytics-section" class="admin-section" style="display: none;">
-        <div class="row">
-            <div class="col-md-3 mb-4">
-                <div class="card text-center">
-                    <div class="card-body">
-                        <i class="fas fa-shopping-cart fa-2x text-primary mb-3"></i>
-                        <h5>মোট অর্ডার</h5>
-                        <h3 class="text-primary" id="total-orders">{{ total_orders }}</h3>
+<!-- Add Product Modal -->
+<div class="modal fade" id="addProductModal" tabindex="-1">
+    <div class="modal-dialog">
+        <div class="modal-content rounded-4 border-0 shadow">
+            <div class="modal-header border-0 pt-4 px-4 pb-0">
+                <h5 class="modal-title fw-bold text-navy">Add New Product / Service</h5>
+                <button type="button" class="btn-close" data-bs-dismiss="modal"></button>
+            </div>
+            <form id="addProductForm" onsubmit="submitAddProduct(event)">
+                <div class="modal-body p-4">
+                    <div class="mb-3">
+                        <label class="form-label small fw-semibold text-muted">Product / Service Name</label>
+                        <input type="text" id="addName" class="form-control" required placeholder="e.g. Fresh Milk 1L">
                     </div>
-                </div>
-            </div>
-            <div class="col-md-3 mb-4">
-                <div class="card text-center">
-                    <div class="card-body">
-                        <i class="fas fa-money-bill fa-2x text-success mb-3"></i>
-                        <h5>মোট বিক্রয়</h5>
-                        <h3 class="text-success" id="total-sales">৳ {{ total_revenue }}</h3>
-                    </div>
-                </div>
-            </div>
-            <div class="col-md-3 mb-4">
-                <div class="card text-center">
-                    <div class="card-body">
-                        <i class="fas fa-users fa-2x text-info mb-3"></i>
-                        <h5>সক্রিয় গ্রাহক</h5>
-                        <h3 class="text-info" id="active-customers">{{ total_customers }}</h3>
-                    </div>
-                </div>
-            </div>
-            <div class="col-md-3 mb-4">
-                <div class="card text-center">
-                    <div class="card-body">
-                        <i class="fas fa-star fa-2x text-warning mb-3"></i>
-                        <h5>গড় রেটিং</h5>
-                        <h3 class="text-warning" id="avg-rating">0.0</h3>
-                    </div>
-                </div>
-            </div>
-        </div>
-    </div>
-
-    <!-- Settings Section -->
-    <div id="settings-section" class="admin-section" style="display: none;">
-        <div class="card">
-            <div class="card-header">
-                <h5><i class="fas fa-cog me-2"></i>সিস্টেম সেটিংস</h5>
-            </div>
-            <div class="card-body">
-                <form>
-                    <div class="row">
-                        <div class="col-md-6 mb-3">
-                            <label class="form-label">ডেলিভারি চার্জ</label>
-                            <input type="number" class="form-control" value="50">
+                    <div class="row g-2 mb-3">
+                        <div class="col-6">
+                            <label class="form-label small fw-semibold text-muted">Category</label>
+                            <select id="addCategory" class="form-select">
+                                <option value="food">Food</option>
+                                <option value="groceries" selected>Groceries</option>
+                                <option value="medicine">Medicine</option>
+                                <option value="gas">Gas / Cylinder</option>
+                                <option value="documents">Documents</option>
+                                <option value="electronics">Electronics</option>
+                                <option value="other">Other Essentials</option>
+                            </select>
                         </div>
-                        <div class="col-md-6 mb-3">
-                            <label class="form-label">ভ্যাট (%)</label>
-                            <input type="number" class="form-control" value="5">
+                        <div class="col-6">
+                            <label class="form-label small fw-semibold text-muted">Price (BDT)</label>
+                            <div class="input-group">
+                                <span class="input-group-text">৳</span>
+                                <input type="number" id="addPrice" class="form-control" step="0.01" required placeholder="120.00">
+                            </div>
                         </div>
                     </div>
-                    <div class="row">
-                        <div class="col-md-6 mb-3">
-                            <label class="form-label">প্রসেসিং ফি (%)</label>
-                            <input type="number" class="form-control" value="2">
-                        </div>
-                        <div class="col-md-6 mb-3">
-                            <label class="form-label">মিনিমাম অর্ডার</label>
-                            <input type="number" class="form-control" value="100">
-                        </div>
+                    <div class="mb-3">
+                        <label class="form-label small fw-semibold text-muted">Initial Stock Quantity</label>
+                        <input type="number" id="addStock" class="form-control" value="25" min="0">
                     </div>
-                    <button type="submit" class="btn btn-primary">
-                        <i class="fas fa-save me-2"></i>সেটিংস সংরক্ষণ করুন
+                    <div class="mb-3">
+                        <label class="form-label small fw-semibold text-muted">Description</label>
+                        <textarea id="addDescription" class="form-control" rows="2" placeholder="Brief details about the item..."></textarea>
+                    </div>
+                </div>
+                <div class="modal-footer border-0 px-4 pb-4">
+                    <button type="button" class="btn btn-light rounded-pill px-3" data-bs-dismiss="modal">Cancel</button>
+                    <button type="submit" class="btn btn-primary rounded-pill px-4 fw-semibold" id="addSubmitBtn">
+                        Save Product
                     </button>
-                </form>
-            </div>
-        </div>
-    </div>
-</div>
-
-<!-- Add/Edit Product Modal -->
-<div class="modal fade" id="productModal" tabindex="-1">
-    <div class="modal-dialog">
-        <div class="modal-content">
-            <div class="modal-header">
-                <h5 class="modal-title" id="productModalTitle">নতুন পণ্য যোগ করুন</h5>
-                <button type="button" class="btn-close" data-bs-dismiss="modal"></button>
-            </div>
-            <div class="modal-body">
-                <form id="productForm">
-                    <div class="mb-3">
-                        <label class="form-label">পণ্যের নাম</label>
-                        <input type="text" class="form-control" id="product-name" required>
-                    </div>
-                    <div class="mb-3">
-                        <label class="form-label">ক্যাটাগরি</label>
-                        <select class="form-select" id="product-category" required>
-                            <option value="">ক্যাটাগরি নির্বাচন করুন</option>
-                            <option value="food">খাবার</option>
-                            <option value="medicine">ঔষধ</option>
-                            <option value="gas">গ্যাস</option>
-                            <option value="groceries">মুদি সামগ্রী</option>
-                            <option value="electronics">ইলেকট্রনিক্স</option>
-                            <option value="clothing">পোশাক</option>
-                            <option value="books">বই</option>
-                            <option value="other">অন্যান্য</option>
-                        </select>
-                    </div>
-                    <div class="mb-3">
-                        <label class="form-label">দর (৳)</label>
-                        <input type="number" class="form-control" id="product-price" required>
-                    </div>
-                    <div class="mb-3">
-                        <label class="form-label">বিবরণ</label>
-                        <textarea class="form-control" id="product-description" rows="3"></textarea>
-                    </div>
-                    <div class="mb-3">
-                        <label class="form-label">স্টক</label>
-                        <input type="number" class="form-control" id="product-stock" value="0">
-                    </div>
-                </form>
-            </div>
-            <div class="modal-footer">
-                <button type="button" class="btn btn-secondary" data-bs-dismiss="modal">বাতিল</button>
-                <button type="button" class="btn btn-primary" onclick="saveProduct()">সংরক্ষণ করুন</button>
-            </div>
-        </div>
-    </div>
-</div>
-
-<!-- Order Status Update Modal -->
-<div class="modal fade" id="orderStatusModal" tabindex="-1">
-    <div class="modal-dialog">
-        <div class="modal-content">
-            <div class="modal-header">
-                <h5 class="modal-title">অর্ডার স্ট্যাটাস আপডেট করুন</h5>
-                <button type="button" class="btn-close" data-bs-dismiss="modal"></button>
-            </div>
-            <div class="modal-body">
-                <div class="mb-3">
-                    <label for="statusSelect" class="form-label">নতুন স্ট্যাটাস</label>
-                    <select class="form-select" id="statusSelect" required>
-                        <option value="pending">অপেক্ষমান</option>
-                        <option value="confirmed">নিশ্চিত</option>
-                        <option value="processing">প্রক্রিয়াধীন</option>
-                        <option value="dispatched">প্রেরিত</option>
-                        <option value="delivered">ডেলিভারি সম্পন্ন</option>
-                        <option value="cancelled">বাতিল</option>
-                        <option value="returned">ফেরত</option>
-                    </select>
                 </div>
-            </div>
-            <div class="modal-footer">
-                <button type="button" class="btn btn-secondary" data-bs-dismiss="modal">বাতিল</button>
-                <button type="button" class="btn btn-primary" id="confirmStatusUpdate">আপডেট করুন</button>
-            </div>
+            </form>
         </div>
     </div>
 </div>
 
-<!-- Admin Notice Modal -->
-<div class="modal fade" id="adminNoticeModal" tabindex="-1">
+<!-- Edit Product Modal -->
+<div class="modal fade" id="editProductModal" tabindex="-1">
     <div class="modal-dialog">
-        <div class="modal-content">
-            <div class="modal-header">
-                <h5 class="modal-title">অ্যাডমিন নোটিশ</h5>
+        <div class="modal-content rounded-4 border-0 shadow">
+            <div class="modal-header border-0 pt-4 px-4 pb-0">
+                <h5 class="modal-title fw-bold text-navy">Edit Product / Service</h5>
                 <button type="button" class="btn-close" data-bs-dismiss="modal"></button>
             </div>
-            <div class="modal-body">
-                <div class="alert alert-info">
-                    <i class="fas fa-info-circle me-2"></i>
-                    <strong>মনে রাখবেন:</strong> অ্যাডমিন হিসেবে আপনি অর্ডার স্ট্যাটাস আপডেট এবং সিস্টেম ব্যবস্থাপনা করতে পারবেন।
+            <form id="editProductForm" onsubmit="submitEditProduct(event)">
+                <input type="hidden" id="editId">
+                <div class="modal-body p-4">
+                    <div class="mb-3">
+                        <label class="form-label small fw-semibold text-muted">Product / Service Name</label>
+                        <input type="text" id="editName" class="form-control" required>
+                    </div>
+                    <div class="row g-2 mb-3">
+                        <div class="col-6">
+                            <label class="form-label small fw-semibold text-muted">Category</label>
+                            <select id="editCategory" class="form-select">
+                                <option value="food">Food</option>
+                                <option value="groceries">Groceries</option>
+                                <option value="medicine">Medicine</option>
+                                <option value="gas">Gas / Cylinder</option>
+                                <option value="documents">Documents</option>
+                                <option value="electronics">Electronics</option>
+                                <option value="other">Other Essentials</option>
+                            </select>
+                        </div>
+                        <div class="col-6">
+                            <label class="form-label small fw-semibold text-muted">Price (BDT)</label>
+                            <div class="input-group">
+                                <span class="input-group-text">৳</span>
+                                <input type="number" id="editPrice" class="form-control" step="0.01" required>
+                            </div>
+                        </div>
+                    </div>
+                    <div class="row g-2 mb-3">
+                        <div class="col-6">
+                            <label class="form-label small fw-semibold text-muted">Stock Quantity</label>
+                            <input type="number" id="editStock" class="form-control" min="0" required>
+                        </div>
+                        <div class="col-6">
+                            <label class="form-label small fw-semibold text-muted">Availability</label>
+                            <select id="editAvailable" class="form-select">
+                                <option value="true">Live / Available</option>
+                                <option value="false">Hidden / Inactive</option>
+                            </select>
+                        </div>
+                    </div>
+                    <div class="mb-3">
+                        <label class="form-label small fw-semibold text-muted">Description</label>
+                        <textarea id="editDescription" class="form-control" rows="2"></textarea>
+                    </div>
                 </div>
-                <p>আপনি যা করতে পারবেন:</p>
-                <ul>
-                    <li>পণ্য যোগ, সম্পাদনা ও মুছে ফেলা</li>
-                    <li>অর্ডার স্ট্যাটাস আপডেট ও ট্র্যাকিং</li>
-                    <li>গ্রাহক তথ্য দেখুন</li>
-                    <li>সিস্টেম এনালিটিক্স</li>
-                </ul>
-            </div>
-            <div class="modal-footer">
-                <button type="button" class="btn btn-primary" data-bs-dismiss="modal">বুঝেছি</button>
-            </div>
+                <div class="modal-footer border-0 px-4 pb-4">
+                    <button type="button" class="btn btn-light rounded-pill px-3" data-bs-dismiss="modal">Cancel</button>
+                    <button type="submit" class="btn btn-primary rounded-pill px-4 fw-semibold" id="editSubmitBtn">
+                        Update Product
+                    </button>
+                </div>
+            </form>
         </div>
     </div>
 </div>
 
 <script>
-    document.addEventListener('DOMContentLoaded', function() {
-        // Analytics data is already loaded from server
-        loadAnalytics();
-        
-        // Add event listeners for edit product buttons
-        document.querySelectorAll('.edit-product-btn').forEach(btn => {
-            btn.addEventListener('click', function() {
-                const id = this.dataset.id;
-                const name = this.dataset.name;
-                const category = this.dataset.category;
-                const price = this.dataset.price;
-                const description = this.dataset.description;
-                const stock = this.dataset.stock;
-                editProduct(id, name, category, price, description, stock);
-            });
-        });
-        
-        // Add event listeners for update order status buttons
-        document.querySelectorAll('.update-order-status-btn').forEach(btn => {
-            btn.addEventListener('click', function() {
-                const orderId = this.dataset.orderId;
-                const currentStatus = this.dataset.currentStatus;
-                updateOrderStatus(orderId, currentStatus);
-            });
-        });
-        
-        // Show admin notice on page load
-        setTimeout(function() {
-            new bootstrap.Modal(document.getElementById('adminNoticeModal')).show();
-        }, 1000);
-        
-        // Add event listeners for delete product buttons
-        document.querySelectorAll('.delete-product-btn').forEach(btn => {
-            btn.addEventListener('click', function() {
-                const productId = this.dataset.productId;
-                deleteProduct(productId);
-            });
-        });
+// Filter catalog table
+document.getElementById('productFilterInput')?.addEventListener('keyup', function() {
+    const val = this.value.toLowerCase();
+    const rows = document.querySelectorAll('#productsTable tbody tr');
+    rows.forEach(r => {
+        const text = r.textContent.toLowerCase();
+        r.style.display = text.includes(val) ? '' : 'none';
     });
+});
 
-    function showSection(sectionName) {
-        document.querySelectorAll('.admin-section').forEach(section => {
-            section.style.display = 'none';
-        });
-        document.getElementById(sectionName + '-section').style.display = 'block';
-    }
+function getCSRFToken() {
+    return document.querySelector('[name=csrfmiddlewaretoken]')?.value || 
+           document.cookie.split('; ').find(row => row.startsWith('csrftoken='))?.split('=')[1] || '';
+}
 
-    function loadAnalytics() {
-        // Analytics data is already loaded from server in the template
-        document.getElementById('avg-rating').textContent = '4.5';
-    }
+function openEditModal(id, name, category, price, stock, description, isAvailable) {
+    document.getElementById('editId').value = id;
+    document.getElementById('editName').value = name;
+    document.getElementById('editCategory').value = category;
+    document.getElementById('editPrice').value = price;
+    document.getElementById('editStock').value = stock;
+    document.getElementById('editDescription').value = description;
+    document.getElementById('editAvailable').value = isAvailable ? 'true' : 'false';
+    new bootstrap.Modal(document.getElementById('editProductModal')).show();
+}
 
-    function showAddProductModal() {
-        editingProductId = null;
-        document.getElementById('productModalTitle').textContent = 'নতুন পণ্য যোগ করুন';
-        document.getElementById('productForm').reset();
-        new bootstrap.Modal(document.getElementById('productModal')).show();
-    }
+async function submitAddProduct(e) {
+    e.preventDefault();
+    const btn = document.getElementById('addSubmitBtn');
+    btn.disabled = true;
+    btn.textContent = 'Saving...';
 
-    function editProduct(id, name, category, price, description, stock) {
-        editingProductId = id;
-        document.getElementById('productModalTitle').textContent = 'পণ্য সম্পাদনা করুন';
-        document.getElementById('product-name').value = name;
-        document.getElementById('product-category').value = category;
-        document.getElementById('product-price').value = price;
-        document.getElementById('product-description').value = description;
-        document.getElementById('product-stock').value = stock;
-        new bootstrap.Modal(document.getElementById('productModal')).show();
-    }
+    const payload = {
+        name: document.getElementById('addName').value,
+        category: document.getElementById('addCategory').value,
+        price: document.getElementById('addPrice').value,
+        stock_quantity: document.getElementById('addStock').value,
+        description: document.getElementById('addDescription').value
+    };
 
-    let editingProductId = null;
-
-    function saveProduct() {
-        const name = document.getElementById('product-name').value;
-        const category = document.getElementById('product-category').value;
-        const price = parseFloat(document.getElementById('product-price').value);
-        const description = document.getElementById('product-description').value;
-        const stock = parseInt(document.getElementById('product-stock').value);
-
-        if (!name || !category || !price) {
-            showNotification('সব প্রয়োজনীয় তথ্য পূরণ করুন!', 'error');
-            return;
-        }
-
-        // Show loading
-        const submitBtn = document.querySelector('#productModal .btn-primary');
-        const originalText = submitBtn.innerHTML;
-        submitBtn.innerHTML = '<i class="fas fa-spinner fa-spin me-2"></i>সংরক্ষণ হচ্ছে...';
-        submitBtn.disabled = true;
-
-        // Prepare product data
-        const productData = {
-            name: name,
-            category: category,
-            price: price,
-            description: description,
-            stock_quantity: stock
-        };
-
-        // Determine if this is an edit or add operation
-        const isEdit = editingProductId !== null;
-        const url = isEdit ? 
-            `{% url "orders:update_product_api" 0 %}`.replace('0', editingProductId) : 
-            '{% url "orders:add_product_api" %}';
-        const method = isEdit ? 'POST' : 'POST';
-
-        // Send to server
-        fetch(url, {
-            method: method,
-            headers: {
-                'Content-Type': 'application/json',
-                'X-CSRFToken': getCookie('csrftoken')
-            },
-            body: JSON.stringify(productData)
-        })
-        .then(response => response.json())
-        .then(data => {
-            if (data.success) {
-                showNotification(`পণ্য সফলভাবে ${isEdit ? 'আপডেট' : 'সংরক্ষণ'} করা হয়েছে!`, 'success');
-                bootstrap.Modal.getInstance(document.getElementById('productModal')).hide();
-                // Reload page to show changes
-                location.reload();
-            } else {
-                showNotification(data.message || 'পণ্য সংরক্ষণে সমস্যা হয়েছে।', 'error');
-            }
-        })
-        .catch(error => {
-            console.error('Error:', error);
-            showNotification('পণ্য সংরক্ষণে সমস্যা হয়েছে।', 'error');
-        })
-        .finally(() => {
-            // Reset button
-            submitBtn.innerHTML = originalText;
-            submitBtn.disabled = false;
-        });
-    }
-    
-    // Get CSRF token
-    function getCookie(name) {
-        let cookieValue = null;
-        if (document.cookie && document.cookie !== '') {
-            const cookies = document.cookie.split(';');
-            for (let i = 0; i < cookies.length; i++) {
-                const cookie = cookies[i].trim();
-                if (cookie.substring(0, name.length + 1) === (name + '=')) {
-                    cookieValue = decodeURIComponent(cookie.substring(name.length + 1));
-                    break;
-                }
-            }
-        }
-        return cookieValue;
-    }
-    
-    // Show notification
-    function showNotification(message, type = 'info') {
-        const notification = document.createElement('div');
-        notification.className = `alert alert-${type === 'error' ? 'danger' : type} alert-dismissible fade show`;
-        notification.style.position = 'fixed';
-        notification.style.top = '20px';
-        notification.style.right = '20px';
-        notification.style.zIndex = '9999';
-        notification.innerHTML = `
-            ${message}
-            <button type="button" class="btn-close" data-bs-dismiss="alert"></button>
-        `;
-        
-        document.body.appendChild(notification);
-        
-        setTimeout(() => {
-            notification.remove();
-        }, 5000);
-    }
-
-    function deleteProduct(id) {
-        if (confirm('আপনি কি এই পণ্য মুছে ফেলতে চান?')) {
-            fetch(`{% url "orders:delete_product_api" 0 %}`.replace('0', id), {
-                method: 'DELETE',
-                headers: {
-                    'X-CSRFToken': getCookie('csrftoken')
-                }
-            })
-            .then(response => response.json())
-            .then(data => {
-                if (data.success) {
-                    showNotification('পণ্য সফলভাবে মুছে ফেলা হয়েছে!', 'success');
-                    location.reload();
-                } else {
-                    showNotification(data.message || 'পণ্য মুছে ফেলতে সমস্যা হয়েছে।', 'error');
-                }
-            })
-            .catch(error => {
-                console.error('Error:', error);
-                showNotification('পণ্য মুছে ফেলতে সমস্যা হয়েছে।', 'error');
-            });
-        }
-    }
-
-    // Order status update functionality
-    let currentOrderId = null;
-    
-    function updateOrderStatus(orderId, currentStatus) {
-        currentOrderId = orderId;
-        document.getElementById('statusSelect').value = currentStatus;
-        
-        var modal = new bootstrap.Modal(document.getElementById('orderStatusModal'));
-        modal.show();
-    }
-    
-    // Handle status update confirmation
-    document.getElementById('confirmStatusUpdate').addEventListener('click', function() {
-        const newStatus = document.getElementById('statusSelect').value;
-        
-        if (!currentOrderId || !newStatus) {
-            showNotification('অর্ডার ID এবং স্ট্যাটাস প্রয়োজন', 'error');
-            return;
-        }
-        
-        // Show loading state
-        const btn = this;
-        const originalText = btn.innerHTML;
-        btn.innerHTML = '<i class="fas fa-spinner fa-spin me-2"></i>আপডেট হচ্ছে...';
-        btn.disabled = true;
-        
-        // Make API call
-        fetch('{% url "orders:admin_update_order_status" %}', {
+    try {
+        const res = await fetch("{% url 'orders:add_product_api' %}", {
             method: 'POST',
             headers: {
                 'Content-Type': 'application/json',
-                'X-CSRFToken': getCookie('csrftoken')
+                'X-CSRFToken': getCSRFToken()
             },
-            body: JSON.stringify({
-                order_id: currentOrderId,
-                status: newStatus
-            })
-        })
-        .then(response => response.json())
-        .then(data => {
-            if (data.success) {
-                showNotification(data.message, 'success');
-                bootstrap.Modal.getInstance(document.getElementById('orderStatusModal')).hide();
-                // Reload the page to show updated data
-                location.reload();
-            } else {
-                showNotification(data.message || 'স্ট্যাটাস আপডেটে সমস্যা হয়েছে', 'error');
-            }
-        })
-        .catch(error => {
-            console.error('Error:', error);
-            showNotification('স্ট্যাটাস আপডেটে সমস্যা হয়েছে', 'error');
-        })
-        .finally(() => {
-            // Reset button
-            btn.innerHTML = originalText;
-            btn.disabled = false;
+            body: JSON.stringify(payload)
         });
-    });
-    
-    // Real-time dashboard updates
-    function updateDashboardData() {
-        fetch('{% url "orders:dashboard_data_api" %}')
-            .then(response => response.json())
-            .then(data => {
-                if (data.success && data.data.user_type === 'admin') {
-                    // Update statistics
-                    document.getElementById('total-orders').textContent = data.data.total_orders;
-                    
-                    // Update recent orders table
-                    const tbody = document.getElementById('orders-table');
-                    if (tbody && data.data.recent_orders) {
-                        tbody.innerHTML = data.data.recent_orders.map(order => `
-                            <tr>
-                                <td>#${order.order_number}</td>
-                                <td>${order.customer_name}</td>
-                                <td>${order.created_at}</td>
-                                <td>৳ ${order.total_amount}</td>
-                                <td>
-                                    <span class="badge 
-                                        ${order.status === 'pending' ? 'bg-warning' :
-                                          order.status === 'confirmed' ? 'bg-info' :
-                                          order.status === 'processing' ? 'bg-primary' :
-                                          order.status === 'dispatched' ? 'bg-success' :
-                                          order.status === 'delivered' ? 'bg-success' :
-                                          order.status === 'cancelled' ? 'bg-danger' :
-                                          order.status === 'returned' ? 'bg-secondary' : 'bg-secondary'}">
-                                        ${order.status_display}
-                                    </span>
-                                </td>
-                                <td>
-                                    <a href="/orders/${order.id}/" class="btn btn-sm btn-primary me-1">
-                                        <i class="fas fa-eye"></i> দেখুন
-                                    </a>
-                                    <button class="btn btn-sm btn-success update-order-status-btn" 
-                                            data-order-id="${order.id}"
-                                            data-current-status="${order.status}">
-                                        <i class="fas fa-check"></i> স্ট্যাটাস
-                                    </button>
-                                    <a href="/orders/${order.id}/track/" class="btn btn-sm btn-info">
-                                        <i class="fas fa-map-marker-alt"></i> ট্র্যাক
-                                    </a>
-                                </td>
-                            </tr>
-                        `).join('');
-                        
-                        // Re-add event listeners for new buttons
-                        document.querySelectorAll('.update-order-status-btn').forEach(btn => {
-                            btn.addEventListener('click', function() {
-                                const orderId = this.dataset.orderId;
-                                const currentStatus = this.dataset.currentStatus;
-                                updateOrderStatus(orderId, currentStatus);
-                            });
-                        });
-                    }
-                }
-            })
-            .catch(error => {
-                console.log('Dashboard update failed:', error);
-            });
+        const data = await res.json();
+        if (data.success) {
+            window.location.reload();
+        } else {
+            alert('Error: ' + data.message);
+            btn.disabled = false;
+            btn.textContent = 'Save Product';
+        }
+    } catch (err) {
+        alert('Request failed: ' + err.message);
+        btn.disabled = false;
+        btn.textContent = 'Save Product';
     }
-    
-    // Update dashboard every 30 seconds
-    setInterval(updateDashboardData, 30000);
-</script>
+}
 
-<style>
-    .admin-section {
-        display: block;
+async function submitEditProduct(e) {
+    e.preventDefault();
+    const id = document.getElementById('editId').value;
+    const btn = document.getElementById('editSubmitBtn');
+    btn.disabled = true;
+    btn.textContent = 'Updating...';
+
+    const payload = {
+        name: document.getElementById('editName').value,
+        category: document.getElementById('editCategory').value,
+        price: document.getElementById('editPrice').value,
+        stock_quantity: document.getElementById('editStock').value,
+        description: document.getElementById('editDescription').value,
+        is_available: document.getElementById('editAvailable').value === 'true'
+    };
+
+    const updateUrl = "{% url 'orders:update_product_api' 999999 %}".replace('999999', id);
+    try {
+        const res = await fetch(updateUrl, {
+            method: 'POST',
+            headers: {
+                'Content-Type': 'application/json',
+                'X-CSRFToken': getCSRFToken()
+            },
+            body: JSON.stringify(payload)
+        });
+        const data = await res.json();
+        if (data.success) {
+            window.location.reload();
+        } else {
+            alert('Error: ' + data.message);
+            btn.disabled = false;
+            btn.textContent = 'Update Product';
+        }
+    } catch (err) {
+        alert('Request failed: ' + err.message);
+        btn.disabled = false;
+        btn.textContent = 'Update Product';
     }
-</style>
+}
+
+async function deleteProduct(id, name) {
+    if (!confirm('Are you sure you want to permanently delete "' + name + '"?')) return;
+    const deleteUrl = "{% url 'orders:delete_product_api' 999999 %}".replace('999999', id);
+    try {
+        const res = await fetch(deleteUrl, {
+            method: 'POST',
+            headers: {
+                'Content-Type': 'application/json',
+                'X-CSRFToken': getCSRFToken()
+            }
+        });
+        const data = await res.json();
+        if (data.success) {
+            window.location.reload();
+        } else {
+            alert('Error: ' + data.message);
+        }
+    } catch (err) {
+        alert('Delete failed: ' + err.message);
+    }
+}
+</script>
 {% endblock %}

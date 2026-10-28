@@ -13,6 +13,6 @@ class Migration(migrations.Migration):
         migrations.AddField(
             model_name='productservice',
             name='stock_quantity',
-            field=models.PositiveIntegerField(default=0, verbose_name='স্টক পরিমাণ'),
+            field=models.PositiveIntegerField(default=0, verbose_name='Stock Quantity'),
         ),
     ]

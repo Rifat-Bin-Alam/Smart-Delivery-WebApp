@@ -1,111 +1,171 @@
 {% load static %}
 <!DOCTYPE html>
-<html lang="bn" dir="ltr">
+<html lang="en" dir="ltr">
 <head>
     <meta charset="UTF-8">
     <meta name="viewport" content="width=device-width, initial-scale=1.0">
     <meta http-equiv="X-UA-Compatible" content="ie=edge">
     
-    <title>{% block title %}নাগরীবাসী এক্সপ্রেস - Always at Your Service{% endblock %}</title>
-    <link rel="icon" type="image/x-icon" href="data:image/svg+xml,<svg xmlns='http://www.w3.org/2000/svg' viewBox='0 0 100 100'><text y='.9em' font-size='90'>🏍️</text></svg>">
+    <title>{% block title %}SwiftDrop — Your Essentials. Delivered Smarter.{% endblock %}</title>
+    <link rel="icon" type="image/svg+xml" href="{% static 'images/logo.svg' %}">
     
-    <!-- Bootstrap CSS -->
-    <link href="https://cdn.jsdelivr.net/npm/bootstrap@5.3.0/dist/css/bootstrap.min.css" rel="stylesheet">
-    
-    <!-- Font Awesome -->
-    <link rel="stylesheet" href="https://cdnjs.cloudflare.com/ajax/libs/font-awesome/6.4.0/css/all.min.css">
-    
-    <!-- Google Fonts - Bengali -->
+    <!-- Google Fonts: Inter -->
     <link rel="preconnect" href="https://fonts.googleapis.com">
     <link rel="preconnect" href="https://fonts.gstatic.com" crossorigin>
-    <link href="https://fonts.googleapis.com/css2?family=Noto+Sans+Bengali:wght@300;400;500;600;700&display=swap" rel="stylesheet">
+    <link href="https://fonts.googleapis.com/css2?family=Inter:wght@400;500;600;700;800&display=swap" rel="stylesheet">
     
-    <!-- Custom CSS -->
+    <!-- Bootstrap 5.3 CSS -->
+    <link href="https://cdn.jsdelivr.net/npm/bootstrap@5.3.3/dist/css/bootstrap.min.css" rel="stylesheet">
+    
+    <!-- Font Awesome Icons -->
+    <link rel="stylesheet" href="https://cdnjs.cloudflare.com/ajax/libs/font-awesome/6.5.1/css/all.min.css">
+    
+    <!-- SwiftDrop Theme CSS -->
     <link rel="stylesheet" href="{% static 'css/style.css' %}">
     
     {% block extra_css %}{% endblock %}
 </head>
 <body>
-    <!-- Navigation -->
-    <nav class="navbar navbar-expand-lg navbar-dark sticky-top" style="background: linear-gradient(135deg, #DC2626 0%, #B91C1C 100%);">
+    <!-- Top Bar -->
+    <div class="bg-dark text-white-50 py-1 d-none d-md-block border-bottom border-secondary border-opacity-25" style="font-size: 0.8rem; background-color: #0B1120 !important;">
+        <div class="container d-flex justify-content-between align-items-center">
+            <div>
+                <span class="me-3"><i class="fas fa-bolt text-warning me-1"></i> Fast Delivery across Dhaka</span>
+                <span><i class="fas fa-shield-alt text-info me-1"></i> 100% Genuine Essentials Guaranteed</span>
+            </div>
+            <div class="d-flex align-items-center gap-3">
+                <a href="tel:+8801711000000" class="text-white-50 text-decoration-none hover-white">
+                    <i class="fas fa-phone-alt me-1"></i> +880 1711-000000
+                </a>
+                <span>|</span>
+                <a href="{% url 'dashboard:faq' %}" class="text-white-50 text-decoration-none hover-white">Help & FAQs</a>
+            </div>
+        </div>
+    </div>
+
+    <!-- Navigation Header -->
+    <nav class="navbar navbar-expand-lg navbar-dark sticky-top sd-navbar">
         <div class="container">
-            <a class="navbar-brand d-flex align-items-center" href="{% url 'dashboard:home' %}">
-                <img src="{% static 'images/logo.svg' %}" alt="নাগরীবাসী এক্সপ্রেস" height="50" class="me-3">
-                <div>
-                    <div class="fw-bold fs-4 text-white">নাগরীবাসী এক্সপ্রেস</div>
-                    <small class="text-light">ALWAYS AT YOUR SERVICE</small>
-                </div>
+            <!-- Brand Logo -->
+            <a class="navbar-brand" href="{% url 'dashboard:home' %}">
+                <img src="{% static 'images/logo.svg' %}" alt="SwiftDrop" height="42">
             </a>
             
-            <button class="navbar-toggler" type="button" data-bs-toggle="collapse" data-bs-target="#navbarNav">
+            <!-- Mobile Toggle -->
+            <button class="navbar-toggler border-0" type="button" data-bs-toggle="collapse" data-bs-target="#sdNavbar" aria-controls="sdNavbar" aria-expanded="false" aria-label="Toggle navigation">
                 <span class="navbar-toggler-icon"></span>
             </button>
             
-            <div class="collapse navbar-collapse" id="navbarNav">
-                <ul class="navbar-nav me-auto">
+            <div class="collapse navbar-collapse" id="sdNavbar">
+                <!-- Main Nav Links -->
+                <ul class="navbar-nav me-auto mb-2 mb-lg-0 ms-lg-3">
                     <li class="nav-item">
-                        <a class="nav-link" href="{% url 'dashboard:home' %}">
-                            <i class="fas fa-home me-1"></i>হোম
+                        <a class="nav-link {% if request.resolver_match.url_name == 'home' %}active{% endif %}" href="{% url 'dashboard:home' %}">
+                            <i class="fas fa-home"></i> Home
                         </a>
                     </li>
                     <li class="nav-item">
-                        <a class="nav-link" href="{% url 'orders:products' %}">
-                            <i class="fas fa-shopping-bag me-1"></i>পণ্য/সেবা
-                        </a>
-                    </li>
-                    {% if not user.is_admin %}
-                    <li class="nav-item">
-                        <a class="nav-link" href="{% url 'orders:cart' %}">
-                            <i class="fas fa-shopping-cart me-1"></i>কার্ট
-                            <span class="badge bg-success ms-1" id="cart-badge" style="display: none;">0</span>
-                        </a>
-                    </li>
-                    {% endif %}
-                    <li class="nav-item">
-                        <a class="nav-link" href="{% url 'orders:order_list' %}">
-                            <i class="fas fa-list me-1"></i>অর্ডার
+                        <a class="nav-link {% if 'products' in request.path %}active{% endif %}" href="{% url 'orders:products' %}">
+                            <i class="fas fa-th-large"></i> Essentials
                         </a>
                     </li>
                     <li class="nav-item">
-                        <a class="nav-link" href="{% url 'dashboard:user_dashboard' %}">
-                            <i class="fas fa-tachometer-alt me-1"></i>ড্যাশবোর্ড
+                        <a class="nav-link {% if 'areas' in request.path %}active{% endif %}" href="{% url 'delivery:delivery_area_list' %}">
+                            <i class="fas fa-map-marker-alt"></i> Coverage Zones
                         </a>
                     </li>
                     <li class="nav-item">
-                        <a class="nav-link" href="{% url 'reviews:review_list' %}">
-                            <i class="fas fa-star me-1"></i>রিভিউ
+                        <a class="nav-link {% if 'reviews' in request.path and 'admin' not in request.path %}active{% endif %}" href="{% url 'reviews:review_list' %}">
+                            <i class="fas fa-star text-warning"></i> Reviews
                         </a>
                     </li>
+                    
+                    <!-- Role-based Admin Menu -->
                     {% if user.is_authenticated and user.is_admin %}
                     <li class="nav-item dropdown">
-                        <a class="nav-link dropdown-toggle" href="#" role="button" data-bs-toggle="dropdown">
-                            <i class="fas fa-cog me-1"></i>অ্যাডমিন
+                        <a class="nav-link dropdown-toggle text-warning fw-semibold" href="#" role="button" data-bs-toggle="dropdown" aria-expanded="false">
+                            <i class="fas fa-crown"></i> Admin Control
                         </a>
                         <ul class="dropdown-menu">
-                            <li><a class="dropdown-item" href="{% url 'dashboard:admin_dashboard' %}">ড্যাশবোর্ড</a></li>
-                            <li><a class="dropdown-item" href="{% url 'dashboard:admin_panel' %}">পণ্য ব্যবস্থাপনা</a></li>
-                            <li><a class="dropdown-item" href="{% url 'orders:admin_order_list' %}">অর্ডার ব্যবস্থাপনা</a></li>
-                            <li><a class="dropdown-item" href="{% url 'delivery:admin_delivery_list' %}">ডেলিভারি ব্যবস্থাপনা</a></li>
-                            <li><a class="dropdown-item" href="{% url 'payments:admin_payment_list' %}">পেমেন্ট ব্যবস্থাপনা</a></li>
-                            <li><a class="dropdown-item" href="{% url 'users:user_list' %}">ব্যবহারকারী ব্যবস্থাপনা</a></li>
+                            <li><h6 class="dropdown-header text-uppercase text-muted" style="font-size: 0.72rem;">Operations</h6></li>
+                            <li><a class="dropdown-item" href="{% url 'dashboard:admin_dashboard' %}"><i class="fas fa-chart-line me-2 text-primary"></i>Command Dashboard</a></li>
+                            <li><a class="dropdown-item" href="{% url 'dashboard:admin_panel' %}"><i class="fas fa-boxes me-2 text-primary"></i>Catalog Inventory</a></li>
+                            <li><a class="dropdown-item" href="{% url 'orders:admin_order_list' %}"><i class="fas fa-shopping-bag me-2 text-primary"></i>Order Management</a></li>
+                            <li><a class="dropdown-item" href="{% url 'delivery:admin_delivery_list' %}"><i class="fas fa-motorcycle me-2 text-primary"></i>Fleet & Dispatch</a></li>
+                            <li><hr class="dropdown-divider"></li>
+                            <li><h6 class="dropdown-header text-uppercase text-muted" style="font-size: 0.72rem;">Governance</h6></li>
+                            <li><a class="dropdown-item" href="{% url 'payments:admin_payment_list' %}"><i class="fas fa-file-invoice-dollar me-2 text-success"></i>Revenue & Payments</a></li>
+                            <li><a class="dropdown-item" href="{% url 'users:user_list' %}"><i class="fas fa-users-cog me-2 text-info"></i>User Directory</a></li>
+                            <li><a class="dropdown-item" href="{% url 'reviews:admin_review_list' %}"><i class="fas fa-shield-alt me-2 text-warning"></i>Review Moderation</a></li>
+                            <li><a class="dropdown-item" href="/admin/" target="_blank"><i class="fas fa-database me-2 text-danger"></i>Django Admin</a></li>
                         </ul>
+                    </li>
+                    {% endif %}
+
+                    <!-- Role-based Delivery Agent Menu -->
+                    {% if user.is_authenticated and user.is_delivery_agent %}
+                    <li class="nav-item">
+                        <a class="nav-link text-info fw-semibold" href="{% url 'delivery:my_deliveries' %}">
+                            <i class="fas fa-motorcycle"></i> My Deliveries
+                        </a>
                     </li>
                     {% endif %}
                 </ul>
                 
-                <ul class="navbar-nav">
+                <!-- Action / Account Navigation -->
+                <ul class="navbar-nav align-items-lg-center gap-2">
+                    <!-- Shopping Cart Pill -->
+                    <li class="nav-item">
+                        <a class="btn btn-outline-light position-relative d-inline-flex align-items-center gap-2 px-3 py-2 rounded-pill" href="{% url 'orders:cart' %}" id="global-cart-button">
+                            <i class="fas fa-shopping-cart text-info"></i>
+                            <span>Cart</span>
+                            <span class="cart-badge-pill cart-badge-count" style="display: none;">0</span>
+                        </a>
+                    </li>
+
                     {% if user.is_authenticated %}
+                        <!-- User Profile Dropdown -->
                         <li class="nav-item dropdown">
-                            <a class="nav-link dropdown-toggle" href="#" role="button" data-bs-toggle="dropdown">
-                                <i class="fas fa-user me-1"></i>{{ user.get_full_name|default:user.username }}
+                            <a class="nav-link dropdown-toggle d-flex align-items-center gap-2" href="#" role="button" data-bs-toggle="dropdown" aria-expanded="false">
+                                <div class="rounded-circle bg-primary text-white d-flex align-items-center justify-content-center fw-bold" style="width: 32px; height: 32px; font-size: 0.85rem;">
+                                    {{ user.first_name|default:user.username|make_list|first|upper }}
+                                </div>
+                                <span class="d-none d-xl-inline">{{ user.get_full_name|default:user.username }}</span>
                             </a>
-                            <ul class="dropdown-menu">
-                                <li><a class="dropdown-item" href="{% url 'users:profile' %}">প্রোফাইল</a></li>
-                                <li><a class="dropdown-item" href="{% url 'orders:order_history' %}">অর্ডার ইতিহাস</a></li>
-                                <li><a class="dropdown-item" href="{% url 'reviews:review_list' %}">আমার রিভিউ</a></li>
+                            <ul class="dropdown-menu dropdown-menu-end shadow">
+                                <li class="px-3 py-2 border-bottom">
+                                    <div class="fw-bold text-dark">{{ user.get_full_name|default:user.username }}</div>
+                                    <div class="small text-muted text-truncate" style="max-width: 200px;">{{ user.email }}</div>
+                                    <span class="badge bg-secondary mt-1 text-uppercase" style="font-size: 0.65rem;">{{ user.get_user_type_display }}</span>
+                                </li>
+                                {% if user.is_customer %}
+                                <li><a class="dropdown-item" href="{% url 'dashboard:user_dashboard' %}"><i class="fas fa-tachometer-alt me-2 text-muted"></i>Dashboard</a></li>
+                                <li><a class="dropdown-item" href="{% url 'orders:order_list' %}"><i class="fas fa-box me-2 text-muted"></i>My Orders</a></li>
+                                {% elif user.is_delivery_agent %}
+                                <li><a class="dropdown-item" href="{% url 'delivery:my_deliveries' %}"><i class="fas fa-motorcycle me-2 text-muted"></i>Delivery Portal</a></li>
+                                {% elif user.is_admin %}
+                                <li><a class="dropdown-item" href="{% url 'dashboard:admin_dashboard' %}"><i class="fas fa-chart-line me-2 text-muted"></i>Admin Dashboard</a></li>
+                                {% endif %}
+                                <li><a class="dropdown-item" href="{% url 'users:profile' %}"><i class="fas fa-user-edit me-2 text-muted"></i>Account Profile</a></li>
                                 <li><hr class="dropdown-divider"></li>
-                                <li><a class="dropdown-item" href="{% url 'users:logout' %}">লগআউট</a></li>
+                                <li>
+                                    <a class="dropdown-item text-danger" href="{% url 'users:logout' %}">
+                                        <i class="fas fa-sign-out-alt me-2"></i>Sign Out
+                                    </a>
+                                </li>
                             </ul>
+                        </li>
+                    {% else %}
+                        <!-- Guest Sign In & Register Buttons -->
+                        <li class="nav-item">
+                            <a class="btn btn-outline-light btn-sm px-3 rounded-pill" href="{% url 'users:login' %}">
+                                <i class="fas fa-sign-in-alt me-1"></i> Sign In
+                            </a>
+                        </li>
+                        <li class="nav-item">
+                            <a class="btn btn-primary btn-sm px-3 rounded-pill" href="{% url 'users:signup' %}">
+                                <i class="fas fa-user-plus me-1"></i> Get Started
+                            </a>
                         </li>
                     {% endif %}
                 </ul>
@@ -113,107 +173,132 @@
         </div>
     </nav>
 
-    <!-- Messages -->
+    <!-- Global Flash Messages -->
     {% if messages %}
         <div class="container mt-3">
             {% for message in messages %}
-                <div class="alert alert-{{ message.tags }} alert-dismissible fade show" role="alert">
-                    {{ message }}
-                    <button type="button" class="btn-close" data-bs-dismiss="alert"></button>
+                <div class="alert alert-{{ message.tags|default:'info' }} alert-dismissible fade show shadow-sm border-0 d-flex align-items-center" role="alert">
+                    <i class="fas {% if message.tags == 'success' %}fa-check-circle text-success{% elif message.tags == 'error' %}fa-exclamation-circle text-danger{% else %}fa-info-circle text-primary{% endif %} me-2 fs-5"></i>
+                    <div>{{ message }}</div>
+                    <button type="button" class="btn-close ms-auto" data-bs-dismiss="alert" aria-label="Close"></button>
                 </div>
             {% endfor %}
         </div>
     {% endif %}
 
-    <!-- Main Content -->
+    <!-- Main Dynamic Content -->
     <main class="main-content">
         {% block content %}{% endblock %}
     </main>
 
-    <!-- Footer -->
-    <footer class="bg-dark text-light py-5 mt-5">
+    <!-- Premium Footer -->
+    <footer class="sd-footer">
         <div class="container">
-            <div class="row">
-                <div class="col-md-4">
-                    <h5 class="mb-3">নাগরীবাসী এক্সপ্রেস</h5>
-                    <p class="text-muted">আপনার শহরের সবচেয়ে নির্ভরযোগ্য ডেলিভারি সেবা। খাবার, ঔষধ, গ্যাস এবং আরও অনেক কিছু দ্রুত এবং নিরাপদে পৌঁছে দেওয়া।</p>
-                </div>
-                <div class="col-md-2">
-                    <h6 class="mb-3">সেবা</h6>
-                    <ul class="list-unstyled">
-                        <li><a href="{% url 'orders:product_list' %}" class="text-muted text-decoration-none">পণ্য/সেবা</a></li>
-                        <li><a href="{% url 'orders:order_list' %}" class="text-muted text-decoration-none">অর্ডার</a></li>
-                        <li><a href="{% url 'delivery:delivery_list' %}" class="text-muted text-decoration-none">ডেলিভারি</a></li>
-                        <li><a href="{% url 'payments:payment_list' %}" class="text-muted text-decoration-none">পেমেন্ট</a></li>
-                    </ul>
-                </div>
-                <div class="col-md-2">
-                    <h6 class="mb-3">সহায়তা</h6>
-                    <ul class="list-unstyled">
-                        <li><a href="{% url 'dashboard:faq' %}" class="text-muted text-decoration-none">প্রায়শই জিজ্ঞাসিত প্রশ্ন</a></li>
-                        <li><a href="{% url 'dashboard:contact' %}" class="text-muted text-decoration-none">যোগাযোগ</a></li>
-                        <li><a href="#" class="text-muted text-decoration-none">সাপোর্ট</a></li>
-                        <li><a href="#" class="text-muted text-decoration-none">শর্তাবলী</a></li>
-                    </ul>
-                </div>
-                <div class="col-md-4">
-                    <h6 class="mb-3">যোগাযোগ</h6>
-                    <p class="text-muted">
-                        <i class="fas fa-phone me-2"></i>০১৭১১-৭৪৫০০০<br>
-                        <i class="fas fa-envelope me-2"></i>nagaribashiexpress@gmail.com<br>
-                        <i class="fas fa-map-marker-alt me-2"></i>ধানমন্ডি, ঢাকা-১২০৫
+            <div class="row g-4">
+                <!-- Brand & Developer Column -->
+                <div class="col-lg-4 col-md-6">
+                    <div class="mb-3">
+                        <img src="{% static 'images/logo.svg' %}" alt="SwiftDrop" height="38">
+                    </div>
+                    <p class="text-light-emphasis pe-lg-4 mb-3" style="line-height: 1.6;">
+                        SwiftDrop is an on-demand essentials delivery web application. Built for rapid, reliable intra-city logistics covering fresh groceries, food, pharmaceuticals, LPG cooking gas, and daily essentials.
                     </p>
-                    <div class="social-links">
-                        <a href="https://www.facebook.com/nagaribashiexpress" target="_blank" class="text-muted me-3" title="Facebook">
-                            <i class="fab fa-facebook-f"></i>
+                    <div class="d-flex align-items-center gap-2 mt-2">
+                        <a href="https://github.com/Rifat-Bin-Alam/Smart-Delivery-WebApp" target="_blank" rel="noopener noreferrer" class="btn btn-sm btn-outline-light rounded-pill px-3" title="View Source on GitHub">
+                            <i class="fab fa-github me-1"></i> GitHub Repository
                         </a>
-                        <a href="tel:01711745000" class="text-muted me-3" title="কল করুন">
-                            <i class="fas fa-phone"></i>
-                        </a>
-                        <a href="mailto:nagaribashiexpress@gmail.com" class="text-muted me-3" title="ইমেইল করুন">
-                            <i class="fas fa-envelope"></i>
-                        </a>
-                        <a href="https://wa.me/8801711745000" target="_blank" class="text-muted me-3" title="WhatsApp">
-                            <i class="fab fa-whatsapp"></i>
+                        <a href="https://rifat-bin-alam.vercel.app/" target="_blank" rel="noopener noreferrer" class="btn btn-sm btn-outline-primary text-white rounded-pill px-3" title="Developer Portfolio">
+                            <i class="fas fa-globe me-1"></i> Portfolio
                         </a>
                     </div>
                 </div>
-            </div>
-            <hr class="my-4">
-            <div class="row align-items-center">
-                <div class="col-md-6">
-                    <p class="mb-0 text-muted">&copy; ২০২৪ নাগরীবাসী এক্সপ্রেস। সকল অধিকার সংরক্ষিত।</p>
+
+                <!-- Categories Column -->
+                <div class="col-lg-2 col-md-6 col-6">
+                    <h6>Essential Categories</h6>
+                    <ul class="list-unstyled d-flex flex-column gap-2">
+                        <li><a href="{% url 'orders:product_category' 'food' %}">Food & Meals</a></li>
+                        <li><a href="{% url 'orders:product_category' 'groceries' %}">Groceries & Fresh</a></li>
+                        <li><a href="{% url 'orders:product_category' 'medicine' %}">Pharmacy & Medicine</a></li>
+                        <li><a href="{% url 'orders:product_category' 'gas' %}">LPG Cooking Gas</a></li>
+                        <li><a href="{% url 'orders:product_category' 'electronics' %}">Electronics & Gadgets</a></li>
+                    </ul>
                 </div>
-                <div class="col-md-6 text-md-end">
-                    <p class="mb-0 text-muted">Made with <i class="fas fa-heart text-danger"></i> in Bangladesh</p>
+
+                <!-- Customer Care Column -->
+                <div class="col-lg-2 col-md-6 col-6">
+                    <h6>Customer Care</h6>
+                    <ul class="list-unstyled d-flex flex-column gap-2">
+                        <li><a href="{% url 'dashboard:faq' %}">Help & FAQs</a></li>
+                        <li><a href="{% url 'orders:cart' %}">My Shopping Cart</a></li>
+                        <li><a href="{% url 'delivery:delivery_area_list' %}">Coverage Zones & Fees</a></li>
+                        <li><a href="{% url 'reviews:review_list' %}">Customer Reviews</a></li>
+                        <li><a href="{% url 'dashboard:contact' %}">Support & Inquiries</a></li>
+                    </ul>
+                </div>
+
+                <!-- Contact & Author Column -->
+                <div class="col-lg-4 col-md-6">
+                    <h6>Developer & Contact</h6>
+                    <ul class="list-unstyled d-flex flex-column gap-2 text-light-emphasis">
+                        <li>
+                            <i class="fas fa-envelope text-primary me-2"></i>
+                            <a href="mailto:rifat5566123@gmail.com" class="text-light-emphasis text-decoration-none">
+                                rifat5566123@gmail.com
+                            </a>
+                        </li>
+                        <li>
+                            <i class="fab fa-github text-primary me-2"></i>
+                            <a href="https://github.com/Rifat-Bin-Alam/Smart-Delivery-WebApp" target="_blank" rel="noopener noreferrer" class="text-light-emphasis text-decoration-none">
+                                github.com/Rifat-Bin-Alam
+                            </a>
+                        </li>
+                        <li>
+                            <i class="fas fa-user-tie text-primary me-2"></i>
+                            <a href="https://rifat-bin-alam.vercel.app/" target="_blank" rel="noopener noreferrer" class="text-light-emphasis text-decoration-none">
+                                rifat-bin-alam.vercel.app
+                            </a>
+                        </li>
+                        <li>
+                            <i class="fas fa-code-branch text-primary me-2"></i>
+                            <span>Built with Python 3.13, Django 5 & Bootstrap 5</span>
+                        </li>
+                    </ul>
+                    <div class="mt-3">
+                        <small class="text-uppercase text-light-emphasis fw-bold d-block mb-2" style="font-size: 0.72rem; letter-spacing: 0.5px;">Supported Payment Methods</small>
+                        <div class="d-flex align-items-center gap-2 flex-wrap">
+                            <span class="badge bg-secondary text-white px-2 py-1"><i class="fas fa-money-bill-wave me-1"></i> Cash on Delivery</span>
+                            <span class="badge bg-danger text-white px-2 py-1">bKash</span>
+                            <span class="badge bg-warning text-dark px-2 py-1">Nagad</span>
+                            <span class="badge bg-purple text-white px-2 py-1" style="background-color: #8B5CF6;">Rocket</span>
+                        </div>
+                    </div>
+                </div>
+            </div>
+
+            <!-- Footer Bottom Line -->
+            <div class="sd-footer-bottom d-flex flex-column flex-md-row justify-content-between align-items-center gap-2 pt-4 mt-4 border-top border-secondary border-opacity-25">
+                <div class="text-light-emphasis small text-center text-md-start">
+                    &copy; 2026 <strong>SwiftDrop</strong>. All rights reserved. Developed by <a href="https://rifat-bin-alam.vercel.app/" target="_blank" rel="noopener noreferrer" class="text-white text-decoration-underline fw-semibold">Rifat Bin Alam</a>.
+                </div>
+                <div class="d-flex align-items-center gap-3 small text-white-50">
+                    <a href="https://github.com/Rifat-Bin-Alam/Smart-Delivery-WebApp" target="_blank" rel="noopener noreferrer" class="text-white-50 text-decoration-none">
+                        <i class="fab fa-github me-1"></i> Repository
+                    </a>
+                    <span>&bull;</span>
+                    <a href="{% url 'dashboard:terms' %}" class="text-white-50 text-decoration-none">Terms</a>
+                    <span>&bull;</span>
+                    <a href="{% url 'dashboard:privacy' %}" class="text-white-50 text-decoration-none">Privacy</a>
                 </div>
             </div>
         </div>
     </footer>
 
-    <!-- Bootstrap JS -->
-    <script src="https://cdn.jsdelivr.net/npm/bootstrap@5.3.0/dist/js/bootstrap.bundle.min.js"></script>
+    <!-- Bootstrap 5.3 JS Bundle -->
+    <script src="https://cdn.jsdelivr.net/npm/bootstrap@5.3.3/dist/js/bootstrap.bundle.min.js"></script>
     
-    <!-- jQuery -->
-    <script src="https://code.jquery.com/jquery-3.7.1.min.js"></script>
-    
-    <!-- Custom JS -->
+    <!-- Custom SwiftDrop JS -->
     <script src="{% static 'js/main.js' %}"></script>
-    
-    <!-- Cart functionality -->
-    <script>
-        // Update cart badge on page load
-        document.addEventListener('DOMContentLoaded', function() {
-            updateCartBadge();
-        });
-        
-        // Listen for storage changes (when cart is updated in other tabs)
-        window.addEventListener('storage', function(e) {
-            if (e.key === 'cart') {
-                updateCartBadge();
-            }
-        });
-    </script>
     
     {% block extra_js %}{% endblock %}
 </body>

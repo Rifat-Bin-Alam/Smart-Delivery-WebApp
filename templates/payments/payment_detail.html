@@ -1,0 +1,73 @@
+{% extends 'base.html' %}
+{% load static %}
+
+{% block title %}Payment Receipt #{{ payment.pk }} - {{ BRAND_NAME }}{% endblock %}
+
+{% block content %}
+<div class="container py-4">
+    <div class="row justify-content-center">
+        <div class="col-lg-7">
+            <div class="card border-0 shadow-sm rounded-4 overflow-hidden mb-4">
+                <div class="card-header bg-gradient-navy text-white p-4 text-center">
+                    <div class="rounded-circle bg-white text-navy mx-auto d-flex align-items-center justify-content-center mb-2" style="width: 56px; height: 56px;">
+                        <i class="fas fa-check fa-2x text-primary"></i>
+                    </div>
+                    <h4 class="fw-bold mb-1">Transaction Voucher</h4>
+                    <p class="mb-0 opacity-75 small">SwiftDrop Financial Settlement</p>
+                </div>
+
+                <div class="card-body p-4 p-md-5">
+                    <div class="d-flex justify-content-between align-items-center pb-3 mb-3 border-bottom">
+                        <div>
+                            <span class="small text-muted d-block">Status</span>
+                            <span class="badge rounded-pill fs-6 
+                                {% if payment.status == 'completed' %}bg-success-subtle text-success border border-success-subtle
+                                {% elif payment.status == 'failed' %}bg-danger-subtle text-danger border border-danger-subtle
+                                {% elif payment.status == 'refunded' %}bg-info-subtle text-info border border-info-subtle
+                                {% else %}bg-warning-subtle text-warning border border-warning-subtle{% endif %}">
+                                {{ payment.get_status_display }}
+                            </span>
+                        </div>
+                        <div class="text-end">
+                            <span class="small text-muted d-block">Amount Settled</span>
+                            <h3 class="fw-bold text-navy mb-0">৳{{ payment.amount|floatformat:2 }}</h3>
+                        </div>
+                    </div>
+
+                    <dl class="row mb-4 small">
+                        <dt class="col-sm-5 text-muted">Order Reference</dt>
+                        <dd class="col-sm-7 fw-semibold text-navy">
+                            <a href="{% url 'orders:order_detail' payment.order.pk %}" class="text-primary text-decoration-none">
+                                #{{ payment.order.order_number }}
+                            </a>
+                        </dd>
+
+                        <dt class="col-sm-5 text-muted">Payment Channel</dt>
+                        <dd class="col-sm-7 fw-semibold text-navy">{{ payment.get_payment_method_display }}</dd>
+
+                        <dt class="col-sm-5 text-muted">Transaction Reference</dt>
+                        <dd class="col-sm-7"><code>{{ payment.transaction_id|default:"COD Verification" }}</code></dd>
+
+                        <dt class="col-sm-5 text-muted">Date Initiated</dt>
+                        <dd class="col-sm-7 text-muted">{{ payment.created_at|date:"F d, Y H:i:s" }}</dd>
+
+                        {% if payment.paid_at %}
+                            <dt class="col-sm-5 text-muted">Settlement Confirmed</dt>
+                            <dd class="col-sm-7 text-success fw-semibold">{{ payment.paid_at|date:"F d, Y H:i:s" }}</dd>
+                        {% endif %}
+                    </dl>
+
+                    <div class="d-flex gap-2">
+                        <a href="{% url 'payments:payment_list' %}" class="btn btn-outline-secondary rounded-pill w-50">
+                            Back to Payments
+                        </a>
+                        <a href="{% url 'orders:order_detail' payment.order.pk %}" class="btn btn-primary rounded-pill w-50">
+                            View Order
+                        </a>
+                    </div>
+                </div>
+            </div>
+        </div>
+    </div>
+</div>
+{% endblock %}

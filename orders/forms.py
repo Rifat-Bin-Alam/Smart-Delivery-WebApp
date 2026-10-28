@@ -7,16 +7,20 @@ User = get_user_model()
 
 class OrderForm(forms.ModelForm):
     """
-    Order form
+    Form for editing or creating delivery order details.
     """
     class Meta:
         model = Order
         fields = [
-            'delivery_type', 'scheduled_delivery_time', 'delivery_address', 
-            'delivery_city', 'delivery_instructions', 'special_instructions'
+            'delivery_type',
+            'scheduled_delivery_time',
+            'delivery_address',
+            'delivery_city',
+            'delivery_instructions',
+            'special_instructions',
         ]
         widgets = {
-            'delivery_type': forms.Select(attrs={'class': 'form-control'}),
+            'delivery_type': forms.Select(attrs={'class': 'form-select'}),
             'scheduled_delivery_time': forms.DateTimeInput(attrs={
                 'class': 'form-control',
                 'type': 'datetime-local'
@@ -24,42 +28,42 @@ class OrderForm(forms.ModelForm):
             'delivery_address': forms.Textarea(attrs={
                 'class': 'form-control',
                 'rows': 3,
-                'placeholder': 'আপনার সম্পূর্ণ ঠিকানা লিখুন'
+                'placeholder': 'Full street address, apartment/floor details'
             }),
             'delivery_city': forms.TextInput(attrs={
                 'class': 'form-control',
-                'placeholder': 'শহরের নাম'
+                'placeholder': 'Area / Zone name'
             }),
             'delivery_instructions': forms.Textarea(attrs={
                 'class': 'form-control',
-                'rows': 3,
-                'placeholder': 'ডেলিভারি সম্পর্কে বিশেষ নির্দেশনা (যদি থাকে)'
+                'rows': 2,
+                'placeholder': 'Special delivery access instructions (optional)'
             }),
             'special_instructions': forms.Textarea(attrs={
                 'class': 'form-control',
-                'rows': 3,
-                'placeholder': 'অর্ডার সম্পর্কে বিশেষ নির্দেশনা (যদি থাকে)'
+                'rows': 2,
+                'placeholder': 'Order packaging instructions (optional)'
             }),
         }
         labels = {
-            'delivery_type': 'ডেলিভারি ধরন',
-            'scheduled_delivery_time': 'নির্ধারিত ডেলিভারি সময়',
-            'delivery_address': 'ডেলিভারি ঠিকানা',
-            'delivery_city': 'শহর',
-            'delivery_instructions': 'ডেলিভারি নির্দেশনা',
-            'special_instructions': 'বিশেষ নির্দেশনা',
+            'delivery_type': 'Delivery Option',
+            'scheduled_delivery_time': 'Preferred Delivery Time',
+            'delivery_address': 'Delivery Address',
+            'delivery_city': 'Area / Zone',
+            'delivery_instructions': 'Delivery Instructions',
+            'special_instructions': 'Special Notes',
         }
 
 
 class OrderItemForm(forms.ModelForm):
     """
-    Order item form
+    Form to manage items inside an order.
     """
     class Meta:
         model = OrderItem
         fields = ['product', 'quantity']
         widgets = {
-            'product': forms.Select(attrs={'class': 'form-control'}),
+            'product': forms.Select(attrs={'class': 'form-select'}),
             'quantity': forms.NumberInput(attrs={
                 'class': 'form-control',
                 'min': '1',
@@ -67,178 +71,175 @@ class OrderItemForm(forms.ModelForm):
             }),
         }
         labels = {
-            'product': 'পণ্য/সেবা',
-            'quantity': 'পরিমাণ',
+            'product': 'Product / Item',
+            'quantity': 'Quantity',
         }
-    
+
     def __init__(self, *args, **kwargs):
         super().__init__(*args, **kwargs)
         self.fields['product'].queryset = ProductService.objects.filter(is_available=True)
-    
+
     def save(self, commit=True):
         order_item = super().save(commit=False)
+        order_item.unit_price = order_item.product.price
+        order_item.total_price = order_item.unit_price * order_item.quantity
         if commit:
-            order_item.unit_price = order_item.product.price
             order_item.save()
         return order_item
 
 
 class OrderSearchForm(forms.Form):
     """
-    Order search form
+    Admin and customer order filter form.
     """
     search = forms.CharField(
         max_length=100,
         required=False,
         widget=forms.TextInput(attrs={
             'class': 'form-control',
-            'placeholder': 'অর্ডার নম্বর বা পণ্যের নাম দিয়ে খুঁজুন'
+            'placeholder': 'Search by order reference or customer...'
         }),
-        label='খুঁজুন'
+        label='Search'
     )
-    
+
     status = forms.ChoiceField(
-        choices=[('', 'সব অবস্থা')] + Order.ORDER_STATUS_CHOICES,
+        choices=[('', 'All Statuses')] + Order.ORDER_STATUS_CHOICES,
         required=False,
-        widget=forms.Select(attrs={'class': 'form-control'}),
-        label='অবস্থা'
+        widget=forms.Select(attrs={'class': 'form-select'}),
+        label='Status'
     )
-    
+
     date_from = forms.DateField(
         required=False,
         widget=forms.DateInput(attrs={
             'class': 'form-control',
             'type': 'date'
         }),
-        label='শুরুর তারিখ'
+        label='From Date'
     )
-    
+
     date_to = forms.DateField(
         required=False,
         widget=forms.DateInput(attrs={
             'class': 'form-control',
             'type': 'date'
         }),
-        label='শেষ তারিখ'
+        label='To Date'
     )
 
 
 class ProductSearchForm(forms.Form):
     """
-    Product search form
+    Search and filter form for products.
     """
     search = forms.CharField(
         max_length=100,
         required=False,
         widget=forms.TextInput(attrs={
             'class': 'form-control',
-            'placeholder': 'পণ্যের নাম বা বিবরণ দিয়ে খুঁজুন'
+            'placeholder': 'Search essentials, food, groceries...'
         }),
-        label='খুঁজুন'
+        label='Search'
     )
-    
+
     category = forms.ChoiceField(
-        choices=[('', 'সব বিভাগ')] + ProductService.CATEGORY_CHOICES,
+        choices=[('', 'All Categories')] + ProductService.CATEGORY_CHOICES,
         required=False,
-        widget=forms.Select(attrs={'class': 'form-control'}),
-        label='বিভাগ'
+        widget=forms.Select(attrs={'class': 'form-select'}),
+        label='Category'
     )
-    
+
     min_price = forms.DecimalField(
         required=False,
         widget=forms.NumberInput(attrs={
             'class': 'form-control',
-            'placeholder': 'ন্যূনতম দাম',
+            'placeholder': 'Min (৳)',
             'min': '0',
-            'step': '0.01'
+            'step': '1'
         }),
-        label='ন্যূনতম দাম (৳)'
+        label='Min Price (৳)'
     )
-    
+
     max_price = forms.DecimalField(
         required=False,
         widget=forms.NumberInput(attrs={
             'class': 'form-control',
-            'placeholder': 'সর্বোচ্চ দাম',
+            'placeholder': 'Max (৳)',
             'min': '0',
-            'step': '0.01'
+            'step': '1'
         }),
-        label='সর্বোচ্চ দাম (৳)'
+        label='Max Price (৳)'
     )
 
 
 class OrderCancellationForm(forms.Form):
     """
-    Order cancellation form with reasons and instructions
+    Order cancellation form with validation.
     """
     CANCELLATION_REASONS = [
-        ('', 'বাতিলের কারণ নির্বাচন করুন'),
-        ('changed_mind', 'মনের পরিবর্তন হয়েছে'),
-        ('wrong_order', 'ভুল অর্ডার দেওয়া হয়েছে'),
-        ('delivery_issue', 'ডেলিভারি সমস্যা'),
-        ('price_issue', 'দাম বেশি মনে হচ্ছে'),
-        ('found_elsewhere', 'অন্য জায়গায় পেয়ে গেছি'),
-        ('no_longer_needed', 'আর প্রয়োজন নেই'),
-        ('payment_issue', 'পেমেন্ট সমস্যা'),
-        ('delivery_time_issue', 'ডেলিভারি সময় সমস্যা'),
-        ('product_quality_concern', 'পণ্যের মান নিয়ে উদ্বেগ'),
-        ('other', 'অন্যান্য'),
+        ('', 'Select cancellation reason...'),
+        ('changed_mind', 'Changed my mind'),
+        ('wrong_items', 'Ordered incorrect items'),
+        ('delivery_delay', 'Delivery turnaround too long'),
+        ('found_cheaper', 'Found a better price elsewhere'),
+        ('accidental_order', 'Placed order by mistake'),
+        ('payment_issue', 'Payment method issues'),
+        ('other', 'Other reason'),
     ]
-    
+
     reason = forms.ChoiceField(
         choices=CANCELLATION_REASONS,
         widget=forms.Select(attrs={
-            'class': 'form-control',
+            'class': 'form-select',
             'required': True
         }),
-        label='বাতিলের কারণ',
-        help_text='অর্ডার বাতিল করার কারণ নির্বাচন করুন'
+        label='Reason for Cancellation',
+        help_text='Please tell us why you are cancelling this order'
     )
-    
+
     additional_notes = forms.CharField(
         widget=forms.Textarea(attrs={
             'class': 'form-control',
-            'rows': 4,
-            'placeholder': 'আপনার বাতিলের কারণ সম্পর্কে বিস্তারিত জানান (ঐচ্ছিক)',
+            'rows': 3,
+            'placeholder': 'Additional context or feedback (optional)',
             'maxlength': '500'
         }),
         required=False,
-        label='অতিরিক্ত নোট',
-        help_text='আপনার মতামত আমাদের উন্নতিতে সাহায্য করবে'
+        label='Additional Notes'
     )
-    
+
     confirm_cancellation = forms.BooleanField(
         widget=forms.CheckboxInput(attrs={
             'class': 'form-check-input',
             'required': True
         }),
-        label='আমি নিশ্চিত যে আমি এই অর্ডার বাতিল করতে চাই',
-        help_text='এই চেকবক্সটি চেক করে আপনি নিশ্চিত করুন যে আপনি অর্ডার বাতিল করতে চান'
+        label='I confirm that I want to cancel this order',
+        help_text='Cancellation is permanent and cannot be reversed.'
     )
-    
+
     refund_preference = forms.ChoiceField(
         choices=[
-            ('', 'রিফান্ড পছন্দ নির্বাচন করুন'),
-            ('refund_to_payment_method', 'মূল পেমেন্ট পদ্ধতিতে রিফান্ড'),
-            ('refund_to_wallet', 'ওয়ালেটে রিফান্ড'),
-            ('no_refund_needed', 'রিফান্ড প্রয়োজন নেই'),
+            ('', 'Select refund preference...'),
+            ('original_method', 'Refund to original payment channel'),
+            ('swift_wallet', 'Credit to SwiftDrop wallet balance'),
+            ('no_refund', 'No refund required (e.g. COD unpaid)'),
         ],
         widget=forms.Select(attrs={
-            'class': 'form-control'
+            'class': 'form-select'
         }),
         required=False,
-        label='রিফান্ড পছন্দ',
-        help_text='আপনি কিভাবে রিফান্ড পেতে চান?'
+        label='Refund Preference',
+        help_text='How would you like eligible refunds to be processed?'
     )
-    
+
     def clean_confirm_cancellation(self):
         confirmed = self.cleaned_data.get('confirm_cancellation')
         if not confirmed:
-            raise forms.ValidationError('অর্ডার বাতিল করতে হলে আপনাকে নিশ্চিত করতে হবে।')
+            raise forms.ValidationError('You must check the confirmation box to cancel your order.')
         return confirmed
-    
+
     def clean_reason(self):
         reason = self.cleaned_data.get('reason')
         if not reason:
-            raise forms.ValidationError('বাতিলের কারণ নির্বাচন করা বাধ্যতামূলক।')
+            raise forms.ValidationError('Please choose a reason for cancelling.')
         return reason

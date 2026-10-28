@@ -16,26 +16,26 @@ class Migration(migrations.Migration):
         migrations.AddField(
             model_name='order',
             name='cancellation_notes',
-            field=models.TextField(blank=True, null=True, verbose_name='বাতিলের নোট'),
+            field=models.TextField(blank=True, null=True, verbose_name='Cancellation Notes'),
         ),
         migrations.AddField(
             model_name='order',
             name='cancellation_reason',
-            field=models.CharField(blank=True, max_length=50, null=True, verbose_name='বাতিলের কারণ'),
+            field=models.CharField(blank=True, max_length=50, null=True, verbose_name='Cancellation Reason'),
         ),
         migrations.AddField(
             model_name='order',
             name='cancelled_at',
-            field=models.DateTimeField(blank=True, null=True, verbose_name='বাতিল হয়েছে'),
+            field=models.DateTimeField(blank=True, null=True, verbose_name='Cancelled'),
         ),
         migrations.AddField(
             model_name='order',
             name='cancelled_by',
-            field=models.ForeignKey(blank=True, null=True, on_delete=django.db.models.deletion.SET_NULL, related_name='cancelled_orders', to=settings.AUTH_USER_MODEL, verbose_name='বাতিল করেছেন'),
+            field=models.ForeignKey(blank=True, null=True, on_delete=django.db.models.deletion.SET_NULL, related_name='cancelled_orders', to=settings.AUTH_USER_MODEL, verbose_name='Cancelled By'),
         ),
         migrations.AddField(
             model_name='order',
             name='refund_preference',
-            field=models.CharField(blank=True, max_length=30, null=True, verbose_name='রিফান্ড পছন্দ'),
+            field=models.CharField(blank=True, max_length=30, null=True, verbose_name='Refund Preference'),
         ),
     ]

@@ -1,353 +1,178 @@
 {% extends 'base.html' %}
 {% load static %}
 
-{% block title %}পণ্য ও সেবা - নাগরীবাসী এক্সপ্রেস{% endblock %}
+{% block title %}Essentials & Supplies — SwiftDrop{% endblock %}
 
 {% block content %}
-<div class="container py-5">
-    <div class="row">
-        <div class="col-12">
-            <h2 class="text-center mb-5">
-                <i class="fas fa-shopping-bag me-2"></i>আমাদের পণ্য ও সেবা
+<div class="container py-4">
+    <!-- Breadcrumb & Header -->
+    <nav aria-label="breadcrumb">
+        <ol class="breadcrumb small">
+            <li class="breadcrumb-item"><a href="{% url 'dashboard:home' %}">Home</a></li>
+            <li class="breadcrumb-item active" aria-current="page">Essentials Catalog</li>
+        </ol>
+    </nav>
+
+    <div class="d-flex flex-column flex-md-row justify-content-between align-items-md-center gap-3 mb-4">
+        <div>
+            <h2 class="fw-bold mb-1 text-dark">
+                <i class="fas fa-boxes-stacked text-primary me-2"></i>Essentials Catalog
             </h2>
+            <p class="text-muted small mb-0">Browse genuine items available for express delivery across Dhaka</p>
+        </div>
+        <div class="d-flex align-items-center gap-2">
+            <a href="{% url 'orders:cart' %}" class="btn btn-outline-primary btn-sm rounded-pill px-3">
+                <i class="fas fa-shopping-cart me-1"></i> View Cart (<span class="cart-badge-count">0</span>)
+            </a>
         </div>
     </div>
 
-    <!-- Filter Section -->
-    <div class="row mb-4">
-        <div class="col-12">
-            <div class="card">
-                <div class="card-body">
-                    <div class="row align-items-center">
-                        <div class="col-md-4">
-                            <h5 class="mb-0">ক্যাটাগরি ফিল্টার</h5>
+    <!-- Search & Filter Controls -->
+    <div class="card border mb-4 shadow-sm rounded-3">
+        <div class="card-body p-3">
+            <form method="get" class="row g-2 align-items-center">
+                <!-- Search Keyword -->
+                <div class="col-md-5">
+                    <div class="input-group">
+                        <span class="input-group-text bg-light border-end-0 text-muted">
+                            <i class="fas fa-search"></i>
+                        </span>
+                        <input type="text" name="q" class="form-control border-start-0" placeholder="Search by name, brand, or details..." value="{{ search_query }}">
+                        {% if search_query %}
+                        <a href="{% url 'orders:products' %}" class="btn btn-outline-secondary">
+                            <i class="fas fa-times"></i>
+                        </a>
+                        {% endif %}
+                    </div>
+                </div>
+
+                <!-- Category Filter -->
+                <div class="col-md-3 col-6">
+                    <select name="category" class="form-select" onchange="this.form.submit()">
+                        <option value="all" {% if selected_category == 'all' %}selected{% endif %}>All Categories</option>
+                        {% for cat_key, cat_name in categories %}
+                        <option value="{{ cat_key }}" {% if selected_category == cat_key %}selected{% endif %}>{{ cat_name }}</option>
+                        {% endfor %}
+                    </select>
+                </div>
+
+                <!-- Sort Order -->
+                <div class="col-md-2 col-6">
+                    <select name="sort" class="form-select" onchange="this.form.submit()">
+                        <option value="newest" {% if selected_sort == 'newest' %}selected{% endif %}>Newest</option>
+                        <option value="price_low" {% if selected_sort == 'price_low' %}selected{% endif %}>Price: Low to High</option>
+                        <option value="price_high" {% if selected_sort == 'price_high' %}selected{% endif %}>Price: High to Low</option>
+                        <option value="name" {% if selected_sort == 'name' %}selected{% endif %}>Name (A-Z)</option>
+                    </select>
+                </div>
+
+                <!-- Submit Button -->
+                <div class="col-md-2">
+                    <button type="submit" class="btn btn-primary w-100">
+                        <i class="fas fa-filter me-1"></i> Apply
+                    </button>
+                </div>
+            </form>
+        </div>
+    </div>
+
+    <!-- Category Pill Strip -->
+    <div class="d-flex gap-2 overflow-auto pb-2 mb-4">
+        <a href="{% url 'orders:products' %}" class="sd-category-pill {% if selected_category == 'all' or not selected_category %}active{% endif %}">
+            All Items
+        </a>
+        {% for cat_key, cat_name in categories %}
+        <a href="?category={{ cat_key }}" class="sd-category-pill {% if selected_category == cat_key %}active{% endif %}">
+            {{ cat_name }}
+        </a>
+        {% endfor %}
+    </div>
+
+    <!-- Product Grid -->
+    <div class="row g-4">
+        {% for product in products %}
+        <div class="col-xl-3 col-lg-4 col-md-6" data-product-id="{{ product.id }}" data-product-name="{{ product.name }}" data-product-price="{{ product.price }}" data-product-stock="{{ product.stock_quantity }}">
+            <div class="sd-product-card">
+                <div class="sd-product-img-wrapper">
+                    <img src="{{ product.image_url }}" alt="{{ product.name }}" loading="lazy" onerror="this.onerror=null; this.src='{% static 'images/fallbacks/default.svg' %}';">
+                    <span class="position-absolute top-0 start-0 m-2 badge bg-primary bg-opacity-90 small">
+                        {{ product.get_category_display }}
+                    </span>
+                    {% if product.stock_quantity <= 5 and product.stock_quantity > 0 %}
+                    <span class="position-absolute top-0 end-0 m-2 badge bg-warning text-dark small">
+                        Low Stock ({{ product.stock_quantity }})
+                    </span>
+                    {% elif product.stock_quantity == 0 %}
+                    <span class="position-absolute top-0 end-0 m-2 badge bg-danger text-white small">
+                        Out of Stock
+                    </span>
+                    {% endif %}
+                </div>
+
+                <div class="sd-product-body">
+                    <a href="{% url 'orders:product_detail' product.id %}" class="text-decoration-none">
+                        <h5 class="sd-product-title">{{ product.name }}</h5>
+                    </a>
+                    <p class="sd-product-desc">{{ product.description }}</p>
+
+                    <div class="sd-product-footer">
+                        <div>
+                            <span class="sd-product-price">৳{{ product.price }}</span>
+                            <div class="text-muted" style="font-size: 0.72rem;">{{ product.get_stock_status }}</div>
                         </div>
-                        <div class="col-md-4">
-                            <div class="input-group">
-                                <input type="text" class="form-control" id="search-input" placeholder="পণ্য খুঁজুন..." onkeyup="searchProducts()">
-                                <button class="btn btn-outline-secondary" type="button" onclick="clearSearch()">
-                                    <i class="fas fa-times"></i>
-                                </button>
-                            </div>
-                        </div>
-                        <div class="col-md-4">
-                            <div class="btn-group flex-wrap" role="group" id="category-filters" style="overflow-x: auto; white-space: nowrap;">
-                                <button type="button" class="btn btn-outline-primary active" onclick="filterProducts('all')">সব</button>
-                                <button type="button" class="btn btn-outline-primary" onclick="filterProducts('food')">খাবার</button>
-                                <button type="button" class="btn btn-outline-primary" onclick="filterProducts('medicine')">ঔষধ</button>
-                                <button type="button" class="btn btn-outline-primary" onclick="filterProducts('gas')">গ্যাস</button>
-                                <button type="button" class="btn btn-outline-primary" onclick="filterProducts('groceries')">মুদি সামগ্রী</button>
-                                <button type="button" class="btn btn-outline-primary" onclick="filterProducts('electronics')">ইলেকট্রনিক্স</button>
-                                <button type="button" class="btn btn-outline-primary" onclick="filterProducts('clothing')">পোশাক</button>
-                                <button type="button" class="btn btn-outline-primary" onclick="filterProducts('books')">বই</button>
-                                <button type="button" class="btn btn-outline-primary" onclick="filterProducts('other')">অন্যান্য</button>
-                            </div>
-                        </div>
+
+                        {% if product.is_available and product.stock_quantity > 0 %}
+                        <button class="btn btn-primary btn-sm rounded-pill btn-add-to-cart" data-product-id="{{ product.id }}" data-product-name="{{ product.name }}" data-product-price="{{ product.price }}" data-product-stock="{{ product.stock_quantity }}" data-product-image="{{ product.image_url }}">
+                            <i class="fas fa-cart-plus me-1"></i> Add
+                        </button>
+                        {% else %}
+                        <button class="btn btn-secondary btn-sm rounded-pill" disabled>
+                            Unavailable
+                        </button>
+                        {% endif %}
                     </div>
                 </div>
             </div>
         </div>
-    </div>
-
-    <!-- Products Grid -->
-    <div class="row" id="products-container">
-        {% if products %}
-            {% for product in products %}
-                <div class="col-lg-3 col-md-4 col-sm-6 mb-4 product-item" data-category="{{ product.category }}">
-                    <div class="card product-card h-100">
-                        <div class="card-body text-center">
-                            <div class="mb-3" style="font-size: 3rem;">
-                                {% if product.category == 'food' %}🍗
-                                {% elif product.category == 'medicine' %}💊
-                                {% elif product.category == 'gas' %}🔥
-                                {% elif product.category == 'groceries' %}🛒
-                                {% elif product.category == 'electronics' %}📱
-                                {% elif product.category == 'clothing' %}👕
-                                {% elif product.category == 'books' %}📚
-                                {% else %}📦{% endif %}
-                            </div>
-                            <h5 class="card-title product-name">{{ product.name }}</h5>
-                            <p class="text-muted">{{ product.get_category_display }}</p>
-                            <p class="text-muted small product-description">{{ product.description|truncatechars:50 }}</p>
-                            <h4 class="text-primary">৳ {{ product.price }}</h4>
-                            
-                            <!-- Stock Status -->
-                            {% if product.is_available and product.stock_quantity > 0 %}
-                                {% if product.stock_quantity <= 5 %}
-                                    <span class="badge bg-warning mb-2">{{ product.get_stock_status }}</span>
-                                {% else %}
-                                    <span class="badge bg-success mb-2">{{ product.get_stock_status }}</span>
-                                {% endif %}
-                            {% else %}
-                                <span class="badge bg-danger mb-2">স্টক শেষ</span>
-                            {% endif %}
-
-                            {% if product.is_available and product.stock_quantity > 0 and not user.is_admin %}
-                            <button class="btn btn-primary w-100 add-to-cart-btn" 
-                                    data-product-id="{{ product.id }}"
-                                    data-product-name="{{ product.name }}"
-                                    data-product-price="{{ product.price }}">
-                                <i class="fas fa-cart-plus me-2"></i>কার্টে যোগ করুন
-                            </button>
-                            {% elif user.is_admin %}
-                            <div class="alert alert-info text-center">
-                                <i class="fas fa-info-circle me-2"></i>
-                                অ্যাডমিন হিসেবে আপনি অর্ডার দিতে পারবেন না
-                            </div>
-                            {% elif product.stock_quantity == 0 %}
-                            <button class="btn btn-secondary w-100" disabled>
-                                <i class="fas fa-times me-2"></i>স্টক শেষ
-                            </button>
-                            {% elif not product.is_available %}
-                            <button class="btn btn-secondary w-100" disabled>
-                                <i class="fas fa-times me-2"></i>অনুপলব্ধ
-                            </button>
-                            {% endif %}
-                        </div>
-                    </div>
-                </div>
-            {% endfor %}
-        {% else %}
-            <div class="col-12 text-center py-5">
-                <i class="fas fa-box-open fa-4x text-muted mb-3"></i>
-                <h4 class="text-muted">কোন পণ্য পাওয়া যায়নি</h4>
-                <p class="text-muted">দয়া করে পরে আবার চেষ্টা করুন</p>
-            </div>
-        {% endif %}
-    </div>
-</div>
-
-<!-- Cart Modal -->
-<div class="modal fade" id="cartModal" tabindex="-1">
-    <div class="modal-dialog modal-lg">
-        <div class="modal-content">
-            <div class="modal-header">
-                <h5 class="modal-title">
-                    <i class="fas fa-shopping-cart me-2"></i>আপনার কার্ট
-                </h5>
-                <button type="button" class="btn-close" data-bs-dismiss="modal"></button>
-            </div>
-            <div class="modal-body">
-                <div id="cart-items">
-                    <!-- Cart items will be loaded here -->
-                </div>
-                <div id="empty-cart" class="text-center py-5" style="display: none;">
-                    <i class="fas fa-shopping-cart fa-3x text-muted mb-3"></i>
-                    <h5 class="text-muted">আপনার কার্ট খালি</h5>
-                    <p class="text-muted">কিছু পণ্য যোগ করুন</p>
-                </div>
-            </div>
-            <div class="modal-footer">
-                <button type="button" class="btn btn-secondary" data-bs-dismiss="modal">বন্ধ করুন</button>
-                <a href="{% url 'orders:checkout' %}" class="btn btn-primary">
-                    <i class="fas fa-credit-card me-2"></i>চেকআউট করুন
+        {% empty %}
+        <div class="col-12 text-center py-5">
+            <div class="p-5 bg-white rounded-3 border">
+                <i class="fas fa-search fa-3x text-muted mb-3 opacity-50"></i>
+                <h4 class="fw-bold text-dark">No essentials found</h4>
+                <p class="text-muted small mb-4">Try clearing your search keyword or switching category filters.</p>
+                <a href="{% url 'orders:products' %}" class="btn btn-primary rounded-pill px-4">
+                    Reset All Filters
                 </a>
             </div>
         </div>
-    </div>
-</div>
-
-<script>
-    // Products data from Django backend
-    const products = [
-        {% for product in products %}
-        { 
-            id: {{ product.id }}, 
-            name: '{{ product.name|escapejs }}', 
-            price: {{ product.price }}, 
-            category: '{{ product.category|escapejs }}', 
-            image: '{% if product.category == "food" %}🍗{% elif product.category == "medicine" %}💊{% elif product.category == "gas" %}🔥{% elif product.category == "groceries" %}🛒{% else %}📦{% endif %}', 
-            description: '{{ product.description|escapejs|truncatechars:50 }}' 
-        }{% if not forloop.last %},{% endif %}
         {% endfor %}
-    ];
+    </div>
 
-    let cart = JSON.parse(localStorage.getItem('cart')) || [];
+    <!-- Pagination -->
+    {% if is_paginated %}
+    <nav class="mt-5" aria-label="Catalog pagination">
+        <ul class="pagination justify-content-center">
+            {% if page_obj.has_previous %}
+            <li class="page-item">
+                <a class="page-link" href="?page={{ page_obj.previous_page_number }}{% if search_query %}&q={{ search_query }}{% endif %}{% if selected_category %}&category={{ selected_category }}{% endif %}{% if selected_sort %}&sort={{ selected_sort }}{% endif %}">
+                    <i class="fas fa-chevron-left"></i> Previous
+                </a>
+            </li>
+            {% endif %}
 
-    // Initialize
-    document.addEventListener('DOMContentLoaded', function() {
-        updateCartBadge();
-        
-        // Add event listeners for add to cart buttons
-        document.querySelectorAll('.add-to-cart-btn').forEach(btn => {
-            btn.addEventListener('click', function() {
-                const productId = this.dataset.productId;
-                const productName = this.dataset.productName;
-                const productPrice = parseFloat(this.dataset.productPrice);
-                addToCart(productId, productName, productPrice);
-            });
-        });
-        
-        // Auto-refresh products every 30 seconds to show new products
-        setInterval(function() {
-            location.reload();
-        }, 30000);
-    });
+            <li class="page-item disabled">
+                <span class="page-link text-muted">Page {{ page_obj.number }} of {{ page_obj.paginator.num_pages }}</span>
+            </li>
 
-
-    // Add to cart
-    function addToCart(id, name, price) {
-        let existingItem = cart.find(item => item.id == id);
-        if (existingItem) {
-            existingItem.quantity += 1;
-        } else {
-            cart.push({ 
-                id: id, 
-                product_id: id,  // Add product_id for API compatibility
-                name: name, 
-                product_name: name,  // Add product_name for API compatibility
-                price: price, 
-                product_price: price,  // Add product_price for API compatibility
-                quantity: 1 
-            });
-        }
-        localStorage.setItem('cart', JSON.stringify(cart));
-        addToCartNotification(name, 1);
-        updateCartBadge();
-    }
-
-    // Update cart badge
-    function updateCartBadge() {
-        const totalItems = cart.reduce((sum, item) => sum + item.quantity, 0);
-        const cartBadge = document.getElementById('cart-badge');
-        if (cartBadge) {
-            if (totalItems > 0) {
-                cartBadge.textContent = totalItems;
-                cartBadge.style.display = 'inline';
-            } else {
-                cartBadge.style.display = 'none';
-            }
-        }
-    }
-
-    // Filter products by category
-    function filterProducts(category) {
-        const productItems = document.querySelectorAll('.product-item');
-        const filterButtons = document.querySelectorAll('.btn-group .btn');
-        
-        // Update active button
-        filterButtons.forEach(btn => {
-            btn.classList.remove('active');
-            if (btn.onclick && btn.onclick.toString().includes(`'${category}'`)) {
-                btn.classList.add('active');
-            }
-        });
-        
-        // Filter products
-        let visibleCount = 0;
-        productItems.forEach(item => {
-            const productCategory = item.getAttribute('data-category');
-            
-            if (category === 'all' || productCategory === category) {
-                item.style.display = 'block';
-                item.style.animation = 'fadeIn 0.3s ease-in';
-                visibleCount++;
-            } else {
-                item.style.display = 'none';
-            }
-        });
-        
-        // Show message if no products found
-        if (visibleCount === 0 && category !== 'all') {
-            const categoryNames = {
-                'food': 'খাবার',
-                'medicine': 'ঔষধ',
-                'gas': 'গ্যাস',
-                'groceries': 'মুদি সামগ্রী',
-                'electronics': 'ইলেকট্রনিক্স',
-                'clothing': 'পোশাক',
-                'books': 'বই',
-                'other': 'অন্যান্য'
-            };
-            const categoryName = categoryNames[category] || category;
-            showNotification(`কোন ${categoryName} পণ্য পাওয়া যায়নি।`, 'info');
-        }
-    }
-    
-    // Search products
-    function searchProducts() {
-        const searchTerm = document.getElementById('search-input').value.toLowerCase();
-        const productItems = document.querySelectorAll('.product-item');
-        
-        let visibleCount = 0;
-        productItems.forEach(item => {
-            const productName = item.querySelector('.product-name').textContent.toLowerCase();
-            const productDescription = item.querySelector('.product-description').textContent.toLowerCase();
-            
-            if (searchTerm === '' || productName.includes(searchTerm) || productDescription.includes(searchTerm)) {
-                item.style.display = 'block';
-                item.style.animation = 'fadeIn 0.3s ease-in';
-                visibleCount++;
-            } else {
-                item.style.display = 'none';
-            }
-        });
-        
-        // Show message if no products found
-        if (visibleCount === 0 && searchTerm !== '') {
-            showNotification(`"${searchTerm}" এর জন্য কোন পণ্য পাওয়া যায়নি।`, 'info');
-        }
-    }
-    
-    // Clear search
-    function clearSearch() {
-        document.getElementById('search-input').value = '';
-        // Reset all buttons
-        document.querySelectorAll('.btn-group .btn').forEach(btn => btn.classList.remove('active'));
-        // Activate "All" button
-        document.querySelector('.btn-group .btn[onclick*="all"]').classList.add('active');
-        // Show all products
-        document.querySelectorAll('.product-item').forEach(item => {
-            item.style.display = 'block';
-            item.style.animation = 'fadeIn 0.3s ease-in';
-        });
-    }
-    
-    // Show notification
-    function showNotification(message, type = 'info') {
-        const notification = document.createElement('div');
-        notification.className = `alert alert-${type === 'error' ? 'danger' : type} alert-dismissible fade show`;
-        notification.style.position = 'fixed';
-        notification.style.top = '20px';
-        notification.style.right = '20px';
-        notification.style.zIndex = '9999';
-        notification.innerHTML = `
-            ${message}
-            <button type="button" class="btn-close" data-bs-dismiss="alert"></button>
-        `;
-        
-        document.body.appendChild(notification);
-        
-        setTimeout(() => {
-            notification.remove();
-        }, 3000);
-    }
-</script>
-
-<style>
-    .product-card {
-        transition: transform 0.3s ease;
-        border: none;
-        box-shadow: 0 2px 4px rgba(0,0,0,0.1);
-    }
-    .product-card:hover {
-        transform: translateY(-5px);
-        box-shadow: 0 4px 8px rgba(0,0,0,0.15);
-    }
-    
-    @keyframes fadeIn {
-        from { opacity: 0; transform: translateY(20px); }
-        to { opacity: 1; transform: translateY(0); }
-    }
-    
-    .product-item {
-        animation: fadeIn 0.3s ease-in;
-    }
-    
-    .btn-group .btn.active {
-        background-color: var(--primary-color);
-        border-color: var(--primary-color);
-        color: white;
-    }
-</style>
+            {% if page_obj.has_next %}
+            <li class="page-item">
+                <a class="page-link" href="?page={{ page_obj.next_page_number }}{% if search_query %}&q={{ search_query }}{% endif %}{% if selected_category %}&category={{ selected_category }}{% endif %}{% if selected_sort %}&sort={{ selected_sort }}{% endif %}">
+                    Next <i class="fas fa-chevron-right"></i>
+                </a>
+            </li>
+            {% endif %}
+        </ul>
+    </nav>
+    {% endif %}
+</div>
 {% endblock %}
