@@ -1,5 +1,4 @@
-# SwiftDrop — Your Essentials. Delivered Smarter.
-
+# SwiftDrop — Your Essentials. Delivered Smarter
 [![Django 5.2](https://img.shields.io/badge/Django-5.2-092E20?style=for-the-badge&logo=django)](https://www.djangoproject.com/)
 [![Python 3.13](https://img.shields.io/badge/Python-3.13-3776AB?style=for-the-badge&logo=python)](https://www.python.org/)
 [![Bootstrap 5.3](https://img.shields.io/badge/Bootstrap-5.3-7952B2?style=for-the-badge&logo=bootstrap)](https://getbootstrap.com/)
